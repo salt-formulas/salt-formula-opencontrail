@@ -90,6 +90,13 @@ opencontrail_database_packages:
   - require:
     - pkg: opencontrail_database_packages
 
+/etc/default/zookeeper:
+  file.managed:
+  - source: salt://opencontrail/files/{{ database.version }}/zookeeper
+  - template: jinja
+  - require:
+    - pkg: opencontrail_database_packages
+
 /var/lib/zookeeper/myid:
   file.managed:
   - contents: '{{ database.id }}'
@@ -105,6 +112,7 @@ opencontrail_database_packages:
 {%- if not grains.get('noservices', False) %}
   - require_in:
     - service: opencontrail_database_services
+    - service: opencontrail_zookeeper_service
 {%- endif %}
 
 /etc/contrail/supervisord_database_files/contrail-database-nodemgr.ini:
@@ -115,6 +123,7 @@ opencontrail_database_packages:
 {%- if not grains.get('noservices', False) %}
   - require_in:
     - service: opencontrail_database_services
+    - service: opencontrail_zookeeper_service
 {%- endif %}
 
 {% endif %}
@@ -164,8 +173,18 @@ opencontrail_database_services:
     - file: {{ database.cassandra_config }}cassandra-env.sh
     - file: {{ database.cassandra_config }}logback.xml
     - file: /etc/zookeeper/conf/zoo.cfg
+    - file: /etc/default/zookeeper
     - file: /etc/contrail/contrail-database-nodemgr.conf
     - file: /var/lib/zookeeper/myid
+    - file: /etc/zookeeper/conf/log4j.properties
+
+opencontrail_zookeeper_service:
+  service.running:
+  - enable: true
+  - name: zookeeper
+  - watch:
+    - file: /etc/zookeeper/conf/zoo.cfg
+    - file: /etc/default/zookeeper
     - file: /etc/zookeeper/conf/log4j.properties
 
 {%- endif %}

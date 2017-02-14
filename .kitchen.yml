@@ -2,9 +2,7 @@
 driver:
   name: docker
   hostname: opencontrail.ci.local
-  use_sudo: false
-
-
+  use_sudo: true
 
 provisioner:
   name: salt_solo
@@ -60,6 +58,7 @@ provisioner:
 verifier:
   name: inspec
   sudo: true
+
 platforms:
   - name: ubuntu-trusty
     driver_config:

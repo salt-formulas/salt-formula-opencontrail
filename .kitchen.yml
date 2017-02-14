@@ -42,7 +42,7 @@ provisioner:
       linux:
         system:
           enabled: true
-          name: opencontrail
+          name: opencontrail.ci.local
         network:
           enabled: true
           hostname: opencontrail.ci.local

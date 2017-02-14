@@ -1,4 +1,4 @@
-{%- from "opencontrail/map.jinja" import control with context %}
+{%- from "opencontrail/map.jinja" import common,control with context %}
 {%- if control.enabled %}
 
 include:
@@ -92,3 +92,4 @@ opencontrail_control_entrypoint:
 {%- endif %}
 
 {%- endif %}
+

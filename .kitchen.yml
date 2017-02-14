@@ -1,8 +1,8 @@
 ---
 driver:
   name: docker
-  hostname: opencontrail.ci.local
-  use_sudo: true
+  hostname: opencontrail
+  use_sudo: false
 
 provisioner:
   name: salt_solo

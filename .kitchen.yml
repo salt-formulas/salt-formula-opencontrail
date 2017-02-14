@@ -2,7 +2,7 @@
 driver:
   name: docker
   hostname: opencontrail.ci.local
-  use_sudo: false
+  use_sudo: true
 
 provisioner:
   name: salt_solo
@@ -45,7 +45,7 @@ provisioner:
           name: opencontrail
         network:
           enabled: true
-          hostname: opencontrail.ci.lolca
+          hostname: opencontrail.ci.local
           interface:
             vhost0:
               enabled: True

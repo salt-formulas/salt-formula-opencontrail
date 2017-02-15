@@ -1,7 +1,7 @@
 ---
 driver:
   name: docker
-  hostname: opencontrail.ci.local
+  hostname: opencontrail
   use_sudo: true
 
 provisioner:
@@ -42,10 +42,10 @@ provisioner:
       linux:
         system:
           enabled: true
-          name: opencontrail.ci.local
+          name: opencontrail
         network:
           enabled: true
-          hostname: opencontrail.ci.local
+          hostname: opencontrail
           interface:
             vhost0:
               enabled: True

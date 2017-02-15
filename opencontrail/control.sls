@@ -1,5 +1,4 @@
-{%- from "opencontrail/map.jinja" import control with context %}
-{%- from "opencontrail/map.jinja" import common with context %}
+{%- from "opencontrail/map.jinja" import common,control with context %}
 {%- if control.enabled %}
 
 include:

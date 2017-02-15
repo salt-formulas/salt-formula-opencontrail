@@ -1,5 +1,4 @@
-{%- from "opencontrail/map.jinja" import config with context %}
-{%- from "opencontrail/map.jinja" import common with context %}
+{%- from "opencontrail/map.jinja" import common,config with context %}
 {%- if config.enabled %}
 
 include:

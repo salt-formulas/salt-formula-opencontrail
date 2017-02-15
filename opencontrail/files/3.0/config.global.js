@@ -1,5 +1,4 @@
-{%- from "opencontrail/map.jinja" import web with context %}
-{%- from "opencontrail/map.jinja" import common with context %}
+{%- from "opencontrail/map.jinja" import common,web with context %}
 /*
  * Copyright (c) 2014 Juniper Networks, Inc. All rights reserved.
  */

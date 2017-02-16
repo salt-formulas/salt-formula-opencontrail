@@ -94,15 +94,16 @@ opencontrail_control_entrypoint:
 {%- endif %}
 
 {%- if common.distribution == "juniper" %}
-/etc/contrail/supervisord_config_files/ifmap.ini:
+add_etc_contrail_supervisord_config_files_ifmap.ini:
   file.managed:
+  - name: /etc/contrail/supervisord_config_files/ifmap.ini
   - template: jinja
-  - source: salt://contrail/files/ifmap.ini
+  - source: salt://opencontrail/files/ifmap.ini
   - mode: 755
   - replace: False
 {%- if not grains.get('noservices', False) %}
   - require:
-    - pkg: contrail_control_packages
+    - pkg: opencontrail_control_packages
 {%- endif %}
 
 {%- endif %}

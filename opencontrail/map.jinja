@@ -82,11 +82,17 @@ web:
          ['contrail-web-controller', 'nodejs-legacy', 'gettext-base']
     services:
          ['contrail-webui-webserver', 'contrail-webui-jobserver']
+    database:
+      engine: cassandra
+      port: 9160
   RedHat:
     pkgs:
          ['contrail-web-controller']
     services:
          ['supervisor-webui']
+    database:
+      engine: cassandra
+      port: 9160
 client:
   Debian:
     pkgs:
@@ -182,11 +188,17 @@ web:
          ['contrail-web-controller', 'contrail-openstack-webui', 'nodejs', 'gettext-base']
     services:
          ['supervisor-webui']
+    database:
+      engine: cassandra
+      port: 9160
   RedHat:
     pkgs:
          ['contrail-web-controller']
     services:
          ['supervisor-webui']
+    database:
+      engine: cassandra
+      port: 9160
 client:
   Debian:
     pkgs:

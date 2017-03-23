@@ -7,6 +7,7 @@ include:
 opencontrail_config_packages:
   pkg.installed:
   - names: {{ config.pkgs }}
+  - force_yes: True
 
 /etc/ifmap-server/authorization.properties:
   file.managed:

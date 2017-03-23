@@ -1,4 +1,4 @@
-{%- from "opencontrail/map.jinja" import common,control with context %}
+{%- from "opencontrail/map.jinja" import control with context %}
 {%- if control.enabled %}
 
 include:
@@ -7,6 +7,7 @@ include:
 opencontrail_control_packages:
   pkg.installed:
   - names: {{ control.pkgs }}
+  - force_yes: True
 
 /etc/contrail/contrail-control-nodemgr.conf:
   file.managed:

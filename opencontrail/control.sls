@@ -48,6 +48,7 @@ opencontrail_control_packages:
 /etc/contrail/supervisord_control_files/contrail-control-nodemgr.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ control.version }}/control/contrail-control-nodemgr.ini
+  - makedirs: true
   - require:
     - pkg: opencontrail_control_packages
 {%- if not grains.get('noservices', False) %}

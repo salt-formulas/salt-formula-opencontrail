@@ -40,6 +40,7 @@ opencontrail_collector_packages:
 {{ collector.redis_config }}:
   file.managed:
   - source: salt://opencontrail/files/{{ collector.version }}/collector/redis.conf
+  - makedirs: True
   - require:
     - pkg: opencontrail_collector_packages
 
@@ -69,6 +70,7 @@ opencontrail_collector_packages:
 /etc/contrail/supervisord_analytics_files/contrail-analytics-nodemgr.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ collector.version }}/collector/contrail-analytics-nodemgr.ini
+  - makedirs: True
   - require:
     - pkg: opencontrail_collector_packages
 {%- if not grains.get('noservices', False) %}

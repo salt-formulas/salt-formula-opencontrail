@@ -45,6 +45,7 @@ publisher_init:
 /etc/contrail/supervisord_config_files/contrail-api.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/config/contrail-api.ini
+  - makedirs: true
   - require:
     - pkg: opencontrail_config_packages
 

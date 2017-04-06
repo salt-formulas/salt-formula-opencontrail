@@ -14,13 +14,19 @@ opencontrail_compute_packages:
   pkg.installed:
   - names: {{ compute.pkgs }}
 
+{%- if grains.get('virtual_subtype', None) not in ['Docker', 'LXC'] %}
+
 net.ipv4.ip_local_reserved_ports:
   sysctl.present:
     - value: 8085,9090
     - require:
       - pkg: opencontrail_compute_packages
+    {%- if not grains.get('noservices', False)%}
     - require_in:
       - service: opencontrail_compute_services
+    {%- endif %}
+
+{%- endif %}
 
 /etc/contrail/contrail-vrouter-nodemgr.conf:
   file.managed:
@@ -28,8 +34,10 @@ net.ipv4.ip_local_reserved_ports:
   - template: jinja
   - require:
     - pkg: opencontrail_compute_packages
+  {%- if not grains.get('noservices', False)%}
   - watch_in:
     - service: opencontrail_compute_services
+  {%- endif %}
 
 /etc/contrail/vrouter_nodemgr_param:
   file.managed:
@@ -51,8 +59,10 @@ net.ipv4.ip_local_reserved_ports:
   - template: jinja
   - require:
     - pkg: opencontrail_compute_packages
+  {%- if not grains.get('noservices', False)%}
   - watch_in:
     - service: opencontrail_compute_services
+  {%- endif %}
 
 /usr/local/bin/findns:
   file.managed:
@@ -66,12 +76,15 @@ net.ipv4.ip_local_reserved_ports:
   - source: salt://opencontrail/files/{{ compute.version }}/contrail-vrouter-nodemgr.ini
   - require:
     - pkg: opencontrail_compute_packages
+  {%- if not grains.get('noservices', False)%}
   - require_in:
     - service: opencontrail_compute_services
+  {%- endif %}
 
 /etc/udev/rules.d/vhost-net.rules:
   file.managed:
   - contents: 'KERNEL=="vhost-net", GROUP="kvm", MODE="0660"'
+  - makedirs: True
 
 /etc/modules:
   file.append:
@@ -99,8 +112,10 @@ opencontrail_vrouter_package:
   - require:
     - pkg: opencontrail_compute_packages
     - pkg: opencontrail_vrouter_package
+  {%- if not grains.get('noservices', False)%}
   - require_in:
     - service: opencontrail_compute_services
+  {%- endif %}
 
 modules_dpdk:
   file.append:
@@ -128,6 +143,7 @@ opencontrail_vrouter_package:
   - contents: "options vrouter vr_flow_entries=2097152"
 
 {%- if network.interface.get('vhost0', {}).get('enabled', False) %}
+{%- if grains.get('virtual_subtype', None) not in ['Docker', 'LXC'] %}
 
 contrail_load_vrouter_kernel_module:
   cmd.run:
@@ -138,27 +154,14 @@ contrail_load_vrouter_kernel_module:
     - pkg: opencontrail_compute_packages
 
 {%- endif %}
-
 {%- endif %}
+{%- endif %}
+
+{%- if not grains.get('noservices', False)%}
 
 opencontrail_compute_services:
   service.enabled:
   - names: {{ compute.services }}
 
-{%- if compute.get('engine', 'openstack') == 'kubernetes' %}
-
-kubernetes_packages:
-  pkg.installed:
-    - names:
-      - bridge-utils
-      - ethtool
-      - opencontrail-kubelet
-
-/usr/libexec/kubernetes/kubelet-plugins/net/exec/opencontrail/opencontrail:
-  file.symlink:
-    - target: /usr/bin/opencontrail-kubelet-plugin
-    - makedirs: true
-
 {%- endif %}
-
 {%- endif %}

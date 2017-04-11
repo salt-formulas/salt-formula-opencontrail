@@ -1,6 +1,6 @@
-============
-OpenContrail
-============
+====================
+OpenContrail Formula
+====================
 
 Contrail Controller is an open, standards-based software solution that
 delivers network virtualization and service automation for federated cloud
@@ -13,6 +13,7 @@ Virtualization (NFV) use cases.
 
 Package source
 ==============
+
 Formula support OpenContrail as well as Juniper Contrail package repository in the backend.
 
 Differences withing the configuration and state run are controlled by
@@ -32,7 +33,7 @@ To use Juniper Contrail repository as a source of packages override pillar as in
         vendor: juniper
 
 
-Sample pillars
+Sample Pillars
 ==============
 
 Controller nodes
@@ -477,9 +478,7 @@ Config, control, database, web.
           token: token
           tenant: admin
 
-
 Analytic nodes
-----------------
 
 Analytics and database on an analytic node(s)
 
@@ -543,7 +542,7 @@ Analytics and database on an analytic node(s)
 
 
 Compute nodes
-----------------
+-------------
 
 Vrouter configuration on a compute node(s)
 
@@ -576,7 +575,7 @@ Vrouter configuration on a compute node(s)
           mtu: 9000
 
 Keystone v3
--------------
+-----------
 
 To enable support for keystone v3 in opencontrail, there must be defined
 version for config and web role.
@@ -632,8 +631,10 @@ Without Keystone
           token: none
         ...
 
+Kubernetes support
+------------------
+
 Kubernetes vrouter nodes
-------------------------
 
 Vrouter configuration on a kubernetes node(s)
 
@@ -646,7 +647,6 @@ Vrouter configuration on a kubernetes node(s)
       ...
 
 vRouter with separated control plane
-------------------------------------
 
 Separate XMPP traffic from dataplane interface.
 
@@ -691,6 +691,7 @@ For OpenContrail version >= 3.1.1 and Cassandra >=2.1 we should override WebUI's
 For appropriate node at class level:
 
 .. code-block:: yaml
+
     opencontrail:
       ....
       web:
@@ -879,8 +880,8 @@ Add virtual router
 
     reboot
 
-Service debugging
------------------
+Debugging
+---------
 
 Display vhost XMPP connection status
 

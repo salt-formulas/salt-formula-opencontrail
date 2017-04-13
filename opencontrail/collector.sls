@@ -76,6 +76,16 @@ opencontrail_collector_packages:
     - service: opencontrail_collector_services
 {%- endif %}
 
+/etc/contrail/supervisord_analytics_files/contrail-alarm-gen.ini:
+  file.managed:
+  - source: salt://opencontrail/files/{{ collector.version }}/collector/contrail-alarm-gen.ini
+  - require:
+    - pkg: opencontrail_collector_packages
+{%- if not grains.get('noservices', False) %}
+  - require_in:
+    - service: opencontrail_collector_services
+{%- endif %}
+
 /etc/contrail/supervisord_analytics.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ collector.version }}/collector/supervisord_analytics.conf

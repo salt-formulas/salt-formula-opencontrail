@@ -1,4 +1,4 @@
-{%- from "opencontrail/map.jinja" import database with context %}
+{%- from "opencontrail/map.jinja" import database,common with context %}
 {%- if database.enabled %}
 
 include:
@@ -158,7 +158,12 @@ zookeeper_service:
 opencontrail_database_services:
   service.running:
   - enable: true
+{%- if common.vendor == "juniper" %}
+  - name: contrail-database
+{%- else %}
   - name: supervisor-database
+{%- endif %}
+  - init_delay: 5
   - watch:
     - file: {{ database.cassandra_config }}cassandra.yaml
     - file: {{ database.cassandra_config }}cassandra-env.sh

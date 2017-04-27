@@ -2,6 +2,7 @@ applications:
 - opencontrail
 classes:
 - service.opencontrail.support
+- service.opencontrail.common
 parameters:
   opencontrail:
     compute:

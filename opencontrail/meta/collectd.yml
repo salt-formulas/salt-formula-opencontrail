@@ -108,7 +108,7 @@ local_plugin:
     {%- if config.get('enabled', False) %}
       {%- set bind_addr=config.bind.address|replace('0.0.0.0', '127.0.0.1') %}
       contrail-api:
-        expected_code: 401
+        expected_code: 200
         url: "http://{{ bind_addr }}:{{ config.bind.api_port }}/"
       contrail-discovery:
         expected_code: 200

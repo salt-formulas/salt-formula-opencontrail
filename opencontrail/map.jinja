@@ -69,13 +69,13 @@ database:
          ['cassandra', 'zookeeper', 'supervisor', 'openjdk-7-jre-headless', 'contrail-database']
     cassandra_config: '/etc/cassandra/'
     services:
-         ['supervisord-contrail-database', 'zookeeper']
+         ['zookeeper', 'supervisor-database']
   RedHat:
     pkgs:
          ['contrail-openstack-database', 'zookeeper', 'supervisor', 'java-1.7.0-openjdk-headless']
     cassandra_config: '/etc/cassandra/conf/'
     services:
-         ['supervisord-contrail-database', 'zookeeper']
+         ['zookeeper', 'supervisor-database']
 web:
   Debian:
     pkgs:
@@ -175,13 +175,13 @@ database:
          ['cassandra', 'zookeeper', 'supervisor', 'openjdk-7-jre-headless', 'contrail-openstack-database']
     cassandra_config: '/etc/cassandra/'
     services:
-         ['supervisord-contrail-database', 'zookeeper']
+         ['zookeeper', 'contrail-database']
   RedHat:
     pkgs:
          ['contrail-openstack-database', 'zookeeper', 'supervisor', 'java-1.7.0-openjdk-headless']
     cassandra_config: '/etc/cassandra/conf/'
     services:
-         ['supervisord-contrail-database', 'zookeeper']
+         ['zookeeper', 'contrail-database']
 web:
   Debian:
     pkgs:

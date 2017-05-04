@@ -158,12 +158,10 @@ zookeeper_service:
 opencontrail_database_services:
   service.running:
   - enable: true
-{%- if common.vendor == "juniper" %}
-  - name: contrail-database
-{%- else %}
-  - name: supervisor-database
-{%- endif %}
+  - names: {{ database.services }}
   - init_delay: 5
+  - require:
+    - service: zookeeper_service
   - watch:
     - file: {{ database.cassandra_config }}cassandra.yaml
     - file: {{ database.cassandra_config }}cassandra-env.sh

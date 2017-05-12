@@ -1,0 +1,9 @@
+{% set node_fqdn = salt['grains.get']('fqdn') %}
+backup:
+  cassandra:
+    fs_excludes:
+    - /var/backups/cassandra/OPENCONTRAIL_CONTROL_DB/*
+    fs_includes:
+    - /var/backups/cassandra/OPENCONTRAIL_CONTROL_DB/{{ node_fqdn }}/
+    actions:
+    - cmd: /usr/local/bin/contrail-cassandra-backup

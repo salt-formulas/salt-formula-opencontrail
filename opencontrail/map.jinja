@@ -65,8 +65,13 @@ control:
          ['contrail-control', 'supervisor-control']
 database:
   Debian:
+    {%- if grains.get('oscodename', 'xenial')%}
+    pkgs:
+         ['cassandra', 'zookeeper', 'supervisor', 'openjdk-8-jre-headless', 'contrail-database']
+    {%- else %}
     pkgs:
          ['cassandra', 'zookeeper', 'supervisor', 'openjdk-7-jre-headless', 'contrail-database']
+    {%- endif %}
     cassandra_config: '/etc/cassandra/'
     services:
          ['supervisord-contrail-database', 'zookeeper']
@@ -79,7 +84,7 @@ database:
 web:
   Debian:
     pkgs:
-         ['contrail-web-controller', 'nodejs-legacy', 'gettext-base']
+         ['contrail-web-controller', 'gettext-base']
     services:
          ['contrail-webui-webserver', 'contrail-webui-jobserver']
     database:

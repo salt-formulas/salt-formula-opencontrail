@@ -1,7 +1,8 @@
 linux:
   system:
+    enabled: true
     repo:
-      mirantis_openstack:
+      mirantis_openstack_mos8:
         source: "deb [arch=amd64] http://mirror.fuel-infra.org/mos-repos/ubuntu/8.0-mu-3/ mos8.0 main restricted"
         architectures: amd64
         key_url: "http://mirror.fuel-infra.org/mos-repos/ubuntu/8.0-mu-3/archive-mos8.0.key"

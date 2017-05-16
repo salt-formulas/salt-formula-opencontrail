@@ -25,3 +25,11 @@ opencontrail:
       mask: /24
       dns: 127.0.0.1
       mtu: 9000
+linux:
+  network:
+    enabled: true
+    hostname: opencontrail
+    interface:
+      vhost0:
+        enabled: True
+        type: eth

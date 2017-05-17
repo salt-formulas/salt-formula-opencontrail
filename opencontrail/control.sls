@@ -51,30 +51,36 @@ opencontrail_control_packages:
   - makedirs: true
   - require:
     - pkg: opencontrail_control_packages
+{%- if not grains.get('noservices', False) %}
   - require_in:
     - service: opencontrail_control_services
+{%- endif %}
 
 /etc/contrail/supervisord_control.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ control.version }}/control/supervisord_control.conf
   - require:
     - pkg: opencontrail_control_packages
+{%- if not grains.get('noservices', False) %}
   - require_in:
     - service: opencontrail_control_services
+{%- endif %}
 
 {% endif %}
+
+{%- if not grains.get('noservices', False) %}
 
 opencontrail_control_services:
   service.running:
   - enable: true
   - names: {{ control.services }}
-  - onlyif:
-    - grains.get('noservices') == True
   - watch:
     - file: /etc/contrail/dns/contrail-rndc.conf
     - file: /etc/contrail/contrail-dns.conf
     - file: /etc/contrail/contrail-control.conf
     - file: /etc/contrail/contrail-control-nodemgr.conf
+
+{%- endif %}
 
 {%- if grains.get('virtual_subtype', None) == "Docker" %}
 

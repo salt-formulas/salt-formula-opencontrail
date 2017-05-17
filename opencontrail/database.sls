@@ -109,18 +109,22 @@ opencontrail_database_packages:
   - template: jinja
   - require:
     - pkg: opencontrail_database_packages
+{%- if not grains.get('noservices', False) %}
   - require_in:
     - service: opencontrail_database_services
     - service: opencontrail_zookeeper_service
+{%- endif %}
 
 /etc/contrail/supervisord_database_files/contrail-database-nodemgr.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ database.version }}/database/contrail-database-nodemgr.ini
   - require:
     - pkg: opencontrail_database_packages
+{%- if not grains.get('noservices', False) %}
   - require_in:
     - service: opencontrail_database_services
     - service: opencontrail_zookeeper_service
+{%- endif %}
 
 {% endif %}
 
@@ -137,8 +141,10 @@ disable-cassandra-service:
   - user: cassandra
   - group: cassandra
   - makedirs: True
+{%- if not grains.get('noservices', False) %}
   - require_in:
     - service: opencontrail_database_services
+{%- endif %}
 
 /var/lib/cassandra:
   file.directory:
@@ -147,12 +153,12 @@ disable-cassandra-service:
   - require:
     - file: /var/lib/cassandra/data
 
+{%- if not grains.get('noservices', False) %}
+
 zookeeper_service:
   service.running:
   - enable: true
   - name: zookeeper
-  - onlyif:
-    - grains.get('noservices') == True
   - watch:
     - file: /etc/zookeeper/conf/zoo.cfg
     - file: /var/lib/zookeeper/myid
@@ -167,8 +173,6 @@ opencontrail_database_services:
   - name: supervisor-database
 {%- endif %}
   - init_delay: 5
-  - onlyif:
-    - grains.get('noservices') == True
   - watch:
     - file: {{ database.cassandra_config }}cassandra.yaml
     - file: {{ database.cassandra_config }}cassandra-env.sh
@@ -183,12 +187,12 @@ opencontrail_zookeeper_service:
   service.running:
   - enable: true
   - name: zookeeper
-  - onlyif:
-    - grains.get('noservices') == True
   - watch:
     - file: /etc/zookeeper/conf/zoo.cfg
     - file: /etc/default/zookeeper
     - file: /etc/zookeeper/conf/log4j.properties
+
+{%- endif %}
 
 {%- if grains.get('virtual_subtype', None) == "Docker" %}
 

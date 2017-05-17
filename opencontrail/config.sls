@@ -94,10 +94,8 @@ publisher_init:
   - template: jinja
   - require:
     - pkg: opencontrail_config_packages
-{%- if not grains.get('noservices', False) %}
   - watch_in:
     - service: opencontrail_config_services
-{%- endif %}
 
 /etc/contrail/contrail-config-nodemgr.conf:
   file.managed:
@@ -105,10 +103,8 @@ publisher_init:
   - template: jinja
   - require:
     - pkg: opencontrail_config_packages
-{%- if not grains.get('noservices', False) %}
   - watch_in:
     - service: opencontrail_config_services
-{%- endif %}
 
 /etc/sudoers.d/contrail_sudoers:
   file.managed:
@@ -124,10 +120,8 @@ publisher_init:
   - template: jinja
   - require:
     - pkg: opencontrail_config_packages
-{%- if not grains.get('noservices', False) %}
   - watch_in:
     - service: opencontrail_config_services
-{%- endif %}
 {%- endif %}
 
 /etc/contrail/contrail-schema.conf:
@@ -151,10 +145,8 @@ publisher_init:
   - source: salt://opencontrail/files/{{ config.version }}/config/contrail-config-nodemgr.ini
   - require:
     - pkg: opencontrail_config_packages
-{%- if not grains.get('noservices', False) %}
   - require_in:
     - service: opencontrail_config_services
-{%- endif %}
 
 {%- if not grains.get('virtual_subtype', None) == "Docker" %}
 {%- if not common.vendor == "juniper" %}
@@ -163,10 +155,8 @@ publisher_init:
   file.absent:
   - require:
     - pkg: opencontrail_config_packages
-{%- if not grains.get('noservices', False) %}
   - require_in:
     - service: opencontrail_config_services
-{%- endif %}
 
 {%- endif %}
 {%- endif %}
@@ -176,19 +166,17 @@ publisher_init:
   - source: salt://opencontrail/files/{{ config.version }}/config/supervisord_config.conf
   - require:
     - pkg: opencontrail_config_packages
-{%- if not grains.get('noservices', False) %}
   - require_in:
     - service: opencontrail_config_services
-{%- endif %}
 
 {% endif %}
-
-{%- if not grains.get('noservices', False) %}
 
 opencontrail_config_services:
   service.running:
   - enable: true
   - names: {{ config.services }}
+  - onlyif:
+    - grains.get('noservices') == True
   - watch: 
     - file: /etc/contrail/contrail-discovery.conf
     - file: /etc/contrail/contrail-svc-monitor.conf
@@ -197,8 +185,6 @@ opencontrail_config_services:
     - file: /etc/contrail/vnc_api_lib.ini
     - file: /etc/ifmap-server/basicauthusers.properties
     - file: /etc/sudoers.d/contrail_sudoers
-
-{%- endif %}
 
 {%- if grains.get('virtual_subtype', None) == "Docker" %}
 

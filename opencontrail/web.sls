@@ -19,7 +19,6 @@ opencontrail_web_packages:
   - template: jinja
   - require:
     - pkg: opencontrail_web_packages
-{%- if not grains.get('noservices', False) %}
   - watch_in:
     - service: opencontrail_web_services
 
@@ -27,10 +26,10 @@ opencontrail_web_services:
   service.running:
   - enable: true
   - names: {{ web.services }}
+  - onlyif:
+    - grains.get('noservices') == True
   - watch: 
     - file: /etc/contrail/config.global.js
-
-{%- endif %}
 
 {%- if grains.get('virtual_subtype', None) == "Docker" %}
 

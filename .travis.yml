@@ -20,17 +20,17 @@ install:
 env:
   matrix:
    - SUITE=analytics
-   - SUITE=control
-   - SUITE=cluster
-   - SUITE=single
-   - SUITE=tor
-   - SUITE=vrouter
-   - PLATFORM=trevorj/salty-whales:trusty SUITE=analytics
-   - PLATFORM=trevorj/salty-whales:trusty SUITE=control
-   - PLATFORM=trevorj/salty-whales:trusty SUITE=cluster
-   - PLATFORM=trevorj/salty-whales:trusty SUITE=single
-   - PLATFORM=trevorj/salty-whales:trusty SUITE=tor
-   - PLATFORM=trevorj/salty-whales:trusty SUITE=vrouter
+   # - SUITE=control
+   # - SUITE=cluster
+   # - SUITE=single
+   # - SUITE=tor
+   # - SUITE=vrouter
+   # - PLATFORM=trevorj/salty-whales:trusty SUITE=analytics
+   # - PLATFORM=trevorj/salty-whales:trusty SUITE=control
+   # - PLATFORM=trevorj/salty-whales:trusty SUITE=cluster
+   # - PLATFORM=trevorj/salty-whales:trusty SUITE=single
+   # - PLATFORM=trevorj/salty-whales:trusty SUITE=tor
+   # - PLATFORM=trevorj/salty-whales:trusty SUITE=vrouter
 
 before_script:
   - set -o pipefail

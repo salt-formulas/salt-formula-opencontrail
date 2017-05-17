@@ -26,7 +26,7 @@ opencontrail_web_services:
   service.running:
   - enable: true
   - names: {{ web.services }}
-  - onlyif:
+  - unless:
     - grains.get('noservices') == True
   - watch: 
     - file: /etc/contrail/config.global.js

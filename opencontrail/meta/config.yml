@@ -72,6 +72,9 @@ config:
   zoo.cfg:
     source: "salt://opencontrail/files/{{ database.version }}/zoo.cfg"
     template: jinja
+  zookeeper:
+    source: "salt://opencontrail/files/{{ database.version }}/zookeeper"
+    template: jinja
   server.properties:
     source: "salt://opencontrail/files/{{ database.version }}/server.properties"
     template: jinja

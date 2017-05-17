@@ -13,7 +13,7 @@ provisioner:
   log_level: error
   formula: opencontrail
   grains:
-    noservices: True
+    noservices: False
   dependencies:
     - name: linux
       repo: git

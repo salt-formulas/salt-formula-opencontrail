@@ -175,7 +175,7 @@ opencontrail_config_services:
   service.running:
   - enable: true
   - names: {{ config.services }}
-  - onlyif:
+  - unless:
     - grains.get('noservices') == True
   - watch: 
     - file: /etc/contrail/contrail-discovery.conf

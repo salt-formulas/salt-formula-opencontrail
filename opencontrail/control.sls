@@ -68,7 +68,7 @@ opencontrail_control_services:
   service.running:
   - enable: true
   - names: {{ control.services }}
-  - onlyif:
+  - unless:
     - grains.get('noservices') == True
   - watch:
     - file: /etc/contrail/dns/contrail-rndc.conf

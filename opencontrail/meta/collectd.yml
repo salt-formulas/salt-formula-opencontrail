@@ -10,6 +10,12 @@ local_plugin:
   collectd_cassandra_jmx:
     plugin: java
     template: opencontrail/files/collectd_cassandra_jmx.conf
+  collectd_zookeeper_jmx:
+    plugin: java
+    template: opencontrail/files/collectd_zookeeper_jmx.conf
+  collectd_zookeeper:
+    plugin: python
+    template: opencontrail/files/collectd_zookeeper.conf
   {%- endif %}
   {%- if control.get('enabled', False) or compute.get('enabled', False) %}
   collectd_contrail_apis:

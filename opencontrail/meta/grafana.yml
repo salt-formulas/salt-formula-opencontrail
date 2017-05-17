@@ -5,3 +5,6 @@ dashboard:
   contrail:
     format: json
     template: opencontrail/files/grafana_dashboards/contrail_influxdb.json
+  zookeeper:
+    format: json
+    template: opencontrail/files/grafana_dashboards/zookeeper_influxdb.json

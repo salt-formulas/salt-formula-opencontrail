@@ -35,12 +35,16 @@ net.ipv4.ip_local_reserved_ports:
   - watch_in:
     - service: opencontrail_compute_services
 
+{%- if compute.version <= 3.0 %}
+
 /etc/contrail/vrouter_nodemgr_param:
   file.managed:
   - source: salt://opencontrail/files/{{ compute.version }}/vrouter_nodemgr_param
   - template: jinja
   - require:
     - pkg: opencontrail_compute_packages
+
+{%- endif %}
 
 /etc/contrail/agent_param:
   file.managed:
@@ -63,7 +67,7 @@ net.ipv4.ip_local_reserved_ports:
   - source: salt://opencontrail/files/findns
   - mode: 755
 
-{% if compute.version == 3.0 %}
+{%- if compute.version >= 3.0 %}
 
 /etc/contrail/supervisord_vrouter_files/contrail-vrouter-nodemgr.ini:
   file.managed:
@@ -84,7 +88,7 @@ net.ipv4.ip_local_reserved_ports:
   - require:
     - file: /etc/udev/rules.d/vhost-net.rules
 
-{% endif %}
+{%- endif %}
 
 {%- if compute.dpdk.enabled %}
 

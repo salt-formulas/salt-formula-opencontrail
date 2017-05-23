@@ -65,7 +65,7 @@ opencontrail_collector_packages:
   - require:
     - pkg: opencontrail_collector_packages
 
-{% if collector.version == 3.0 %}
+{%- if collector.version >= 3.0 %}
 
 /etc/contrail/supervisord_analytics_files/contrail-analytics-nodemgr.ini:
   file.managed:
@@ -84,8 +84,7 @@ opencontrail_collector_packages:
   - require_in:
     - service: opencontrail_collector_services
 
-{% endif %}
-
+{%- endif %}
 
 opencontrail_collector_services:
   service.running:

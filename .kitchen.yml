@@ -30,7 +30,6 @@ provisioner:
           - linux_repo_openstack
           - linux_repo_opencontrail
           - linux_repo_cassandra
-          - linux_repo_mos
           - linux
           - opencontrail
           - opencontrail_juniper
@@ -41,9 +40,8 @@ provisioner:
           name: opencontrail
     opencontrail_juniper.sls: {}
   pillars-from-files:
-    linux_repo_mos.sls: tests/pillar/repo_mos8.sls
     linux_repo_cassandra.sls: tests/pillar/repo_cassandra.sls
-    linux_repo_opencontrail.sls: tests/pillar/repo_opencontrail.sls
+    linux_repo_opencontrail.sls: tests/pillar/repo_opencontrail_<%= ENV['OC_REPO'] || 'oc311' %>.sls
     linux_repo_openstack.sls: tests/pillar/repo_openstack.sls
 
 verifier:
@@ -58,9 +56,29 @@ platforms:
 
 suites:
 
-  - name: <%= ENV['SUITE'] || 'single' %>
+  # - name: single<%= ENV['OC_VERSION'] || '' %>
+  #   provisioner:
+  #     pillars-from-files:
+  #       opencontrail.sls: tests/pillar/single<%= ENV['OC_VERSION'] || '' %>.sls
+  - name: analytics<%= ENV['OC_VERSION'] || '' %>
     provisioner:
       pillars-from-files:
-        opencontrail.sls: tests/pillar/<%= ENV['SUITE'] || 'single' %>.sls
+        opencontrail.sls: tests/pillar/analytics<%= ENV['OC_VERSION'] || '' %>.sls
+  - name: control<%= ENV['OC_VERSION'] || '' %>
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/control<%= ENV['OC_VERSION'] || '' %>.sls
+  # - name: cluster<%= ENV['OC_VERSION'] || '' %>
+  #   provisioner:
+  #     pillars-from-files:
+  #       opencontrail.sls: tests/pillar/cluster<%= ENV['OC_VERSION'] || '' %>.sls
+  - name: tor<%= ENV['OC_VERSION'] || '' %>
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/tor<%= ENV['OC_VERSION'] || '' %>.sls
+  - name: vrouter<%= ENV['OC_VERSION'] || '' %>
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/vrouter<%= ENV['OC_VERSION'] || '' %>.sls
 
 # vim: ft=yaml sw=2 ts=2 sts=2 tw=125

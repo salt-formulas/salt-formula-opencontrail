@@ -9,9 +9,11 @@ doc:
       param:
         bind:
           value: {{ config.bind.address }}
+        {%- if config.version <= 3.0 %}
         discovery:
           name: "Discovery host"
           value: {{ config.discovery.host }}
+        {%- endif %}
         analytics:
           name: "Analytics host"
           value: {{ config.analytics.host }}
@@ -44,9 +46,11 @@ doc:
       param:
         bind:
           value: {{ control.bind.address }}
+        {% if- control.version <= 3.0 %}
         discovery:
           name: "Discovery host"
           value: {{ control.discovery.host }}
+        {%- endif %}
         master:
           name: "Master host"
           value: {{ control.master.host }}
@@ -70,9 +74,11 @@ doc:
       param:
         bind:
           value: {{ database.bind.host }}{{ database.bind.port }}
+        {%- if database.version <= 3.0 %}
         discovery:
           name: "Discovery host"
           value: {{ database.discovery.host }}
+        {%- endif %}
         version:
           name: "Contrail version"
           value: {{ database.version }}
@@ -125,9 +131,11 @@ doc:
       param:
         bind:
           value: {{ collector.bind.address }}
+        {%- if collector.version <= 3.0 %}
         discovery:
           name: "Discovery host"
           value: {{ collector.discovery.host }}
+        {%- endif %}
         data_ttl:
           name: "Data TTL hours"
           value: {{ collector.data_ttl }}
@@ -136,7 +144,7 @@ doc:
           value: {{ collector.version }}
         database_host:
           name: "Database members"
-          value: {% for member in collector.database.members %}{{ member.host }}:{{ member.port }} {% endfor %}
+          value: {% for member in collector.database.members %}{{ member.host }} {% endfor %}
         packages:
           value: |
             {%- for pkg in collector.pkgs %}
@@ -149,9 +157,11 @@ doc:
     vrouter:
       name: vrouter
       param:
+        {%- if compute.version <= 3.0 %}
         discovery:
           name: "Discovery host"
           value: {{ compute.discovery.host }}
+        {%- endif %}
         disable_flow_collection:
           name: "Disable flow collection"
           value: {{ compute.disable_flow_collection }}

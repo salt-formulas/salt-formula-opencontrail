@@ -99,4 +99,23 @@ opencontrail_client_database_node_{{ database_node_name }}:
 
 {%- endfor %}
 
+{%- for linklocal_service_name, linklocal_service in client.get('linklocal_service', {}).items() %}
+
+opencontrail_client_linklocal_service_{{ linklocal_service_name }}:
+  contrail.linklocal_service_present:
+  - name: {{ linklocal_service.get('name', linklocal_service_name) }}
+  - lls_ip: {{ linklocal_service.get('lls_ip') }}
+  - lls_port: {{ linklocal_service.get('lls_port') }}
+  - ipf_addresses: {{ linklocal_service.get('ipf_addresses') }}
+  - ipf_port: {{ linklocal_service.get('ipf_port') }}
+  - user: {{ client.identity.user }}
+  - password: {{ client.identity.password }}
+  - project: {{ client.identity.tenant }}
+  - auth_host_ip: {{ client.identity.host }}
+  - api_server_ip: {{ client.api.host }}
+  - api_server_port: {{ client.api.port }}
+  - api_base_url: '/'
+
+{%- endfor %}
+
 {%- endif %}

@@ -849,6 +849,45 @@ Enforcing analytics nodes
         nal02:
           ip_address: 172.16.0.32
 
+Enforcing Link Local Services
+
+.. code-block:: yaml
+
+  opencontrail:
+    client:
+      ...
+      linklocal_service:
+         # example with dns name address (only one permited)
+         meta1:
+           lls_ip: 10.0.0.23
+           lls_port: 80
+           ipf_addresses: "meta.example.com"
+           ipf_port: 80
+         # example with multiple ip addresses
+         meta2:
+           lls_ip: 10.0.0.23
+           lls_port: 80
+           ipf_addresses:
+           - 10.10.10.10
+           - 10.20.20.20
+           - 10.30.30.30
+           ipf_port: 80
+         # example with one ip address
+         meta3:
+           lls_ip: 10.0.0.23
+           lls_port: 80
+           ipf_addresses:
+           - 10.10.10.10
+           ipf_port: 80
+         # example with name override
+         lls_meta4:
+           name: meta4
+           lls_ip: 10.0.0.23
+           lls_port: 80
+           ipf_addresses:
+           - 10.10.10.10
+           ipf_port: 80
+
 
 Usage
 =====

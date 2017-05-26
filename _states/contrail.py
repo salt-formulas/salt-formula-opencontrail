@@ -41,6 +41,53 @@ Enforce the virtual router absence
         name: cmp01
 
 
+Enforce the link local service entry existence
+----------------------------------------------
+
+.. code-block:: yaml
+
+    # Example with dns name, only one is permited
+    lls_meta1:
+      contrail.linklocal_service_present:
+        - name: meta1
+        - lls_ip: 10.0.0.23
+        - lls_port: 80
+        - ipf_addresses: "meta.example.com"
+        - ipf_port: 80
+
+    # Example with multiple ip addresses
+    lls_meta2:
+      contrail.linklocal_service_present:
+        - name: meta2
+        - lls_ip: 10.0.0.23
+        - lls_port: 80
+        - ipf_addresses:
+          - 10.10.10.10
+          - 10.20.20.20
+          - 10.30.30.30
+        - ipf_port: 80
+
+    # Example with one ip addresses
+    lls_meta3:
+      contrail.linklocal_service_present:
+        - name: meta3
+        - lls_ip: 10.0.0.23
+        - lls_port: 80
+        - ipf_addresses:
+          - 10.10.10.10
+        - ipf_port: 80
+
+
+Enforce the link local service entry absence
+--------------------------------------------
+
+.. code-block:: yaml
+
+    lls_meta1_delete:
+      contrail.linklocal_service_absent:
+        - name: cmp01
+
+
 Enforce the analytics node existence
 ------------------------------------
 
@@ -121,6 +168,46 @@ def virtual_router_absent(name, **kwargs):
 
     return ret
 
+
+def linklocal_service_present(name, lls_ip, lls_port, ipf_addresses, ipf_port, **kwargs):
+    '''
+    Ensures that the Contrail link local service entry exists.
+
+    :param name:           Link local service name
+    :param lls_ip:         Link local ip address
+    :param lls_port:       Link local service port
+    :param ipf_addresses:  IP fabric dns name or list of IP fabric ip addresses
+    :param ipf_port:       IP fabric port
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': 'Link local service "{0}" already exists'.format(name)}
+    lls = __salt__['contrail.linklocal_service_get'](name, **kwargs)
+    if 'Error' in lls:
+        __salt__['contrail.linklocal_service_create'](name, lls_ip, lls_port, ipf_addresses, ipf_port, **kwargs)
+        ret['comment'] = 'Link local service "{0}" has been created'.format(name)
+        ret['changes']['LinkLocalService'] = 'Created'
+    return ret
+
+
+def linklocal_service_absent(name, **kwargs):
+    '''
+    Ensure that the Contrail link local service entry doesn't exist
+
+    :param name: The name of the link local service entry
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': ' "{0}" is already absent'.format(name)}
+    lls = __salt__['contrail.linklocal_service_get'](name, **kwargs)
+    if 'Error' not in lls:
+        __salt__['contrail.linklocal_service_delete'](name, **kwargs)
+        ret['comment'] = 'Link local service "{0}" has been deleted'.format(name)
+        ret['changes']['LinkLocalService'] = 'Deleted'
+
+    return ret
 
 def analytics_node_present(name, ip_address, **kwargs):
     '''

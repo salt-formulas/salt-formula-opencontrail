@@ -17,6 +17,8 @@ from netaddr import IPNetwork
 
 try:
     from vnc_api import vnc_api
+    from vnc_api.vnc_api import LinklocalServiceEntryType, \
+        LinklocalServicesTypes, GlobalVrouterConfig
     from vnc_api.gen.resource_client import VirtualRouter, AnalyticsNode, \
         ConfigNode, DatabaseNode, BgpRouter
     from vnc_api.gen.resource_xsd import AddressFamilies, BgpSessionAttributes, \
@@ -504,3 +506,160 @@ def database_node_delete(name, **kwargs):
     database_node_obj = databaseNode(name, gsc_obj)
     vnc_client.database_node_delete(
         fq_name=database_node_obj.get_fq_name())
+
+
+
+
+def _get_vrouter_config(vnc_client):
+    try:
+        config = vnc_client.global_vrouter_config_read(
+            fq_name=['default-global-system-config', 'default-global-vrouter-config'])
+    except Exception:
+        config = None
+
+    return config
+
+
+
+def linklocal_service_list(**kwargs):
+    '''
+    Return a list of all Contrail link local services
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.linklocal_service_list
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+
+    current_config = _get_vrouter_config(vnc_client)
+    if current_config is None:
+        return ret
+
+    service_list_res = current_config.get_linklocal_services()
+    if service_list_res is None:
+        service_list_obj = {'linklocal_service_entry': []}
+    else:
+        service_list_obj = service_list_res.__dict__
+    for _, value in service_list_obj.iteritems():
+        for entry in value:
+            service = entry.__dict__
+            if 'linklocal_service_name' in service:
+                ret[service['linklocal_service_name']] = service
+    return ret
+
+
+def linklocal_service_get(name, **kwargs):
+    '''
+    Return a specific Contrail link local service
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.linklocal_service_get llservice
+    '''
+    ret = {}
+    services = linklocal_service_list(**kwargs)
+    if name in services:
+        ret[name] = services.get(name)
+    if len(ret) == 0:
+        return {'Error': 'Error in retrieving link local service "{0}"'.format(name)}
+    return ret
+
+
+def linklocal_service_create(name, lls_ip, lls_port, ipf_dns_or_ip, ipf_port, **kwargs):
+    '''
+    Create specific Contrail link local service
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.linklocal_service_create \
+            llservice 10.10.10.103 22 '["20.20.20.20", "30.30.30.30"]' 22
+        salt '*' contrail.linklocal_service_create \
+            llservice 10.10.10.103 22 link-local.service.dns-name 22
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+
+    current_config = _get_vrouter_config(vnc_client)
+
+    service_entry = LinklocalServiceEntryType(
+        linklocal_service_name=name,
+        linklocal_service_ip=lls_ip,
+        linklocal_service_port=lls_port,
+        ip_fabric_service_port=ipf_port)
+    if isinstance(ipf_dns_or_ip, basestring):
+        service_entry.ip_fabric_DNS_service_name = ipf_dns_or_ip
+    elif isinstance(ipf_dns_or_ip, list):
+        service_entry.ip_fabric_service_ip = ipf_dns_or_ip
+        service_entry.ip_fabric_DNS_service_name = ''
+
+    if current_config is None:
+        new_services = LinklocalServicesTypes([service_entry])
+        new_config = GlobalVrouterConfig(linklocal_services=new_services)
+        vnc_client.global_vrouter_config_create(new_config)
+    else:
+        _current_service_list = current_config.get_linklocal_services()
+        if _current_service_list is None:
+            service_list = {'linklocal_service_entry': []}
+        else:
+            service_list = _current_service_list.__dict__
+        new_services = [service_entry]
+        for key, value in service_list.iteritems():
+            if key != 'linklocal_service_entry':
+                continue
+            for _entry in value:
+                entry = _entry.__dict__
+                if 'linklocal_service_name' in entry:
+                    if entry['linklocal_service_name'] == name:
+                        return {'Error': 'Link local service "{0}" already exists'.format(name)}
+                    new_services.append(_entry)
+            service_list[key] = new_services
+        new_config = GlobalVrouterConfig(linklocal_services=service_list)
+        vnc_client.global_vrouter_config_update(new_config)
+    ret = linklocal_service_list(**kwargs)
+    return ret[name]
+
+
+def linklocal_service_delete(name, **kwargs):
+    '''
+    Delete specific link local service entry
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.linklocal_service_delete llservice
+    '''
+    vnc_client = _auth(**kwargs)
+
+    current_config = _get_vrouter_config(vnc_client)
+
+    found = False
+    if current_config is not None:
+        _current_service_list = current_config.get_linklocal_services()
+        if _current_service_list is None:
+            service_list = {'linklocal_service_entry': []}
+        else:
+            service_list = _current_service_list.__dict__
+        new_services = []
+        for key, value in service_list.iteritems():
+            if key != 'linklocal_service_entry':
+                continue
+            for _entry in value:
+                entry = _entry.__dict__
+                if 'linklocal_service_name' in entry:
+                    if entry['linklocal_service_name'] == name:
+                        found = True
+                    else:
+                        new_services.append(_entry)
+            service_list[key] = new_services
+        new_config = GlobalVrouterConfig(linklocal_services=service_list)
+        vnc_client.global_vrouter_config_update(new_config)
+    if not found:
+        return {'Error': 'Link local service "{0}" not found'.format(name)}

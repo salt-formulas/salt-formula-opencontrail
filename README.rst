@@ -661,7 +661,7 @@ Separate XMPP traffic from dataplane interface.
 Disable Contrail API authentication
 -----------------------------------
 
-Contrail version must >=3.0. It is useful especially for Keystone v3.
+Contrail version must >= 3.0. It is useful especially for Keystone v3.
 
 .. code-block:: yaml
 
@@ -669,6 +669,21 @@ Contrail version must >=3.0. It is useful especially for Keystone v3.
       ...
       config:
         multi_tenancy: false
+      ...
+
+Switch from on demand to periodic keystone sync
+-----------------------------------------------
+
+This can be useful when you want to sync projects from OpenStack to Contrail
+automatically. The period of sync is 60s.
+
+.. code-block:: yaml
+
+    opencontrail:
+      ...
+      config:
+        identity:
+          sync_on_demand: false
       ...
 
 Cassandra listen interface
@@ -686,7 +701,7 @@ Cassandra listen interface
 
 OpenContrail WebUI version >= 3.1.1
 -----------------------------------
-For OpenContrail version >= 3.1.1 and Cassandra >=2.1 we should override WebUI's cassandra port from 9160 to 9042.
+For OpenContrail version >= 3.1.1 and Cassandra >= 2.1 we should override WebUI's cassandra port from 9160 to 9042.
 
 For appropriate node at class level:
 
@@ -746,7 +761,7 @@ Contrail client
 
 Basic parameters with identity and host configs
 
-.. code-block:: bash
+.. code-block:: yaml
 
   opencontrail:
     client:
@@ -761,7 +776,7 @@ Basic parameters with identity and host configs
 
 Enforcing virtual routers
 
-.. code-block:: bash
+.. code-block:: yaml
 
   opencontrail:
     client:
@@ -776,7 +791,7 @@ Enforcing virtual routers
 
 Enforcing control nodes
 
-.. code-block:: bash
+.. code-block:: yaml
 
   opencontrail:
     client:
@@ -795,7 +810,7 @@ Enforcing control nodes
 
 Enforcing edge BGP routers
 
-.. code-block:: bash
+.. code-block:: yaml
 
   opencontrail:
     client:
@@ -812,7 +827,7 @@ Enforcing edge BGP routers
 
 Enforcing config nodes
 
-.. code-block:: bash
+.. code-block:: yaml
 
   opencontrail:
     client:
@@ -825,7 +840,7 @@ Enforcing config nodes
 
 Enforcing database nodes
 
-.. code-block:: bash
+.. code-block:: yaml
 
   opencontrail:
     client:
@@ -838,7 +853,7 @@ Enforcing database nodes
 
 Enforcing analytics nodes
 
-.. code-block:: bash
+.. code-block:: yaml
 
   opencontrail:
     client:

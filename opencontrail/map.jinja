@@ -178,11 +178,14 @@ database:
   Debian:
     {%- if grains.get('oscodename') == 'trusty' %}
     pkgs:
-         ['cassandra', 'zookeeper', 'supervisor', 'openjdk-7-jre-headless', 'contrail-database']
+         ['cassandra', 'zookeeper', 'supervisor', 'openjdk-7-jre-headless', 'contrail-openstack-database']
     {%- else %}
     pkgs:
-         ['cassandra', 'zookeeper', 'supervisor', 'openjdk-8-jre-headless', 'contrail-database']
+         ['cassandra', 'zookeeper', 'supervisor', 'openjdk-8-jre-headless', 'contrail-openstack-database']
     {%- endif %}
+    cassandra_config: '/etc/cassandra/'
+    services:
+         ['supervisord-contrail-database', 'zookeeper']
   RedHat:
     pkgs:
          ['contrail-openstack-database', 'zookeeper', 'supervisor', 'java-1.7.0-openjdk-headless']

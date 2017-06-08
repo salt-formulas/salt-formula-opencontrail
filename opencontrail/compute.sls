@@ -147,7 +147,7 @@ opencontrail_vrouter_package:
 
 contrail_load_vrouter_kernel_module:
   cmd.run:
-  - name: modprobe vrouter
+  - name: sync && echo 3 > /proc/sys/vm/drop_caches && echo 1 > /proc/sys/vm/compact_memory && modprobe vrouter
   - unless: "lsmod | grep vrouter"
   - cwd: /root
   - require:

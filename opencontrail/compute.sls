@@ -21,10 +21,8 @@ net.ipv4.ip_local_reserved_ports:
     - value: 8085,9090
     - require:
       - pkg: opencontrail_compute_packages
-    {%- if not grains.get('noservices', False)%}
     - require_in:
       - service: opencontrail_compute_services
-    {%- endif %}
 
 {%- endif %}
 
@@ -34,10 +32,8 @@ net.ipv4.ip_local_reserved_ports:
   - template: jinja
   - require:
     - pkg: opencontrail_compute_packages
-  {%- if not grains.get('noservices', False)%}
   - watch_in:
     - service: opencontrail_compute_services
-  {%- endif %}
 
 /etc/contrail/vrouter_nodemgr_param:
   file.managed:
@@ -59,10 +55,8 @@ net.ipv4.ip_local_reserved_ports:
   - template: jinja
   - require:
     - pkg: opencontrail_compute_packages
-  {%- if not grains.get('noservices', False)%}
   - watch_in:
     - service: opencontrail_compute_services
-  {%- endif %}
 
 /usr/local/bin/findns:
   file.managed:
@@ -76,10 +70,8 @@ net.ipv4.ip_local_reserved_ports:
   - source: salt://opencontrail/files/{{ compute.version }}/contrail-vrouter-nodemgr.ini
   - require:
     - pkg: opencontrail_compute_packages
-  {%- if not grains.get('noservices', False)%}
   - require_in:
     - service: opencontrail_compute_services
-  {%- endif %}
 
 /etc/udev/rules.d/vhost-net.rules:
   file.managed:
@@ -112,10 +104,8 @@ opencontrail_vrouter_package:
   - require:
     - pkg: opencontrail_compute_packages
     - pkg: opencontrail_vrouter_package
-  {%- if not grains.get('noservices', False)%}
   - require_in:
     - service: opencontrail_compute_services
-  {%- endif %}
 
 modules_dpdk:
   file.append:
@@ -157,11 +147,11 @@ contrail_load_vrouter_kernel_module:
 {%- endif %}
 {%- endif %}
 
-{%- if not grains.get('noservices', False)%}
-
 opencontrail_compute_services:
   service.enabled:
   - names: {{ compute.services }}
+  {%- if grains.get('noservices') %}
+  - onlyif: /bin/false
+  {%- endif %}
 
-{%- endif %}
 {%- endif %}

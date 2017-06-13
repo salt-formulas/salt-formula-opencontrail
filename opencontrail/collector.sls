@@ -73,29 +73,27 @@ opencontrail_collector_packages:
   - makedirs: True
   - require:
     - pkg: opencontrail_collector_packages
-{%- if not grains.get('noservices', False) %}
   - require_in:
     - service: opencontrail_collector_services
-{%- endif %}
 
 /etc/contrail/supervisord_analytics.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ collector.version }}/collector/supervisord_analytics.conf
   - require:
     - pkg: opencontrail_collector_packages
-{%- if not grains.get('noservices', False) %}
   - require_in:
     - service: opencontrail_collector_services
-{%- endif %}
 
 {% endif %}
 
-{%- if not grains.get('noservices', False) %}
 
 opencontrail_collector_services:
   service.running:
   - enable: true
   - names: {{ collector.services }}
+  {%- if grains.get('noservices') %}
+  - onlyif: /bin/false
+  {%- endif %}
   - watch:
     - file: /etc/contrail/contrail-analytics-api.conf
     - file: /etc/contrail/contrail-query-engine.conf
@@ -105,8 +103,6 @@ opencontrail_collector_services:
     - file: /etc/contrail/contrail-snmp-collector.conf
     - file: /etc/contrail/contrail-analytics-nodemgr.conf
     - file: /etc/contrail/contrail-alarm-gen.conf
-
-{%- endif %}
 
 {%- if grains.get('virtual_subtype', None) == "Docker" %}
 

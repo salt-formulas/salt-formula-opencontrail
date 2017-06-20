@@ -1,0 +1,7 @@
+{%- from "opencontrail/map.jinja" import database with context %}
+{%- if database is defined and database.get('enabled', False) %}
+agent:
+  input:
+    zookeeper:
+      address: "{{ database.bind.host|replace('0.0.0.0', '127.0.0.1') }}"
+{%- endif %}

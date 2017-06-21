@@ -1,7 +1,101 @@
-{%- from "opencontrail/map.jinja" import database with context %}
-{%- if database is defined and database.get('enabled', False) %}
+{%- if pillar.opencontrail is defined %}
+  {%- from "opencontrail/map.jinja" import control, collector, compute, config, database, web with context %}
 agent:
   input:
+  {%- if database is defined and database.get('enabled', False) %}
     zookeeper:
       address: "{{ database.bind.host|replace('0.0.0.0', '127.0.0.1') }}"
+  {%- endif %}
+  {%- if control.get('enabled', False) or compute.get('enabled', False) %}
+    contrail:
+    {%- if control.get('enabled', False) %}
+      ifmap_count: "true"
+    {%- endif %}
+      checks:
+    {%- if control.get('enabled', False) %}
+      {%- set bind_addr=control.bind.address|replace('0.0.0.0', '127.0.0.1') %}
+        bgp_session_count:
+          url: "http://{{ bind_addr }}:8083/Snh_ShowNeighborStatisticsReq?bgp_or_xmpp=bgp"
+          xml_element: "ShowNeighborStatisticsResp"
+          result_type: "count"
+        bgp_session_up_count:
+          url: "http://{{ bind_addr }}:8083/Snh_ShowNeighborStatisticsReq?bgp_or_xmpp=bgp&up_or_down=up"
+          xml_element: "ShowNeighborStatisticsResp"
+          result_type: "count"
+        bgp_session_down_count:
+          url: "http://{{ bind_addr }}:8083/Snh_ShowNeighborStatisticsReq?bgp_or_xmpp=bgp&up_or_down=down"
+          xml_element: "ShowNeighborStatisticsResp"
+          result_type: "count"
+        xmpp_session_count:
+          url: "http://{{ bind_addr }}:8083/Snh_ShowNeighborStatisticsReq?bgp_or_xmpp=xmpp"
+          xml_element: "ShowNeighborStatisticsResp"
+          result_type: "count"
+        xmpp_session_up_count:
+          url: "http://{{ bind_addr }}:8083/Snh_ShowNeighborStatisticsReq?bgp_or_xmpp=xmpp&up_or_down=up"
+          xml_element: "ShowNeighborStatisticsResp"
+          result_type: "count"
+        xmpp_session_down_count:
+          url: "http://{{ bind_addr }}:8083/Snh_ShowNeighborStatisticsReq?bgp_or_xmpp=xmpp&up_or_down=down"
+          xml_element: "ShowNeighborStatisticsResp"
+          result_type: "count"
+    {%- endif %}
+    {%- if compute.get('enabled', False) %}
+      {%- set bind_addr=compute.interface.address|replace('0.0.0.0', '127.0.0.1') %}
+        vrouter_flows_active:
+          url: "http://{{ bind_addr }}:8085/Snh_AgentStatsReq"
+          xml_element: "FlowStatsResp"
+          result_type: "flow_active"
+        vrouter_flows_aged:
+          url: "http://{{ bind_addr }}:8085/Snh_AgentStatsReq"
+          xml_element: "FlowStatsResp"
+          result_type: "flow_aged"
+        vrouter_flows_created:
+          url: "http://{{ bind_addr }}:8085/Snh_AgentStatsReq"
+          xml_element: "FlowStatsResp"
+          result_type: "flow_created"
+        vrouter_flows_composite_invalid_interface:
+          url: "http://{{ bind_addr }}:8085/Snh_KDropStatsReq"
+          xml_element: "KDropStatsResp"
+          result_type: "ds_invalid_if"
+        vrouter_flows_discard:
+          url: "http://{{ bind_addr }}:8085/Snh_KDropStatsReq"
+          xml_element: "KDropStatsResp"
+          result_type: "ds_discard"
+        vrouter_flows_flow_action_drop:
+          url: "http://{{ bind_addr }}:8085/Snh_KDropStatsReq"
+          xml_element: "KDropStatsResp"
+          result_type: "ds_flow_action_drop"
+        vrouter_flows_flow_queue_limit_exceeded:
+          url: "http://{{ bind_addr }}:8085/Snh_KDropStatsReq"
+          xml_element: "KDropStatsResp"
+          result_type: "ds_flow_queue_limit_exceeded"
+        vrouter_flows_flow_table_full:
+          url: "http://{{ bind_addr }}:8085/Snh_KDropStatsReq"
+          xml_element: "KDropStatsResp"
+          result_type: "ds_flow_table_full"
+        vrouter_flows_frag_err:
+          url: "http://{{ bind_addr }}:8085/Snh_KDropStatsReq"
+          xml_element: "KDropStatsResp"
+          result_type: "ds_frag_err"
+        vrouter_flows_invalid_label:
+          url: "http://{{ bind_addr }}:8085/Snh_KDropStatsReq"
+          xml_element: "KDropStatsResp"
+          result_type: "ds_invalid_label"
+        vrouter_flows_invalid_nh:
+          url: "http://{{ bind_addr }}:8085/Snh_KDropStatsReq"
+          xml_element: "KDropStatsResp"
+          result_type: "ds_invalid_nh"
+        vrouter_dns_xmpp:
+          url: "http://{{ bind_addr }}:8085/Snh_AgentDnsXmppConnectionStatusReq"
+          xml_element: "AgentXmppDnsData"
+          state: "Established"
+        vrouter_lls:
+          url: "http://{{ bind_addr }}:8085/Snh_LinkLocalServiceInfo"
+          xml_element: "LinkLocalServiceData"
+        vrouter_xmpp:
+          url: "http://{{ bind_addr }}:8085/Snh_AgentXmppConnectionStatusReq"
+          xml_element: "AgentXmppData"
+          state: "Established"
+    {%- endif %}
+  {%- endif %}
 {%- endif %}

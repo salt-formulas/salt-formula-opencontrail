@@ -1,9 +1,6 @@
 opencontrail:
   common:
     version: 3.0
-    source:
-      engine: pkg
-      address: http://mirror.robotice.cz/contrail-havana/
     identity:
       engine: keystone
       host: 127.0.0.1

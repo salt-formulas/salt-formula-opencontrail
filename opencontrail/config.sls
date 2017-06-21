@@ -9,6 +9,8 @@ opencontrail_config_packages:
   - names: {{ config.pkgs }}
   - force_yes: True
 
+{% if config.version == 2.2 or config.version == 3.0 %}
+
 /etc/ifmap-server/authorization.properties:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/config/authorization.properties
@@ -42,22 +44,10 @@ publisher_init:
   - require:
     - pkg: opencontrail_config_packages
 
-/etc/contrail/supervisord_config_files/contrail-api.ini:
-  file.managed:
-  - source: salt://opencontrail/files/{{ config.version }}/config/contrail-api.ini
-  - makedirs: true
-  - require:
-    - pkg: opencontrail_config_packages
-
 /etc/contrail/supervisord_config_files/contrail-discovery.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/config/contrail-discovery.ini
-  - require:
-    - pkg: opencontrail_config_packages
-
-/etc/init.d/contrail-api:
-  file.managed:
-  - source: salt://opencontrail/files/{{ config.version }}/config/contrail-api
+  - makedirs: true
   - require:
     - pkg: opencontrail_config_packages
 
@@ -67,16 +57,31 @@ publisher_init:
   - require:
     - pkg: opencontrail_config_packages
 
-/etc/contrail/contrail-api.conf:
+/etc/contrail/contrail-discovery.conf:
   file.managed:
-  - source: salt://opencontrail/files/{{ config.version }}/contrail-api.conf
+  - source: salt://opencontrail/files/{{ config.version }}/contrail-discovery.conf
   - template: jinja
   - require:
     - pkg: opencontrail_config_packages
 
-/etc/contrail/contrail-discovery.conf:
+{%- endif %}
+
+/etc/contrail/supervisord_config_files/contrail-api.ini:
   file.managed:
-  - source: salt://opencontrail/files/{{ config.version }}/contrail-discovery.conf
+  - source: salt://opencontrail/files/{{ config.version }}/config/contrail-api.ini
+  - makedirs: true
+  - require:
+    - pkg: opencontrail_config_packages
+
+/etc/init.d/contrail-api:
+  file.managed:
+  - source: salt://opencontrail/files/{{ config.version }}/config/contrail-api
+  - require:
+    - pkg: opencontrail_config_packages
+
+/etc/contrail/contrail-api.conf:
+  file.managed:
+  - source: salt://opencontrail/files/{{ config.version }}/contrail-api.conf
   - template: jinja
   - require:
     - pkg: opencontrail_config_packages
@@ -138,7 +143,7 @@ publisher_init:
   - require:
     - pkg: opencontrail_config_packages
 
-{% if config.version == 3.0 %}
+{%- if config.version >= 3.0 %}
 
 /etc/contrail/supervisord_config_files/contrail-config-nodemgr.ini:
   file.managed:
@@ -169,7 +174,7 @@ publisher_init:
   - require_in:
     - service: opencontrail_config_services
 
-{% endif %}
+{%- endif %}
 
 opencontrail_config_services:
   service.running:
@@ -179,12 +184,14 @@ opencontrail_config_services:
   - onlyif: /bin/false
   {%- endif %}
   - watch: 
+    {%- if config.version <= 3.0 %}
     - file: /etc/contrail/contrail-discovery.conf
+    - file: /etc/ifmap-server/basicauthusers.properties
+    {%- endif %}
     - file: /etc/contrail/contrail-svc-monitor.conf
     - file: /etc/contrail/contrail-schema.conf
     - file: /etc/contrail/contrail-api.conf
     - file: /etc/contrail/vnc_api_lib.ini
-    - file: /etc/ifmap-server/basicauthusers.properties
     - file: /etc/sudoers.d/contrail_sudoers
 
 {%- if grains.get('virtual_subtype', None) == "Docker" %}

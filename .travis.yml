@@ -18,19 +18,11 @@ install:
   - bundle install
 
 env:
-  matrix:
-   - SUITE=analytics
-   - SUITE=control
-   - SUITE=cluster
-   - SUITE=single
-   - SUITE=tor
-   - SUITE=vrouter
-   - PLATFORM=trevorj/salty-whales:trusty SUITE=analytics
-   - PLATFORM=trevorj/salty-whales:trusty SUITE=control
-   - PLATFORM=trevorj/salty-whales:trusty SUITE=cluster
-   - PLATFORM=trevorj/salty-whales:trusty SUITE=single
-   - PLATFORM=trevorj/salty-whales:trusty SUITE=tor
-   - PLATFORM=trevorj/salty-whales:trusty SUITE=vrouter
+  - PLATFORM=trevorj/salty-whales:trusty
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323
+  - OC_REPO=oc323
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 OC_VERSION=4_0
+  - OC_REPO=oc40 OC_VERSION=4_0
 
 before_script:
   - set -o pipefail

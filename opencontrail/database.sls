@@ -101,7 +101,7 @@ opencontrail_database_packages:
   file.managed:
   - contents: '{{ database.id }}'
 
-{% if database.version == 3.0 %}
+{%- if database.version >= 3.0 %}
 
 /usr/share/kafka/config/server.properties:
   file.managed:
@@ -122,7 +122,7 @@ opencontrail_database_packages:
     - service: opencontrail_database_services
     - service: opencontrail_zookeeper_service
 
-{% endif %}
+{%- endif %}
 
 {% if grains.os_family == "Debian" %}
 #Stop cassandra started by init script - replaced by contrail-database

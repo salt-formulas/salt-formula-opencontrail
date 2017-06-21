@@ -5,6 +5,11 @@ dashboard:
   contrail:
     format: json
     template: opencontrail/files/grafana_dashboards/contrail_influxdb.json
-  zookeeper:
+  zookeeper_influxdb:
+    datasource: influxdb
     format: json
     template: opencontrail/files/grafana_dashboards/zookeeper_influxdb.json
+  zookeeper_prometheus:
+    datasource: prometheus
+    format: json
+    template: opencontrail/files/grafana_dashboards/zookeeper_prometheus.json

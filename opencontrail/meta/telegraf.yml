@@ -2,6 +2,26 @@
   {%- from "opencontrail/map.jinja" import control, collector, compute, config, database, web with context %}
 agent:
   input:
+  {%- if config.get('enabled', False) or collector.get('enabled', False) or compute.get('enabled', False) %}
+    http_response:
+    {%- if config.get('enabled', False) %}
+      {%- set bind_addr=config.bind.address|replace('0.0.0.0', '127.0.0.1') %}
+      contrail-api:
+        address: "http://{{ bind_addr }}:{{ config.bind.api_port }}/"
+      contrail-discovery:
+        address: "http://{{ bind_addr }}:{{ config.bind.discovery_port }}/"
+    {%- endif %}
+    {%- if collector.get('enabled', False) %}
+      contrail-collector:
+        address: "http://{{ collector.bind.address|replace('0.0.0.0', '127.0.0.1') }}:{{ collector.bind.port }}/"
+    {%- endif %}
+    {%- if compute.get('enabled', False) %}
+      contrail-node-manager:
+        address: "http://127.0.0.1:8102/"
+      contrail-vrouter:
+        address: "http://127.0.0.1:8085/"
+    {%- endif %}
+  {%- endif %}
   {%- if database is defined and database.get('enabled', False) %}
     zookeeper:
       address: "{{ database.bind.host|replace('0.0.0.0', '127.0.0.1') }}"

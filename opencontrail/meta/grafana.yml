@@ -2,9 +2,14 @@ dashboard:
   cassandra:
     format: json
     template: opencontrail/files/grafana_dashboards/cassandra_influxdb.json
-  contrail:
+  contrail_influxdb:
+    datasource: influxdb
     format: json
     template: opencontrail/files/grafana_dashboards/contrail_influxdb.json
+  contrail_prometheus:
+    datasource: prometheus
+    format: json
+    template: opencontrail/files/grafana_dashboards/contrail_prometheus.json
   zookeeper_influxdb:
     datasource: influxdb
     format: json

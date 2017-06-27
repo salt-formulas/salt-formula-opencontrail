@@ -46,7 +46,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "max(http_response_status{host=~\"$host\",service=\"contrail.api\",host=~\"$host\"}) by (host)",
+              "expr": "max(http_response_status{host=~\"$host\",service=~\"contrail.api\",host=~\"$host\"}) by (host)",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{ host }}",

@@ -1,0 +1,462 @@
+{%- if pillar.opencontrail is defined %}
+  {%- from "opencontrail/map.jinja" import control, collector, compute, config, database, web with context %}
+
+  {%- if collector.get('enabled', False) %}
+    {%- set collector_apis = ( 'contrail.collector', ) %}
+    {%- set collector_processes = (
+        'contrail-alarm-gen', 'contrail-analytics-api', 'contrail-collector',
+        'contrail-nodemgr', 'contrail-query-engine', 'contrail-snmp-collector',
+        'contrail-supervisord-analytics', 'contrail-topology',
+        ) %}
+  {%- endif %}
+
+  {%- if compute.get('enabled', False) %}
+    {%- set compute_apis = ( 'contrail.vrouter', 'contrail.node.manager' ) %}
+    {%- set compute_processes = (
+        'contrail-nodemgr-vrouter', 'contrail-supervisord-vrouter', 'contrail-vrouter-agent'
+        ) %}
+  {%- endif %}
+
+  {%- if control.get('enabled', False) %}
+    {%- set control_apis = ( 'contrail.api', 'contrail.discovery' ) %}
+    {%- set control_processes = (
+        'contrail-api', 'contrail-control', 'contrail-device-manager',
+        'contrail-discovery', 'contrail-dns', 'contrail-ifmap-server',
+        'contrail-irond', 'contrail-job-server', 'contrail-named',
+        'contrail-nodemgr-config', 'contrail-nodemgr-control',
+        'contrail-schema', 'contrail-supervisord-config',
+        'contrail-supervisord-control', 'contrail-svc-monitor',
+        ) %}
+  {%- endif %}
+
+  {%- if database.get('enabled', False) %}
+    {%- set database_processes = (
+        'zookeeper-server', 'kafka-server', 'cassandra-server',
+        'contrail-nodemgr-database', 'contrail-supervisord-database',
+        ) %}
+  {%- endif %}
+
+  {%- if web.get('enabled', False) %}
+    {%- if web.get('cache', {}).get('engine', '') == 'redis' %}
+      {%- set web_processes = (
+          'contrail-web-server', 'redis-server'
+          ) %}
+    {%- else %}
+      {%- set web_processes = (
+          'contrail-web-server',
+          ) %}
+    {%- endif %}
+  {%- endif %}
+
+  {%- if control_processes is defined or
+         collector_processes is defined or
+         compute_processes is defined or
+         database_processes is defined or
+         web_processes is defined %}
+server:
+  alert:
+    {%- if control_processes is defined %}
+      {%- for contrail_api in control_apis %}
+        {%- set words = contrail_api.split('.') %}
+    {% for word in words %}{%- if word != 'api' %}{{ word | capitalize }}{% endif %}{% endfor %}APIDown:
+      if: >-
+        http_response_status{service=~"{{ contrail_api }}"} == 0
+{%- raw %}
+      for: 2m
+      labels:
+        severity: down
+        service: "{{ $labels.service }}"
+      annotations:
+        summary: "Endpoint check for '{{ $labels.service }}' is down"
+        description: >-
+            Endpoint check for '{{ $labels.service }}' is down for 2 minutes on node {{ $labels.host }}
+{%- endraw %}
+      {%- endfor %}
+      {%- for contrail_process in control_processes %}
+        {%- set words = contrail_process.split('-') %}
+    ProcstatRunning{% for word in words %}{{ word | capitalize }}{% endfor %}:
+      if: >-
+        procstat_running{process_name="{{ contrail_process }}"} == 0
+      labels:
+        severity: down
+        service: {{ contrail_process }}
+      annotations:
+        summary: '{{ contrail_process }} service is down'
+        description: '{{ contrail_process }} service is down on node {% raw %}{{ $labels.host }}{% endraw %}'
+      {%- endfor %}
+{%- raw %}
+    ContrailBGPSessionsNoneUp:
+      if: >-
+        max(contrail_bgp_session_up_count) == 0
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-control
+      annotations:
+        summary: 'no active BGP sessions'
+        description: 'There are no active BGP sessions on node {{ $labels.host }}'
+    ContrailBGPSessionsSomeDown:
+      if: >-
+        min(contrail_bgp_session_down_count) >= 0
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-control
+      annotations:
+        summary: 'inactive BGP sessions'
+        description: 'There are inactive BGP sessions on node {{ $labels.host }}'
+    ContrailBGPSessionsNone:
+      if: >-
+        max(contrail_bgp_session_count) == 0
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-control
+      annotations:
+        summary: 'No BGP sessions'
+        description: 'There are no BGP sessions on node {{ $labels.host }}'
+    ContrailXMPPSessionsNoneUp:
+      if: >-
+        max(contrail_xmpp_session_up_count) == 0
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-control
+      annotations:
+        summary: 'no active XMPP sessions'
+        description: 'There are no active XMPP sessions on node {{ $labels.host }}'
+    ContrailXMPPSessionsSomeDown:
+      if: >-
+        min(contrail_xmpp_session_down_count) >= 0
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-control
+      annotations:
+        summary: 'inactive XMPP sessions'
+        description: 'There are inactive XMPP sessions on node {{ $labels.host }}'
+    ContrailXMPPSessionsNone:
+      if: >-
+        max(contrail_xmpp_session_count) == 0
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-control
+      annotations:
+        summary: 'No XMPP sessions'
+        description: 'There are no XMPP sessions on node {{ $labels.host }}'
+    ContrailXMPPSessionsTooMany:
+      if: >-
+        min(contrail_xmpp_session_count) >= 500
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-control
+      annotations:
+        summary: 'Too many XMPP sessions'
+        description: 'There are too many XMPP sessions on node {{ $labels.host }}'
+    ContrailXMPPSessionsTooManyVariations:
+      if: >-
+        abs(delta(contrail_xmpp_session_count[2m])) >= 100
+      labels:
+        severity: warning
+        service: contrail-control
+      annotations:
+        summary: 'Number of XMPP sessions changed between checks is too high'
+        description: 'There are too many XMPP sessions changes on node {{ $labels.host }}'
+{%- endraw %}
+    {%- endif %}
+
+    {%- if collector_processes is defined %}
+      {%- for contrail_api in collector_apis %}
+        {%- set words = contrail_api.split('.') %}
+    {% for word in words %}{%- if word != 'api' %}{{ word | capitalize }}{% endif %}{% endfor %}APIDown:
+      if: >-
+        http_response_status{service=~"{{ contrail_api }}"} == 0
+{%- raw %}
+      for: 2m
+      labels:
+        severity: down
+        service: "{{ $labels.service }}"
+      annotations:
+        summary: "Endpoint check for '{{ $labels.service }}' is down"
+        description: >-
+            Endpoint check for '{{ $labels.service }}' is down for 2 minutes on node {{ $labels.host }}
+{%- endraw %}
+      {%- endfor %}
+      {%- for contrail_process in collector_processes %}
+        {%- set words = contrail_process.split('-') %}
+    ProcstatRunning{% for word in words %}{{ word | capitalize }}{% endfor %}:
+      if: >-
+        procstat_running{process_name="{{ contrail_process }}"} == 0
+      labels:
+        severity: down
+        service: {{ contrail_process }}
+      annotations:
+        summary: '{{ contrail_process }} service is down'
+        description: '{{ contrail_process }} service is down on node {% raw %}{{ $labels.host }}{% endraw %}'
+      {%- endfor %}
+    {%- endif %}
+
+    {%- if compute_processes is defined %}
+{%- raw %}
+    ContrailVrouterXMPPSessionsNone:
+      if: >-
+        max(contrail_vrouter_xmpp) == 0
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'No vRouter XMPP sessions'
+        description: 'There are no vRouter XMPP sessions on node {{ $labels.host }}'
+    ContrailVrouterXMPPSessionsTooMany:
+      if: >-
+        min(contrail_vrouter_xmpp) >= 10
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter XMPP sessions'
+        description: 'There are too many vRouter XMPP sessions on node {{ $labels.host }}'
+    ContrailVrouterXMPPSessionsTooManyVariations:
+      if: >-
+        abs(delta(contrail_vrouter_xmpp[2m])) >= 5
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Number of vRouter XMPP sessions changed between checks is too high'
+        description: 'There are too many vRouter XMPP sessions changes on node {{ $labels.host }}'
+    ContrailVrouterDNSXMPPSessionsNone:
+      if: >-
+        max(contrail_vrouter_dns_xmpp) == 0
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'No vRouter DNS-XMPP sessions'
+        description: 'There are no vRouter DNS-XMPP sessions on node {{ $labels.host }}'
+    ContrailVrouterDNSXMPPSessionsTooMany:
+      if: >-
+        min(contrail_vrouter_dns_xmpp) >= 10
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter DNS-XMPP sessions'
+        description: 'There are too many vRouter DNS-XMPP sessions on node {{ $labels.host }}'
+    ContrailVrouterDNSXMPPSessionsTooManyVariations:
+      if: >-
+        abs(delta(contrail_vrouter_dns_xmpp[2m])) >= 5
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Number of vRouter DNS-XMPP sessions changed between checks is too high'
+        description: 'There are too many vRouter DNS-XMPP sessions changes on node {{ $labels.host }}'
+    ContrailVrouterLLSSessionsNone:
+      if: >-
+        max(contrail_vrouter_lls) == 0
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'No vRouter LLS sessions'
+        description: 'There are no vRouter LLS sessions on node {{ $labels.host }}'
+    ContrailVrouterLLSSessionsTooMany:
+      if: >-
+        min(contrail_vrouter_lls) >= 10
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter LLS sessions'
+        description: 'There are too many vRouter LLS sessions on node {{ $labels.host }}'
+    ContrailVrouterLLSSessionsTooManyVariations:
+      if: >-
+        abs(delta(contrail_vrouter_lls[2m])) >= 5
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Number of vRouter LLS sessions changed between checks is too high'
+        description: 'There are too many vRouter LLS sessions changes on node {{ $labels.host }}'
+    ContrailFlowsActiveNone:
+      if: >-
+        min(contrail_vrouter_flows_active) == 0
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'No active vRouter flows'
+        description: 'There are no active vRouter flows on node {{ $labels.host }}'
+    ContrailFlowsActiveTooMany:
+      if: >-
+        min(contrail_vrouter_flows_active) >= 1200
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter active flows'
+        description: 'There are too many active vRouter flows on node {{ $labels.host }}'
+    ContrailFlowsCreatedTooMany:
+      if: >-
+        min(contrail_vrouter_flows_created) >= 1000
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter created flows'
+        description: 'There are too many created vRouter flows on node {{ $labels.host }}'
+    ContrailFlowsDiscardTooMany:
+      if: >-
+        min(contrail_vrouter_flows_discard) >= 1200
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter discarded flows'
+        description: 'There are too many discarded vRouter flows on node {{ $labels.host }}'
+    ContrailFlowsDropTooMany:
+      if: >-
+        min(contrail_vrouter_flows_flow_action_drop) >= 100
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter dropped flows'
+        description: 'There are too many dropped vRouter flows on node {{ $labels.host }}'
+    ContrailFlowsFragErrTooMany:
+      if: >-
+        min(contrail_vrouter_flows_frag_err) >= 100
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter flows with fragment errors'
+        description: 'There are too many vRouter flows with fragment errors on node {{ $labels.host }}'
+    ContrailFlowsInvalidNHTooMany:
+      if: >-
+        min(contrail_vrouter_flows_invalid_nh) >= 100
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter flows with invalid next hop'
+        description: 'There are too many vRouter flows with invalid next hop on node {{ $labels.host }}'
+    ContrailFlowsInvalidITFTooMany:
+      if: >-
+        min(contrail_vrouter_flows_composite_invalid_interface) >= 100
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter flows with composite invalid interface'
+        description: 'There are too many vRouter flows with composite invalid interface on node {{ $labels.host }}'
+    ContrailFlowsInvalidLabelTooMany:
+      if: >-
+        min(contrail_vrouter_flows_invalid_label) >= 100
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter flows with invalid label'
+        description: 'There are too many vRouter flows with invalid label on node {{ $labels.host }}'
+    ContrailFlowsQueueLimitExeededTooMany:
+      if: >-
+        min(contrail_vrouter_flows_flow_queue_limit_exceeded) >= 100
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter flows with queue limit exceeded'
+        description: 'There are too many vRouter flows with queue limit exceeded on node {{ $labels.host }}'
+    ContrailFlowsTableFullTooMany:
+      if: >-
+        min(contrail_vrouter_flows_flow_table_full) >= 100
+      for: 2m
+      labels:
+        severity: warning
+        service: contrail-compute
+      annotations:
+        summary: 'Too many vRouter flows with table full'
+        description: 'There are too many vRouter flows with table full on node {{ $labels.host }}'
+{%- endraw %}
+      {%- for contrail_api in compute_apis %}
+        {%- set words = contrail_api.split('.') %}
+    {% for word in words %}{%- if word != 'api' %}{{ word | capitalize }}{% endif %}{% endfor %}APIDown:
+      if: >-
+        http_response_status{service=~"{{ contrail_api }}"} == 0
+{%- raw %}
+      for: 2m
+      labels:
+        severity: down
+        service: "{{ $labels.service }}"
+      annotations:
+        summary: "Endpoint check for '{{ $labels.service }}' is down"
+        description: >-
+            Endpoint check for '{{ $labels.service }}' is down for 2 minutes on node {{ $labels.host }}
+{%- endraw %}
+      {%- endfor %}
+      {%- for contrail_process in compute_processes %}
+        {%- set words = contrail_process.split('-') %}
+    ProcstatRunning{% for word in words %}{{ word | capitalize }}{% endfor %}:
+      if: >-
+        procstat_running{process_name="{{ contrail_process }}"} == 0
+      labels:
+        severity: down
+        service: {{ contrail_process }}
+      annotations:
+        summary: '{{ contrail_process }} service is down'
+        description: '{{ contrail_process }} service is down on node {% raw %}{{ $labels.host }}{% endraw %}'
+      {%- endfor %}
+    {%- endif %}
+
+    {%- if database_processes is defined %}
+      {%- for contrail_process in database_processes %}
+        {%- set words = contrail_process.split('-') %}
+    ProcstatRunning{% for word in words %}{{ word | capitalize }}{% endfor %}:
+      if: >-
+        procstat_running{process_name="{{ contrail_process }}"} == 0
+      labels:
+        severity: down
+        service: {{ contrail_process }}
+      annotations:
+        summary: '{{ contrail_process }} service is down'
+        description: '{{ contrail_process }} service is down on node {% raw %}{{ $labels.host }}{% endraw %}'
+      {%- endfor %}
+    {%- endif %}
+
+    {%- if web_processes is defined %}
+      {%- for contrail_process in web_processes %}
+        {%- set words = contrail_process.split('-') %}
+    ProcstatRunning{% for word in words %}{{ word | capitalize }}{% endfor %}:
+      if: >-
+        procstat_running{process_name="{{ contrail_process }}"} == 0
+      labels:
+        severity: down
+        service: {{ contrail_process }}
+      annotations:
+        summary: '{{ contrail_process }} service is down'
+        description: '{{ contrail_process }} service is down on node {% raw %}{{ $labels.host }}{% endraw %}'
+      {%- endfor %}
+    {%- endif %}
+  {%- endif %}
+{%- endif %}
+

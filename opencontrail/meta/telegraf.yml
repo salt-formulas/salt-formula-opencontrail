@@ -2,6 +2,89 @@
   {%- from "opencontrail/map.jinja" import control, collector, compute, config, database, web with context %}
 agent:
   input:
+  {%- if collector.get('enabled', False) or database.get('enabled', False) or control.get('enabled', False)
+      or web.get('enabled', False) or compute.get('enabled', False) %}
+    procstat:
+      process:
+    {%- if collector.get('enabled', False) %}
+        contrail-alarm-gen:
+          pattern: 'python.*contrail-alarm-gen'
+        contrail-analytics-api:
+          pattern: 'python.*contrail-analytics-api'
+        contrail-collector:
+          pattern: 'contrail-collector'
+        contrail-nodemgr:
+          pattern: 'python.*contrail-nodemgr$'
+        contrail-query-engine:
+          pattern: 'contrail-query-engine'
+        contrail-snmp-collector:
+          pattern: 'python.*contrail-snmp-collector'
+        contrail-supervisord-analytics:
+          pattern: 'python.*supervisord.*_analytics'
+        contrail-topology:
+          pattern: 'python.*contrail-topology'
+    {%- endif %}
+    {%- if database.get('enabled', False) %}
+        zookeeper-server:
+          pattern: 'java.*zookeeper.server'
+        kafka-server:
+          pattern: 'java.*kafka.Kafka'
+        cassandra-server:
+          pattern: 'java.*service.CassandraDaemon'
+        contrail-nodemgr-database:
+          pattern: 'python.*contrail-nodemgr.*-database'
+        contrail-supervisord-database:
+          pattern: 'python.*supervisord.*_database'
+    {%- endif %}
+    {%- if control.get('enabled', False) %}
+        contrail-api:
+          pattern: 'python.*contrail-api'
+        contrail-control:
+          pattern: '[^=]contrail-control$'
+        contrail-device-manager:
+          pattern: 'python.*contrail-device-manager'
+        contrail-discovery:
+          pattern: 'python.*contrail-discovery'
+        contrail-dns:
+          pattern: 'contrail-dns'
+        contrail-ifmap-server:
+          pattern: 'sh.*ifmap-server'
+        contrail-irond:
+          pattern: 'java.*irond'
+        contrail-job-server:
+          pattern: 'node.*jobServerStart'
+        contrail-named:
+          pattern: 'contrail-named'
+        contrail-nodemgr-config:
+          pattern: 'python.*contrail-nodemgr.*-config'
+        contrail-nodemgr-control:
+          pattern: 'python.*contrail-nodemgr.*-control'
+        contrail-schema:
+          pattern: 'python.*contrail-schema'
+        contrail-supervisord-config:
+          pattern: 'python.*supervisord.*_config'
+        contrail-supervisord-control:
+          pattern: 'python.*supervisord.*_control'
+        contrail-svc-monitor:
+          pattern: 'python.*contrail-svc-monitor'
+    {%- endif %}
+    {%- if web.get('enabled', False) %}
+        contrail-web-server:
+          pattern: 'node.*webServerStart'
+      {%- if web.get('cache', {}).get('engine', '') == 'redis' %}
+        redis-server:
+          pattern: 'redis-server'
+      {%- endif %}
+    {%- endif %}
+    {%- if compute.get('enabled', False) %}
+        contrail-nodemgr-vrouter:
+          pattern: 'python.*contrail-nodemgr.*-vrouter'
+        contrail-supervisord-vrouter:
+          pattern: 'python.*supervisord.*_vrouter'
+        contrail-vrouter-agent:
+          pattern: 'contrail-vrouter-agent'
+    {%- endif %}
+  {%- endif %}
   {%- if config.get('enabled', False) or collector.get('enabled', False) or compute.get('enabled', False) %}
     http_response:
     {%- if config.get('enabled', False) %}

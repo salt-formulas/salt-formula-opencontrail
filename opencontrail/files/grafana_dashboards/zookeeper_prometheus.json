@@ -1083,7 +1083,7 @@
         "multi": true,
         "name": "host",
         "options": [],
-        "query": "label_values(zookeeper_znode_count,host)",
+        "query": "label_values(procstat_running{process_name=\"zookeeper-server\"},host)",
         "refresh": 1,
         "refresh_on_load": true,
         "regex": "",

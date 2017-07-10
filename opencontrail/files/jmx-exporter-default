@@ -1,0 +1,1 @@
+JMX_EXPORTER_OPTS="{{ bind.address|default("0.0.0.0") }}:{{ bind.port|default(9111) }} {{ cfg_file }}"

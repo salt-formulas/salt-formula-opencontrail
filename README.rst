@@ -658,6 +658,24 @@ Separate XMPP traffic from dataplane interface.
           address: 172.16.0.50
       ...
 
+Override RPF default in Contrail API
+------------------------------------
+
+From MCP1.1 with OpenContrail >= 3.1.1 you can override RPF default for newly
+created virtual networks. This can be useful for usecases like running
+Calico and K8S in overlay. The `override_rpf_default_by` has valid values
+`disable`, `enable`. If not defined, the configuration fallbacks to Contrail
+default - currently `enable`.
+
+.. code-block:: yaml
+
+    opencontrail:
+      ...
+      config:
+        override_rpf_default_by: 'disable'
+      ...
+
+
 Disable Contrail API authentication
 -----------------------------------
 

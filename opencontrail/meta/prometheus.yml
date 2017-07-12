@@ -258,16 +258,6 @@ server:
       annotations:
         summary: 'Number of vRouter DNS-XMPP sessions changed between checks is too high'
         description: 'There are too many vRouter DNS-XMPP sessions changes on node {{ $labels.host }}'
-    ContrailVrouterLLSSessionsNone:
-      if: >-
-        max(contrail_vrouter_lls) == 0
-      for: 2m
-      labels:
-        severity: warning
-        service: contrail-compute
-      annotations:
-        summary: 'No vRouter LLS sessions'
-        description: 'There are no vRouter LLS sessions on node {{ $labels.host }}'
     ContrailVrouterLLSSessionsTooMany:
       if: >-
         min(contrail_vrouter_lls) >= 10
@@ -287,16 +277,6 @@ server:
       annotations:
         summary: 'Number of vRouter LLS sessions changed between checks is too high'
         description: 'There are too many vRouter LLS sessions changes on node {{ $labels.host }}'
-    ContrailFlowsActiveNone:
-      if: >-
-        min(contrail_vrouter_flows_active) == 0
-      for: 2m
-      labels:
-        severity: warning
-        service: contrail-compute
-      annotations:
-        summary: 'No active vRouter flows'
-        description: 'There are no active vRouter flows on node {{ $labels.host }}'
     ContrailFlowsActiveTooMany:
       if: >-
         min(contrail_vrouter_flows_active) >= 1200

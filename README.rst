@@ -136,6 +136,7 @@ Config, control, analytics, database, web -- altogether on one node.
         minimum_disk: 10
         name: 'Contrail'
         original_token: 0
+        compaction_throughput_mb_per_sec: 16
         data_dirs:
         - /var/lib/cassandra
         id: 1

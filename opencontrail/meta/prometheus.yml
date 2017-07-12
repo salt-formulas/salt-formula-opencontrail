@@ -48,6 +48,38 @@
     {%- endif %}
   {%- endif %}
 
+  {%- if database_processes is defined and
+         database.get('cassandra', False) and
+         exporters is defined %}
+{%- set packages = exporters.get('jmx', {}).get('packages', ('jmx-exporter', )) %}
+{%- set template = exporters.get('jmx', {}).get('template', 'opencontrail/files/jmx-exporter-default') %}
+    {%- load_yaml as new_exporters_cfg %}
+exporters:
+  jmx:
+    enabled: true
+{%- if packages is defined %}
+    packages:
+    {% for pkg in packages %}
+    - {{ pkg }}
+    {% endfor %}
+{%- endif %}
+{%- if template is defined %}
+    template:  {{ template }}
+{%- endif %}
+    services:
+      cassandra:
+        enabled: true
+        template: opencontrail/files/jmx_exporter_cassandra.conf
+        jmx_bind:
+          address: localhost
+          port: 7199
+        bind:
+          address: 0.0.0.0
+          port: 9111
+    {%- endload %}
+{{ new_exporters_cfg|yaml(False) }}
+  {%- endif %}
+
   {%- if control_processes is defined or
          collector_processes is defined or
          compute_processes is defined or
@@ -436,6 +468,9 @@ server:
         summary: '{{ contrail_process }} service is down'
         description: '{{ contrail_process }} service is down on node {% raw %}{{ $labels.host }}{% endraw %}'
       {%- endfor %}
+    {%- endif %}
+    {%- if exporters is defined %}
+      {%- include "prometheus/_exporters_config.sls" %}
     {%- endif %}
   {%- endif %}
 {%- endif %}

@@ -1,7 +1,12 @@
 dashboard:
-  cassandra:
+  cassandra_influxdb:
+    datasource: influxdb
     format: json
     template: opencontrail/files/grafana_dashboards/cassandra_influxdb.json
+  cassandra_prometheus:
+    datasource: prometheus
+    format: json
+    template: opencontrail/files/grafana_dashboards/cassandra_prometheus.json
   contrail_influxdb:
     datasource: influxdb
     format: json

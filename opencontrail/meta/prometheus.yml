@@ -97,7 +97,7 @@ server:
         description: 'There are no active BGP sessions on node {{ $labels.host }}'
     ContrailBGPSessionsSomeDown:
       if: >-
-        min(contrail_bgp_session_down_count) >= 0
+        min(contrail_bgp_session_down_count) > 0
       for: 2m
       labels:
         severity: warning
@@ -127,7 +127,7 @@ server:
         description: 'There are no active XMPP sessions on node {{ $labels.host }}'
     ContrailXMPPSessionsSomeDown:
       if: >-
-        min(contrail_xmpp_session_down_count) >= 0
+        min(contrail_xmpp_session_down_count) > 0
       for: 2m
       labels:
         severity: warning

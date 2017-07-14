@@ -69,13 +69,13 @@ database:
          ['cassandra', 'zookeeper', 'supervisor', 'openjdk-7-jre-headless', 'contrail-database']
     cassandra_config: '/etc/cassandra/'
     services:
-         ['zookeeper', 'supervisor-database']
+         ['zookeeper', 'contrail-database']
   RedHat:
     pkgs:
          ['contrail-openstack-database', 'zookeeper', 'supervisor', 'java-1.7.0-openjdk-headless']
     cassandra_config: '/etc/cassandra/conf/'
     services:
-         ['zookeeper', 'supervisor-database']
+         ['zookeeper', 'contrail-database']
 web:
   Debian:
     pkgs:

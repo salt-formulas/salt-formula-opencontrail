@@ -3,4 +3,6 @@ version: "0.2"
 source: "https://github.com/openstack/salt-formula-opencontrail"
 dependencies:
 - name: linux
-  source: "https://github.com/tcpcloud/salt-formula-linux"
+  source: "https://github.com/salt-formulas/salt-formula-linux"
+- name: prometheus
+  source: "https://github.com/salt-formulas/salt-formula-prometheus"

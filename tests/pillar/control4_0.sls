@@ -64,6 +64,7 @@ opencontrail:
       id: 2
     - host: 127.0.0.1
       id: 3
+    list_optimization_enabled: true
   control:
     version: 4.0
     enabled: true

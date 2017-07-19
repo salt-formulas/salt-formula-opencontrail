@@ -922,6 +922,21 @@ Enforcing Link Local Services
            - 10.10.10.10
            ipf_port: 80
 
+Configuring OpenStack default quotasx
+
+.. code-block:: yaml
+
+  opencontrail:
+    config:
+      quota:
+        networks: 5
+        subnets: 10
+        routers: 10
+        floating_ips: 100
+        secgroups: 1000
+        secgroup_rules: 1000
+        ports: 1000
+
 
 Usage
 =====

@@ -929,13 +929,17 @@ Configuring OpenStack default quotasx
   opencontrail:
     config:
       quota:
-        networks: 5
-        subnets: 10
-        routers: 10
-        floating_ips: 100
-        secgroups: 1000
-        secgroup_rules: 1000
-        ports: 1000
+        network: 5
+        subnet: 10
+        router: 10
+        floating_ip: 100
+        secgroup: 1000
+        secgroup_rule: 1000
+        port: 1000
+        pool: -1
+        member: -1
+        health_monitor: -1
+        vip: -1
 
 
 Usage

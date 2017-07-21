@@ -969,27 +969,11 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "cassandra_jvm_Memory_HeapMemoryUsage_max{host=~\"$host\"}",
+              "expr": "cassandra_jvm_Memory_HeapMemoryUsage{host=~\"$host\", attribute=~\"$attribute\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "max {{ host }}",
+              "legendFormat": "{{ attribute }} {{ host }}",
               "refId": "A",
-              "step": 2
-            },
-            {
-              "expr": "cassandra_jvm_Memory_HeapMemoryUsage_used{host=~\"$host\"}",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "used {{ host }}",
-              "refId": "B",
-              "step": 2
-            },
-            {
-              "expr": "cassandra_jvm_Memory_HeapMemoryUsage_committed{host=~\"$host\"}",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "committed {{ host }}",
-              "refId": "C",
               "step": 2
             }
           ],
@@ -1062,51 +1046,11 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "cassandra_jvm_MemoryPool_Usage_max{host=~\"$host\",name=\"CMS Old Gen\"}",
+              "expr": "cassandra_jvm_MemoryPool_Usage{host=~\"$host\", name=~\"$type\", attribute=~\"$attribute\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "Max OldGen {{ host }}",
+              "legendFormat": "{{ attribute }} {{ name }} {{ host }}",
               "refId": "A",
-              "step": 2
-            },
-            {
-              "expr": "cassandra_jvm_MemoryPool_Usage_used{host=~\"$host\",name=\"CMS Old Gen\"}",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "Used OldGen {{ host }}",
-              "refId": "B",
-              "step": 2
-            },
-            {
-              "expr": "cassandra_jvm_MemoryPool_Usage_committed{host=~\"$host\",name=\"CMS Old Gen\"}",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "Committed OldGen {{ host }}",
-              "refId": "C",
-              "step": 2
-            },
-            {
-              "expr": "cassandra_jvm_MemoryPool_Usage_max{host=~\"$host\",name=\"CMS Perm Gen\"}",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "Max PermGen {{ host }}",
-              "refId": "D",
-              "step": 2
-            },
-            {
-              "expr": "cassandra_jvm_MemoryPool_Usage_used{host=~\"$host\",name=\"CMS Perm Gen\"}",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "Used PermGen {{ host }}",
-              "refId": "E",
-              "step": 2
-            },
-            {
-              "expr": "cassandra_jvm_MemoryPool_Usage_committed{host=~\"$host\",name=\"CMS Perm Gen\"}",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "Committed PermGen {{ host }}",
-              "refId": "F",
               "step": 2
             }
           ],
@@ -1185,6 +1129,48 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+     },
+     {
+        "allValue": ".*",
+        "current": {},
+        "datasource": "prometheus",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "attribute",
+        "options": [],
+        "query": "label_values(cassandra_jvm_Memory_HeapMemoryUsage{host=~\"$host\"},attribute)",
+        "refresh": 1,
+        "refresh_on_load": true,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+     },
+     {
+        "allValue": ".*",
+        "current": {},
+        "datasource": "prometheus",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "type",
+        "options": [],
+        "query": "label_values(cassandra_jvm_MemoryPool_Usage{host=~\"$host\"},name)",
+        "refresh": 1,
+        "refresh_on_load": true,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
      }
     ]
   },
@@ -1219,6 +1205,6 @@
   },
   "timezone": "browser",
   "title": "Cassandra",
-  "version": 2
+  "version": 3
 }
 {% endraw %}

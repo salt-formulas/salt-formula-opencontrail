@@ -115,15 +115,15 @@ local_plugin:
       {%- set bind_addr=config.bind.address|replace('0.0.0.0', '127.0.0.1') %}
       contrail-api:
         expected_code: 200
-        url: "http://{{ bind_addr }}:{{ config.bind.api_port }}/"
+        url: "http://{{ bind_addr }}:{{ config.bind.api_port|default(9100) }}/"
       contrail-discovery:
         expected_code: 200
-        url: "http://{{ bind_addr }}:{{ config.bind.discovery_port }}/"
+        url: "http://{{ bind_addr }}:{{ config.bind.discovery_port|default(9110) }}/"
     {%- endif %}
     {%- if collector.get('enabled', False) %}
       contrail-collector:
         expected_code: 200
-        url: "http://{{ collector.bind.address|replace('0.0.0.0', '127.0.0.1') }}:{{ collector.bind.port }}/"
+        url: "http://{{ collector.bind.address|replace('0.0.0.0', '127.0.0.1') }}:{{ collector.bind.port|default(9081) }}/"
     {%- endif %}
     {%- if compute.get('enabled', False) %}
       contrail-node-manager:

@@ -239,3 +239,25 @@ tor:
 {% set client    = salt['grains.filter_by'](base_defaults['client'], merge=salt['pillar.get']('opencontrail:client', {}), base='client') %}
 {% set tor       = salt['grains.filter_by'](base_defaults['tor'], merge=salt['pillar.get']('opencontrail:tor', {}), base='tor') %}
 
+{% set monitoring = salt['grains.filter_by']({
+    'default': {
+        'xmpp_sessions_too_high_threshold': 500,
+        'xmpp_sessions_variation_threshold': 100,
+        'vrouter_xmpp_sessions_too_high_threshold': 10,
+        'vrouter_xmpp_sessions_variation_threshold': 5,
+        'vrouter_dns_xmpp_sessions_too_high_threshold': 10,
+        'vrouter_dns_xmpp_sessions_variation_threshold': 5,
+        'vrouter_lls_too_high_threshold': 10,
+        'vrouter_lls_variation_threshold': 5,
+        'vrouter_flows_active_too_high_threshold': 1200,
+        'vrouter_flows_created_too_high_threshold': 1000,
+        'vrouter_flows_discard_too_high_threshold': 1200,
+        'vrouter_flows_flow_action_drop_too_high_threshold': 100,
+        'vrouter_flows_frag_err_too_high_threshold': 100,
+        'vrouter_flows_invalid_nh_too_high_threshold': 104,
+        'vrouter_flows_composite_invalid_interface_too_high_threshold': 105,
+        'vrouter_flows_invalid_label_too_high_threshold': 100,
+        'vrouter_flows_flow_queue_limit_exceeded_too_high_threshold': 100,
+        'vrouter_flows_flow_table_full_too_high_threshold': 100,
+    },
+}, grain='os_family', merge=salt['pillar.get']('opencontrail:monitoring')) %}

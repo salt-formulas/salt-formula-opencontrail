@@ -69,7 +69,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "max(cassandra_net_FailureDetector_UpEndpointCount{host=~\"$host\"})",
+              "expr": "min(cassandra_net_FailureDetector_UpEndpointCount{host=~\"$host\"})",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "",
@@ -972,15 +972,31 @@
               "expr": "cassandra_jvm_Memory_HeapMemoryUsage_max{host=~\"$host\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{ host }}",
+              "legendFormat": "max {{ host }}",
               "refId": "A",
+              "step": 2
+            },
+            {
+              "expr": "cassandra_jvm_Memory_HeapMemoryUsage_used{host=~\"$host\"}",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "used {{ host }}",
+              "refId": "B",
+              "step": 2
+            },
+            {
+              "expr": "cassandra_jvm_Memory_HeapMemoryUsage_committed{host=~\"$host\"}",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "committed {{ host }}",
+              "refId": "C",
               "step": 2
             }
           ],
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Heap Usage Max",
+          "title": "Heap Usage",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1046,19 +1062,51 @@
           "steppedLine": false,
           "targets": [
             {
+              "expr": "cassandra_jvm_MemoryPool_Usage_max{host=~\"$host\",name=\"CMS Old Gen\"}",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "Max OldGen {{ host }}",
+              "refId": "A",
+              "step": 2
+            },
+            {
               "expr": "cassandra_jvm_MemoryPool_Usage_used{host=~\"$host\",name=\"CMS Old Gen\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "OldGen {{ host }}",
-              "refId": "A",
+              "legendFormat": "Used OldGen {{ host }}",
+              "refId": "B",
+              "step": 2
+            },
+            {
+              "expr": "cassandra_jvm_MemoryPool_Usage_committed{host=~\"$host\",name=\"CMS Old Gen\"}",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "Committed OldGen {{ host }}",
+              "refId": "C",
+              "step": 2
+            },
+            {
+              "expr": "cassandra_jvm_MemoryPool_Usage_max{host=~\"$host\",name=\"CMS Perm Gen\"}",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "Max PermGen {{ host }}",
+              "refId": "D",
               "step": 2
             },
             {
               "expr": "cassandra_jvm_MemoryPool_Usage_used{host=~\"$host\",name=\"CMS Perm Gen\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "PermGen {{ host }}",
-              "refId": "B",
+              "legendFormat": "Used PermGen {{ host }}",
+              "refId": "E",
+              "step": 2
+            },
+            {
+              "expr": "cassandra_jvm_MemoryPool_Usage_committed{host=~\"$host\",name=\"CMS Perm Gen\"}",
+              "format": "time_series",
+              "intervalFactor": 2,
+              "legendFormat": "Committed PermGen {{ host }}",
+              "refId": "F",
               "step": 2
             }
           ],
@@ -1081,7 +1129,7 @@
           },
           "yaxes": [
             {
-              "format": "short",
+              "format": "decbytes",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -1171,6 +1219,6 @@
   },
   "timezone": "browser",
   "title": "Cassandra",
-  "version": 1
+  "version": 2
 }
 {% endraw %}

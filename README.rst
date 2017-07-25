@@ -565,6 +565,7 @@ Vrouter configuration on a compute node(s)
       compute:
         version: 2.2
         enabled: True
+        hostname: node-12.domain.tld
         discovery:
           host: 127.0.0.1
         interface:

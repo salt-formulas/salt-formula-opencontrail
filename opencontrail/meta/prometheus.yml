@@ -106,7 +106,7 @@ server:
       {%- endfor %}
       {%- for contrail_process in control_processes %}
         {%- set words = contrail_process.split('-') %}
-    ProcstatRunning{% for word in words %}{{ word | capitalize }}{% endfor %}:
+    {% for word in words %}{{ word | capitalize }}{% endfor %}ProcessDown:
       if: >-
         procstat_running{process_name="{{ contrail_process }}"} == 0
       labels:
@@ -222,7 +222,7 @@ server:
       {%- endfor %}
       {%- for contrail_process in collector_processes %}
         {%- set words = contrail_process.split('-') %}
-    ProcstatRunning{% for word in words %}{{ word | capitalize }}{% endfor %}:
+    {% for word in words %}{{ word | capitalize }}{% endfor %}ProcessDown:
       if: >-
         procstat_running{process_name="{{ contrail_process }}"} == 0
       labels:
@@ -466,7 +466,7 @@ server:
       {%- endfor %}
       {%- for contrail_process in compute_processes %}
         {%- set words = contrail_process.split('-') %}
-    ProcstatRunning{% for word in words %}{{ word | capitalize }}{% endfor %}:
+    {% for word in words %}{{ word | capitalize }}{% endfor %}ProcessDown:
       if: >-
         procstat_running{process_name="{{ contrail_process }}"} == 0
       labels:
@@ -481,7 +481,7 @@ server:
     {%- if database_processes is defined %}
       {%- for contrail_process in database_processes %}
         {%- set words = contrail_process.split('-') %}
-    ProcstatRunning{% for word in words %}{{ word | capitalize }}{% endfor %}:
+    {% for word in words %}{{ word | capitalize }}{% endfor %}ProcessDown:
       if: >-
         procstat_running{process_name="{{ contrail_process }}"} == 0
       labels:
@@ -496,7 +496,7 @@ server:
     {%- if web_processes is defined %}
       {%- for contrail_process in web_processes %}
         {%- set words = contrail_process.split('-') %}
-    ProcstatRunning{% for word in words %}{{ word | capitalize }}{% endfor %}:
+    {% for word in words %}{{ word | capitalize }}{% endfor %}ProcessDown:
       if: >-
         procstat_running{process_name="{{ contrail_process }}"} == 0
       labels:

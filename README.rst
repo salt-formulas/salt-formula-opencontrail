@@ -576,6 +576,19 @@ Vrouter configuration on a compute node(s)
           dns: 127.0.0.1
           mtu: 9000
 
+
+Compute nodes with gateway_mode
+-------------------------------
+
+Gateway mode: can be server/ vcpe (default is none)
+
+.. code-block:: yaml
+
+    opencontrail:
+      compute:
+        gateway_mode: server
+
+
 Keystone v3
 -----------
 

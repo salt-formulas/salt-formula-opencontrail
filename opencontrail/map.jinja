@@ -107,11 +107,6 @@ client:
   RedHat:
     pkgs:
          []
-tor:
-  Debian:
-    agents: 1
-    bind:
-      port: 8086
 
 {%- elif vendor == 'juniper' -%}
 
@@ -220,11 +215,6 @@ client:
   RedHat:
     pkgs:
          []
-tor:
-  Debian:
-    agents: 1
-    bind:
-     port: 8086
 
 {%- endif %}
 {%- endload %}
@@ -237,7 +227,6 @@ tor:
 {% set database  = salt['grains.filter_by'](base_defaults['database'], merge=salt['pillar.get']('opencontrail:database', {}), base='database') %}
 {% set web       = salt['grains.filter_by'](base_defaults['web'], merge=salt['pillar.get']('opencontrail:web', {}), base='web') %}
 {% set client    = salt['grains.filter_by'](base_defaults['client'], merge=salt['pillar.get']('opencontrail:client', {}), base='client') %}
-{% set tor       = salt['grains.filter_by'](base_defaults['tor'], merge=salt['pillar.get']('opencontrail:tor', {}), base='tor') %}
 
 {% set monitoring = salt['grains.filter_by']({
     'default': {

@@ -1,0 +1,16 @@
+applications:
+- opencontrail
+parameters:
+  opencontrail:
+    compute:
+      tor:
+        enabled: true
+        bind:
+          port: 8086
+        agent:
+          tor01:
+            id: 0
+            address: ${_param:single_address}
+            port: 6632
+            ssl:
+              enabled: True

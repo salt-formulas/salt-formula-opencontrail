@@ -72,10 +72,10 @@ suites:
   #   provisioner:
   #     pillars-from-files:
   #       opencontrail.sls: tests/pillar/cluster<%= ENV['OC_VERSION'] || '' %>.sls
-  - name: tor<%= ENV['OC_VERSION'] || '' %>
-    provisioner:
-      pillars-from-files:
-        opencontrail.sls: tests/pillar/tor<%= ENV['OC_VERSION'] || '' %>.sls
+  # - name: tor<%= ENV['OC_VERSION'] || '' %>
+  #   provisioner:
+  #     pillars-from-files:
+  #       opencontrail.sls: tests/pillar/tor<%= ENV['OC_VERSION'] || '' %>.sls
   - name: vrouter<%= ENV['OC_VERSION'] || '' %>
     provisioner:
       pillars-from-files:

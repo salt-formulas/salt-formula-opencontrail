@@ -706,7 +706,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "irate(assandra_metrics_Compaction_Value{host=~\"$host\",name=\"CompletedTasks\"}[1m])",
+              "expr": "irate(cassandra_metrics_Compaction_Value{host=~\"$host\",name=\"CompletedTasks\"}[1m])",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Completed {{ host }}",

@@ -121,6 +121,7 @@ opencontrail:
       id: 2
     - host: 127.0.0.1
       id: 3
+    concurrent_compactors: 1
   web:
     version: 3.0
     enabled: True

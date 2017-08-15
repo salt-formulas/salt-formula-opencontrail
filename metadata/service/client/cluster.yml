@@ -1,5 +1,7 @@
 applications:
 - opencontrail
+classes:
+- service.opencontrail.common
 parameters:
   _param:
     opencontrail_version: 3.0

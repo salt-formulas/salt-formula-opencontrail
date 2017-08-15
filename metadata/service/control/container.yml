@@ -1,3 +1,5 @@
+classes:
+- service.opencontrail.common
 parameters:
   kubernetes:
     control:

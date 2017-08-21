@@ -151,6 +151,31 @@ contrail_load_vrouter_kernel_module:
 {%- endif %}
 {%- endif %}
 
+{%- if compute.get('tor', {}).get('enabled', False) %}
+
+{% for agent_name, agent in compute.tor.agent.iteritems() %}
+
+/etc/contrail/contrail-tor-agent-{{ agent.id }}.conf:
+  file.managed:
+  - source: salt://opencontrail/files/{{ compute.version }}/contrail-tor-agent.conf
+  - template: jinja
+  - defaults:
+      agent_name: {{ agent_name }}
+  - watch_in:
+    - service: opencontrail_compute_services
+
+/etc/contrail/supervisord_vrouter_files/contrail-tor-agent-{{ agent.id }}.ini:
+  file.managed:
+  - source: salt://opencontrail/files/{{ compute.version }}/tor/contrail-tor-agent.ini
+  - template: jinja
+  - defaults:
+      agent_name: {{ agent_name }}
+  - watch_in:
+    - service: opencontrail_compute_services
+
+{%- endfor %}
+{%- endif %}
+
 opencontrail_compute_services:
   service.enabled:
   - names: {{ compute.services }}

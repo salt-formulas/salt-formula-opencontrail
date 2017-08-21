@@ -18,9 +18,6 @@ include:
 {% if pillar.opencontrail.web is defined %}
 - opencontrail.web
 {% endif %}
-{% if pillar.opencontrail.tor is defined %}
-- opencontrail.tor
-{% endif %}
 {%- if pillar.opencontrail.client is defined %}
 - opencontrail.client
 {%- endif %}

@@ -177,7 +177,7 @@ contrail_load_vrouter_kernel_module:
 {%- endif %}
 
 opencontrail_compute_services:
-  service.enabled:
+  service.running:
   - names: {{ compute.services }}
   {%- if grains.get('noservices') %}
   - onlyif: /bin/false

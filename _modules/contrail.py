@@ -14,6 +14,8 @@
 # limitations under the License.
 
 from netaddr import IPNetwork
+from vnc_api.vnc_api import PhysicalRouter, PhysicalInterface, LogicalInterface
+from vnc_api.vnc_api import EncapsulationPrioritiesType
 
 try:
     from vnc_api import vnc_api
@@ -23,6 +25,7 @@ try:
         ConfigNode, DatabaseNode, BgpRouter
     from vnc_api.gen.resource_xsd import AddressFamilies, BgpSessionAttributes, \
         BgpSession, BgpPeeringAttributes, BgpRouterParams
+
     HAS_CONTRAIL = True
 except ImportError:
     HAS_CONTRAIL = False
@@ -53,13 +56,13 @@ def _auth(**kwargs):
     use_ssl = False
     auth_host = kwargs.get('auth_host_ip')
     vnc_lib = vnc_api.VncApi(user, password, tenant_name,
-        api_host, api_port, api_base_url, wait_for_connect=True,
-        api_server_use_ssl=use_ssl, auth_host=auth_host)
+                             api_host, api_port, api_base_url, wait_for_connect=True,
+                             api_server_use_ssl=use_ssl, auth_host=auth_host)
 
     return vnc_lib
 
 
-def _get_config(vnc_client, global_system_config = 'default-global-system-config'):
+def _get_config(vnc_client, global_system_config='default-global-system-config'):
     try:
         gsc_obj = vnc_client.global_system_config_read(id=global_system_config)
     except vnc_api.NoIdError:
@@ -71,7 +74,6 @@ def _get_config(vnc_client, global_system_config = 'default-global-system-config
 
 
 def _get_rt_inst_obj(vnc_client):
-
     # TODO pick fqname hardcode from common
     rt_inst_obj = vnc_client.routing_instance_read(
         fq_name=['default-domain', 'default-project',
@@ -82,7 +84,6 @@ def _get_rt_inst_obj(vnc_client):
 
 def _get_ip(ip_w_pfx):
     return str(IPNetwork(ip_w_pfx).ip)
-
 
 
 def virtual_router_list(**kwargs):
@@ -101,7 +102,9 @@ def virtual_router_list(**kwargs):
     for vrouter_obj in vrouter_objs:
         ret[vrouter_obj.name] = {
             'ip_address': vrouter_obj.virtual_router_ip_address,
-            'dpdk_enabled': vrouter_obj.virtual_router_dpdk_enabled
+            'dpdk_enabled': vrouter_obj.virtual_router_dpdk_enabled,
+            'uuid': vrouter_obj.uuid
+
         }
     return ret
 
@@ -125,7 +128,7 @@ def virtual_router_get(name, **kwargs):
     return ret
 
 
-def virtual_router_create(name, ip_address, dpdk_enabled=False, **kwargs):
+def virtual_router_create(name, ip_address, router_type=None, dpdk_enabled=False, **kwargs):
     '''
     Create specific Contrail virtual router
 
@@ -134,21 +137,48 @@ def virtual_router_create(name, ip_address, dpdk_enabled=False, **kwargs):
     .. code-block:: bash
 
         salt '*' contrail.virtual_router_create cmp02 10.10.10.102
+        router_types:
+        - tor-agent
+        - tor-service-node
+        - embedded
     '''
     ret = {}
     vnc_client = _auth(**kwargs)
     gsc_obj = _get_config(vnc_client)
     vrouter_objs = virtual_router_list(**kwargs)
     if name in vrouter_objs:
-        return {'Error': 'Virtual router %s already exists' % name}
+        vrouter = virtual_router_get(name)
+        vrouter_obj = vnc_client._object_read('virtual-router', id=vrouter[name]['uuid'])
+        changed = False
+        if vrouter_obj.get_virtual_router_ip_address() != ip_address:
+            ret['ip_address'] = {'from': vrouter_obj.get_virtual_router_ip_address(), "to": ip_address}
+            vrouter_obj.set_virtual_router_ip_address(ip_address)
+            changed = True
+        if vrouter_obj.get_virtual_router_type() != router_type:
+            ret['router_type'] = {"from": vrouter_obj.get_virtual_router_type(), "to": router_type}
+            vrouter_obj.set_virtual_router_type(router_type)
+            changed = True
+        if vrouter_obj.get_virtual_router_dpdk_enabled() != dpdk_enabled:
+            ret['dpdk_enabled'] = {"from": vrouter_obj.get_virtual_router_dpdk_enabled(), "to": dpdk_enabled}
+            vrouter_obj.set_virtual_router_dpdk_enabled(dpdk_enabled)
+            changed = True
+        if changed:
+            if __opts__['test']:
+                return "Virtual router " + name + " will be updated"
+            vnc_client.virtual_router_update(vrouter_obj)
+            return ret
+        return {'OK': 'Virtual router %s already exists and is updated' % name}
     else:
         vrouter_obj = VirtualRouter(
             name, gsc_obj,
-            virtual_router_ip_address=ip_address)
+            virtual_router_ip_address=ip_address,
+            virtual_router_type=router_type)
         vrouter_obj.set_virtual_router_dpdk_enabled(dpdk_enabled)
+        if __opts__['test']:
+            return "Virtual router " + name + " will be created"
         vnc_client.virtual_router_create(vrouter_obj)
     ret = virtual_router_list(**kwargs)
-    return ret[name]
+    return "Create"
 
 
 def virtual_router_delete(name, **kwargs):
@@ -164,8 +194,462 @@ def virtual_router_delete(name, **kwargs):
     vnc_client = _auth(**kwargs)
     gsc_obj = _get_config(vnc_client)
     vrouter_obj = VirtualRouter(name, gsc_obj)
+    if __opts__['test']:
+        return "Virtual router " + name + " will be deleted"
     vnc_client.virtual_router_delete(
         fq_name=vrouter_obj.get_fq_name())
+    return "Deleted"
+
+
+def physical_router_list(**kwargs):
+    '''
+    Return a list of all Contrail physical routers
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.physical_router_list
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    prouter_objs = vnc_client._objects_list('physical-router', detail=True)
+    for prouter_obj in prouter_objs:
+        ret[prouter_obj.name] = {
+            'uuid': prouter_obj._uuid,
+            'management_ip': prouter_obj._physical_router_management_ip,
+            'product_name': prouter_obj._physical_router_product_name,
+        }
+
+    return ret
+
+
+def physical_router_get(name, **kwargs):
+    '''
+    Return a specific Contrail physical router
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.physical_router_get router_name
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    prouter_objs = vnc_client._objects_list('physical-router', detail=True)
+    for prouter_obj in prouter_objs:
+        if name == prouter_obj.name:
+            ret[name] = prouter_obj.__dict__
+    if len(ret) == 0:
+        return {'Error': 'Error in retrieving physical router.'}
+    return ret
+
+
+def physical_router_create(name, parent_type=None,
+                           management_ip=None,
+                           dataplane_ip=None,  # VTEP address in web GUI
+                           vendor_name=None,
+                           product_name=None,
+                           vnc_managed=None,
+                           junos_service_ports=None,
+                           agents=None, **kwargs):
+    '''
+    Create specific Contrail physical router
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.physical_router_create OVSDB_router management_ip=10.167.4.202 dataplane_ip=172.16.20.15 vendor_name=MyVendor product_name=MyProduct agents="['tor01','tns01']"
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    gsc_obj = _get_config(vnc_client)
+    prouter_objs = physical_router_list(**kwargs)
+    if name in prouter_objs:
+        prouter = physical_router_get(name)
+        prouter_obj = vnc_client._object_read('physical-router', id=prouter[name]['_uuid'])
+        if prouter_obj.physical_router_management_ip != management_ip:
+            ret['management_ip'] = {'from': prouter_obj.physical_router_management_ip, "to": management_ip}
+            prouter_obj.set_physical_router_management_ip(management_ip)
+        if prouter_obj.physical_router_dataplane_ip != dataplane_ip:
+            ret['dataplane_ip'] = {'from': prouter_obj.physical_router_dataplane_ip, "to": dataplane_ip}
+            prouter_obj.set_physical_router_dataplane_ip(dataplane_ip)
+        if prouter_obj.get_physical_router_vendor_name() != vendor_name:
+            ret['vendor_name'] = {'from': prouter_obj.get_physical_router_vendor_name(), "to": vendor_name}
+            prouter_obj.set_physical_router_vendor_name(vendor_name)
+        if prouter_obj.get_physical_router_product_name() != product_name:
+            ret['product_name'] = {'from': prouter_obj.get_physical_router_product_name(), "to": product_name}
+            prouter_obj.set_physical_router_product_name(product_name)
+        if prouter_obj.get_physical_router_vnc_managed() != vnc_managed:
+            ret['vnc_managed'] = {'from': prouter_obj.get_physical_router_vnc_managed(), "to": vnc_managed}
+            prouter_obj.set_physical_router_vnc_managed(vnc_managed)
+        if prouter_obj.get_physical_router_junos_service_ports() != junos_service_ports:
+            ret['junos_service_ports'] = {'from': prouter_obj.get_physical_router_junos_service_ports(),
+                                          "to": junos_service_ports}
+            prouter_obj.set_physical_router_junos_service_ports(junos_service_ports)
+
+        if __opts__['test']:
+            if len(ret) != 0:
+                return "Physical router " + name + " will be updated"
+            return {"OK": "Physical router exists and is updated"}
+
+        vrouter_objs = vnc_client._objects_list('virtual-router', detail=True)  # all vrouter objects
+        c_agents = []  # referenced vrouters
+        for c_agent in prouter_obj.get_virtual_router_refs():
+            c_agents.append(c_agent['uuid'])
+        agent_objs = []  # required state of references
+        for vrouter_obj in vrouter_objs:
+            if vrouter_obj._display_name in agents and vrouter_obj._uuid not in c_agents:
+                prouter_obj.add_virtual_router(vrouter_obj)
+                ret['vrouter ' + vrouter_obj._display_name] = "Reference added"
+            if vrouter_obj._display_name not in agents and vrouter_obj._uuid in c_agents:
+                prouter_obj.del_virtual_router(vrouter_obj)
+                ret['vrouter ' + vrouter_obj._display_name] = "Reference removed"
+        vnc_client.physical_router_update(prouter_obj)
+
+        if len(ret) == 0:
+            return {"OK": "Physical router exists and is updated"}
+        return ret
+    else:
+        if __opts__['test']:
+            return "Physical router " + name + " will be created"
+        prouter_obj = PhysicalRouter(
+            name=name,
+            parent_obj=None,
+            physical_router_management_ip=management_ip,
+            physical_router_dataplane_ip=dataplane_ip,
+            physical_router_vendor_name=vendor_name,
+            physical_router_product_name=product_name,
+            physical_router_vnc_managed=vnc_managed,
+            physical_router_junos_service_ports=junos_service_ports,
+        )
+        for agent in agents:
+            vrouter = virtual_router_get(agent)
+            vrouter_obj = vnc_client._object_read('virtual-router', id=vrouter[agent]['uuid'])
+            prouter_obj.add_virtual_router(vrouter_obj)
+        vnc_client.physical_router_create(prouter_obj)
+    return "Created"
+
+
+def physical_router_delete(name, **kwargs):
+    '''
+    Delete specific Contrail physical router
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.physical_router_delete router_name
+    '''
+    vnc_client = _auth(**kwargs)
+    gsc_obj = _get_config(vnc_client)
+    prouter_obj = PhysicalRouter(name, gsc_obj)
+    if __opts__['test']:
+        return "Physical router " + name + " will be deleted"
+    vnc_client.physical_router_delete(
+        fq_name=prouter_obj.get_fq_name())
+    return "Deleted"
+
+
+def physical_interface_list(**kwargs):
+    '''
+    Return a list of all Contrail physical interface
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.physical_interface_list
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    pinterface_objs = vnc_client._objects_list('physical-interface', detail=True)
+    for pinterface_obj in pinterface_objs:
+        ret[pinterface_obj.name] = {
+            'uuid': pinterface_obj._uuid,
+            'fq_name': pinterface_obj.fq_name,
+            'parent_type': pinterface_obj.parent_type,
+        }
+
+    return ret
+
+
+def physical_interface_get(name, physical_router, **kwargs):
+    '''
+    Return a specific Contrail physical interface
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.physical_interface_get interface_name physical_router_name
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    pinterf_objs = vnc_client._objects_list('physical-interface', detail=True)
+    for pinterf_obj in pinterf_objs:
+        if name == pinterf_obj.name and physical_router in pinterf_obj.fq_name:
+            ret[name] = pinterf_obj.__dict__
+    if len(ret) == 0:
+        return {'Error': 'Error in retrieving physical interface.'}
+    return ret
+
+
+def physical_interface_create(name, physical_router, **kwargs):
+    '''
+    Create specific Contrail physical interface
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.physical_interface_create ge-0/0/10 physical_router_name
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    gsc_obj = _get_config(vnc_client)
+    pinterf_obj = physical_interface_get(name, physical_router, **kwargs)
+    if 'Error' not in pinterf_obj:
+        return {'OK': 'Physical interface ' + name + ' on ' + physical_router + ' already exists'}
+    else:
+        if __opts__['test']:
+            return "Physical interface " + name + " will be created"
+        prouter = physical_router_get(physical_router)
+        prouter_obj = vnc_client._object_read('physical-router', id=prouter[physical_router]['_uuid'])
+        pinterf_obj = PhysicalInterface(name, prouter_obj)
+        vnc_client.physical_interface_create(pinterf_obj)
+    return "Created"
+
+
+def physical_interface_delete(name, physical_router, **kwargs):
+    '''
+    Delete specific Contrail physical interface
+
+    CLI Example:
+    .. code-block:: bash
+
+        salt '*' contrail.physical_interface_delete ge-0/0/0 phr01
+    '''
+    vnc_client = _auth(**kwargs)
+    gsc_obj = _get_config(vnc_client)
+    piface = physical_interface_get(name, physical_router)
+    if __opts__['test']:
+        return "Physical interface " + name + " will be deleted"
+    vnc_client.physical_interface_delete(id=piface[name]['_uuid'])
+    return "Deleted"
+
+
+def logical_interface_list(**kwargs):
+    '''
+    Return a list of all Contrail logical interfaces
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.logical_interface_list
+    '''
+    ret = []
+    vnc_client = _auth(**kwargs)
+    liface_objs = vnc_client._objects_list('logical-interface', detail=True)
+    for liface_obj in liface_objs:
+        ret.append({
+            'name': liface_obj.name,
+            'uuid': liface_obj._uuid,
+            'fq_name': liface_obj.fq_name,
+            'parent_type': liface_obj.parent_type,
+        })
+    return ret
+
+
+def logical_interface_get(name, parent_names, parent_type=None, **kwargs):
+    '''
+    Return a specific Contrail logical interface
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.logical_interface_get ge-0/0/0.10 ['phr01']
+        or
+        salt '*' contrail.logical_interface_get ge-0/0/0.10 ['ge-0/0/0','phr01']
+        or
+        salt '*' contrail.logical_interface_get ge-0/0/0.10 ['phr01'] parent_type=physcal-interface
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    liface_objs = vnc_client._objects_list('logical-interface', detail=True)
+    count = 0
+    for liface_obj in liface_objs:
+        if name == liface_obj.name and set(parent_names).issubset(liface_obj.fq_name):
+            if parent_type and parent_type == liface_obj.parent_type:
+                count += 1
+                ret[liface_obj.name] = liface_obj.__dict__
+            if not parent_type:
+                count += 1
+                ret[liface_obj.name] = liface_obj.__dict__
+    if len(ret) == 0:
+        return {'Error': 'Error in retrieving logical interface.'}
+    if count > 1:
+        return {
+            'Error': 'Error Was found more then one logical interface. Please put more parent_name or put parent_type to chose one of them.'}
+    return ret
+
+
+def logical_interface_create(name, parent_names, parent_type='physical-interface', vlan_tag=None, interface_type="l2",
+                             **kwargs):
+    '''
+    Create specific Contrail logical interface
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.logical_interface_create ge-0/0/10.11 parent_names="['ge-0/0/0','phr1']" parent_type=physical-interface vlan_tag=1025 interface_type=L2
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    gsc_obj = _get_config(vnc_client)
+    liface_obj = logical_interface_get(name, parent_names, parent_type, **kwargs)
+    if 'Error' not in liface_obj:
+        return {'OK': 'Logical interface ' + name + ' already exists'}
+    else:
+        if __opts__['test']:
+            return "Logical interface " + name + " will be created"
+        parent_obj = None
+        for router in parent_names:
+            parent_router = physical_router_get(router)
+            if 'Error' not in parent_router:
+                parent_obj = vnc_client._object_read('physical-router', id=parent_router[router]['_uuid'])
+                break
+        if not parent_obj:
+            return {'Error': 'Physical router have to be defined'}
+        if parent_type == 'physical-interface':
+            for interface in parent_names:
+                parent_interface = physical_interface_get(interface, parent_obj.name)
+                if 'Error' not in parent_interface:
+                    parent_obj = vnc_client._object_read('physical-interface', id=parent_interface[interface]['_uuid'])
+                    break
+        if interface_type.lower() == "l3":
+            return {'Error': "Virtual Network have to be defined for L3 interface type"}
+
+        liface_obj = LogicalInterface(name, parent_obj, vlan_tag, interface_type.lower())
+        vnc_client.logical_interface_create(liface_obj)
+    return "Created"
+
+
+def logical_interface_delete(name, parent_names, parent_type=None, **kwargs):
+    '''
+    Delete specific Contrail logical interface
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.logical_interface_delete ge-0/0/0.12 ['ge-0/0/0','phr01']
+        or
+        salt '*' contrail.logical_interface_delete ge-0/0/0.12 ['phr01'] parent_type=physical-router
+
+    '''
+    vnc_client = _auth(**kwargs)
+    gsc_obj = _get_config(vnc_client)
+    liface = logical_interface_get(name, parent_names, parent_type)
+    if 'Error' not in liface:
+        if __opts__['test']:
+            return "Logical interface " + name + " will be deleted"
+        vnc_client.logical_interface_delete(id=liface[name]['_uuid'])
+        return "Deleted"
+    else:
+        return liface
+
+
+def global_vrouter_config_list(**kwargs):
+    '''
+    Return a list of all Contrail global vrouter configs
+
+    CLI Example:
+
+    .. code-block:: bash"
+
+        salt '*' global_vrouter_config_list
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    vrouter_conf_objs = vnc_client._objects_list('global-vrouter-config', detail=True)
+    for vrouter_conf_obj in vrouter_conf_objs:
+        ret[vrouter_conf_obj._display_name] = vrouter_conf_obj.__dict__
+    return ret
+
+
+def global_vrouter_config_get(name, **kwargs):
+    '''
+    Return a specific Contrail global vrouter config
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.global_vrouter_get global-vrouter-config
+    '''
+    ret = {}
+    vrouter_conf_objs = global_vrouter_config_list(**kwargs)
+    if name in vrouter_conf_objs:
+        ret[name] = vrouter_conf_objs.get(name)
+    if len(ret) == 0:
+        return {'Error': 'Error in retrieving  global vrouter config.'}
+    return ret
+
+
+def global_vrouter_config_create(name, parent_type, encap_priority, vxlan_vn_id_mode, *fq_names, **kwargs):
+    '''
+    Create specific Contrail global vrouter config
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.global_vrouter_config_create name=global-vrouter-config parent_type=global-system-config encap_priority="MPLSoUDP,MPLSoGRE" vxlan_vn_id_mode="automatic" fq_names="['default-global-system-config', 'default-global-vrouter-config']"
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    gsc_obj = _get_config(vnc_client)
+    vrouter_conf_objs = global_vrouter_config_list(**kwargs)
+    if name in vrouter_conf_objs:
+        return {'OK': 'Global vrouter config %s already exists' % name}
+    else:
+        vrouter_conf_obj = GlobalVrouterConfig(
+            name=name,
+            parent_obj=None,
+            encapsulation_priorities=EncapsulationPrioritiesType(encapsulation=encap_priority.split(",")),
+            fq_name=fq_names,
+            vxlan_network_identifier_mode=vxlan_vn_id_mode,
+            parent_type=parent_type,
+        )
+        if __opts__['test']:
+            return "Global vRouter config " + name + " will be created"
+        vnc_client.global_vrouter_config_create(vrouter_conf_obj)
+    return "Created"
+
+
+def global_vrouter_config_delete(name, **kwargs):
+    '''
+    Delete specific Contrail global vrouter config
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.global_vrouter_config_delete global-vrouter-config
+    '''
+    vnc_client = _auth(**kwargs)
+    gsc_obj = _get_config(vnc_client)
+    vrouter_conf_obj = GlobalVrouterConfig(name, gsc_obj)
+    if __opts__['test']:
+        return "Global vRouter config " + name + " will be deleted"
+    vnc_client.global_vrouter_config_delete(
+        fq_name=vrouter_conf_obj.get_fq_name())
+    return "Deleted"
 
 
 def analytics_node_list(**kwargs):
@@ -220,14 +704,15 @@ def analytics_node_create(name, ip_address, **kwargs):
     gsc_obj = _get_config(vnc_client)
     analytics_node_objs = analytics_node_list(**kwargs)
     if name in analytics_node_objs:
-        return {'Error': 'Analytics node %s already exists' % name}
+        return {'OK': 'Analytics node %s already exists' % name}
     else:
         analytics_node_obj = AnalyticsNode(
             name, gsc_obj,
             analytics_node_ip_address=ip_address)
+        if __opts__['test']:
+            return "AnalyticsNode " + name + " will be created"
         vnc_client.analytics_node_create(analytics_node_obj)
-    ret = analytics_node_list(**kwargs)
-    return ret[name]
+    return "Created"
 
 
 def analytics_node_delete(name, **kwargs):
@@ -243,8 +728,11 @@ def analytics_node_delete(name, **kwargs):
     vnc_client = _auth(**kwargs)
     gsc_obj = _get_config(vnc_client)
     analytics_node_obj = AnalyticsNode(name, gsc_obj)
+    if __opts__['test']:
+        return "AnalyticsNode " + name + " will be deleted"
     vnc_client.analytics_node_delete(
         fq_name=analytics_node_obj.get_fq_name())
+    return "Deleted"
 
 
 def config_node_list(**kwargs):
@@ -299,14 +787,15 @@ def config_node_create(name, ip_address, **kwargs):
     gsc_obj = _get_config(vnc_client)
     config_node_objs = config_node_list(**kwargs)
     if name in config_node_objs:
-        return {'Error': 'Config node %s already exists' % name}
+        return {'OK': 'Config node %s already exists' % name}
     else:
         config_node_obj = ConfigNode(
             name, gsc_obj,
             config_node_ip_address=ip_address)
+        if __opts__['test']:
+            return "ConfigNode " + name + " will be created"
         vnc_client.config_node_create(config_node_obj)
-    ret = config_node_list(**kwargs)
-    return ret[name]
+    return "Created"
 
 
 def config_node_delete(name, **kwargs):
@@ -322,8 +811,11 @@ def config_node_delete(name, **kwargs):
     vnc_client = _auth(**kwargs)
     gsc_obj = _get_config(vnc_client)
     config_node_obj = ConfigNode(name, gsc_obj)
+    if __opts__['test']:
+        return "ConfigNode " + name + " will be deleted"
     vnc_client.config_node_delete(
         fq_name=config_node_obj.get_fq_name())
+    return "Deleted"
 
 
 def bgp_router_list(**kwargs):
@@ -377,39 +869,45 @@ def bgp_router_create(name, type, ip_address, asn=64512, **kwargs):
     ret = {}
     vnc_client = _auth(**kwargs)
 
+    address_families = ['route-target', 'inet-vpn', 'e-vpn', 'erm-vpn',
+                        'inet6-vpn']
+    if type != 'control-node':
+        address_families.remove('erm-vpn')
+
+    bgp_addr_fams = AddressFamilies(address_families)
+    bgp_sess_attrs = [
+        BgpSessionAttributes(address_families=bgp_addr_fams)]
+    bgp_sessions = [BgpSession(attributes=bgp_sess_attrs)]
+    bgp_peering_attrs = BgpPeeringAttributes(session=bgp_sessions)
+    rt_inst_obj = _get_rt_inst_obj(vnc_client)
+
+    if type == 'control-node':
+        vendor = 'contrail'
+    elif type == 'router':
+        vendor = 'mx'
+    else:
+        vendor = 'unknown'
+
+    router_params = BgpRouterParams(router_type=type,
+                                    vendor=vendor, autonomous_system=int(asn),
+                                    identifier=_get_ip(ip_address),
+                                    address=_get_ip(ip_address),
+                                    port=179, address_families=bgp_addr_fams)
+
     bgp_router_objs = bgp_router_list(**kwargs)
     if name in bgp_router_objs:
-        return {'Error': 'control node %s already exists' % name}
+        bgp_router_obj = vnc_client._object_read('bgp-router', id=bgp_router_objs[name]['_uuid'])
+        bgp_router_obj.set_bgp_router_parameters(router_params)
+        if __opts__['test']:
+            return "BGP router " + name + " will be updated"
+        vnc_client.bgp_router_update(bgp_router_obj)
     else:
-        address_families = ['route-target', 'inet-vpn', 'e-vpn', 'erm-vpn',
-                            'inet6-vpn']
-        if type != 'control-node':
-            address_families.remove('erm-vpn')
-
-        bgp_addr_fams = AddressFamilies(address_families)
-        bgp_sess_attrs = [
-            BgpSessionAttributes(address_families=bgp_addr_fams)]
-        bgp_sessions = [BgpSession(attributes=bgp_sess_attrs)]
-        bgp_peering_attrs = BgpPeeringAttributes(session=bgp_sessions)
-        rt_inst_obj = _get_rt_inst_obj(vnc_client)
-
-        if type == 'control-node':
-            vendor = 'contrail'
-        elif type == 'router':
-            vendor = 'mx'
-        else:
-            vendor = 'unknown'
-
-        router_params = BgpRouterParams(router_type=type,
-            vendor=vendor, autonomous_system=int(asn),
-            identifier=_get_ip(ip_address),
-            address=_get_ip(ip_address),
-            port=179, address_families=bgp_addr_fams)
-        bgp_router_obj = BgpRouter(name, rt_inst_obj,
-            bgp_router_parameters=router_params)
+        bgp_router_obj = BgpRouter(name, rt_inst_obj, bgp_router_parameters=router_params)
+        if __opts__['test']:
+            return "BGP router " + name + " will be created"
         vnc_client.bgp_router_create(bgp_router_obj)
-    ret = bgp_router_list(**kwargs)
-    return ret[name]
+        return "Created"
+    return {'OK': 'Config node %s already exists' % name}
 
 
 def bgp_router_delete(name, **kwargs):
@@ -423,10 +921,15 @@ def bgp_router_delete(name, **kwargs):
         salt '*' contrail.bgp_router_delete mx01
     '''
     vnc_client = _auth(**kwargs)
-    gsc_obj = _get_control(vnc_client)
+    gsc_obj = _get_config(vnc_client)
     bgp_router_obj = BgpRouter(name, gsc_obj)
+
+    if __opts__['test']:
+        return "BGP router " + name + " will be deleted"
     vnc_client.bgp_router_delete(
         fq_name=bgp_router_obj.get_fq_name())
+
+    return "Deleted"
 
 
 def database_node_list(**kwargs):
@@ -481,14 +984,15 @@ def database_node_create(name, ip_address, **kwargs):
     gsc_obj = _get_config(vnc_client)
     database_node_objs = database_node_list(**kwargs)
     if name in database_node_objs:
-        return {'Error': 'Database node %s already exists' % name}
+        return {'OK': 'Database node %s already exists' % name}
     else:
         database_node_obj = DatabaseNode(
             name, gsc_obj,
             database_node_ip_address=ip_address)
+        if __opts__['test']:
+            return "DatabaseNode " + name + " will be created"
         vnc_client.database_node_create(database_node_obj)
-    ret = database_node_list(**kwargs)
-    return ret[name]
+    return "Created"
 
 
 def database_node_delete(name, **kwargs):
@@ -502,12 +1006,12 @@ def database_node_delete(name, **kwargs):
         salt '*' contrail.database_node_delete cmp01
     '''
     vnc_client = _auth(**kwargs)
-    gsc_obj = _get_database(vnc_client)
-    database_node_obj = databaseNode(name, gsc_obj)
+    gsc_obj = _get_config(vnc_client)
+    database_node_obj = DatabaseNode(name, gsc_obj)
+    if __opts__['test']:
+        return "DatabaseNode " + name + " will be deleted"
     vnc_client.database_node_delete(
         fq_name=database_node_obj.get_fq_name())
-
-
 
 
 def _get_vrouter_config(vnc_client):
@@ -518,7 +1022,6 @@ def _get_vrouter_config(vnc_client):
         config = None
 
     return config
-
 
 
 def linklocal_service_list(**kwargs):
@@ -602,7 +1105,11 @@ def linklocal_service_create(name, lls_ip, lls_port, ipf_dns_or_ip, ipf_port, **
     if current_config is None:
         new_services = LinklocalServicesTypes([service_entry])
         new_config = GlobalVrouterConfig(linklocal_services=new_services)
-        vnc_client.global_vrouter_config_create(new_config)
+        if __opts__['test']:
+            ret['GlobalVrouterConfig'] = "Global vRouter Config will be created"
+        else:
+            ret = "Created"
+            vnc_client.global_vrouter_config_create(new_config)
     else:
         _current_service_list = current_config.get_linklocal_services()
         if _current_service_list is None:
@@ -617,13 +1124,18 @@ def linklocal_service_create(name, lls_ip, lls_port, ipf_dns_or_ip, ipf_port, **
                 entry = _entry.__dict__
                 if 'linklocal_service_name' in entry:
                     if entry['linklocal_service_name'] == name:
-                        return {'Error': 'Link local service "{0}" already exists'.format(name)}
+                        return {'OK': 'Link local service "{0}" already exists'.format(name)}
                     new_services.append(_entry)
+            if __opts__['test']:
+                ret['Test'] = "LinkLocalSevices will be created"
             service_list[key] = new_services
         new_config = GlobalVrouterConfig(linklocal_services=service_list)
-        vnc_client.global_vrouter_config_update(new_config)
-    ret = linklocal_service_list(**kwargs)
-    return ret[name]
+        if __opts__['test']:
+            ret['GlobalVrouterConfig'] = "Global vRouter Config will be updated"
+        else:
+            vnc_client.global_vrouter_config_update(new_config)
+            ret = "Created"
+    return ret
 
 
 def linklocal_service_delete(name, **kwargs):
@@ -660,6 +1172,46 @@ def linklocal_service_delete(name, **kwargs):
                         new_services.append(_entry)
             service_list[key] = new_services
         new_config = GlobalVrouterConfig(linklocal_services=service_list)
+        if __opts__['test']:
+            return "Link local service " + name + " will be deleted"
         vnc_client.global_vrouter_config_update(new_config)
+        return "Deleted"
     if not found:
         return {'Error': 'Link local service "{0}" not found'.format(name)}
+
+
+def virtual_machine_interface_list(**kwargs):
+    '''
+    Return a list of all Contrail virtual machine interfaces
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.virtual_machine_interfaces
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    vm_ifaces = vnc_client._objects_list('virtual-machine-interface', detail=True)
+    for vm_iface in vm_ifaces:
+        ret[vm_iface.name] = vm_iface.__dict__
+    return ret
+
+
+def virtual_network_list(**kwargs):
+    '''
+    Return a list of all Contrail virtual network
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.virtual_network
+    '''
+
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    virtual_networks = vnc_client._objects_list('virtual-network', detail=True)
+    for virtual_network in virtual_networks:
+        ret[virtual_network.name] = virtual_network.__dict__
+    return ret

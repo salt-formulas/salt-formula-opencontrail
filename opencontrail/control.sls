@@ -43,7 +43,7 @@ opencontrail_control_packages:
   - require:
     - pkg: opencontrail_control_packages
 
-{%- if control.version >= 3.0 %}
+{%- if control.version >= 3.0 and grains.get('init') != 'systemd' %}
 
 /etc/contrail/supervisord_control_files/contrail-control-nodemgr.ini:
   file.managed:

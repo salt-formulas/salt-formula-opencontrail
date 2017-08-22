@@ -1,4 +1,5 @@
 {%- set vendor = salt['pillar.get']('opencontrail:common:vendor', 'opencontrail') %}
+{%- set version = salt['pillar.get']('opencontrail:common:version') %}
 
 {%- load_yaml as base_defaults %}
 {%- if vendor in ['opencontrail'] %}
@@ -19,26 +20,42 @@ collector:
         ['contrail-analytics', 'python-cassandra']
     redis_config: '/etc/redis/redis.conf'
     services:
+    {%- if grains.get('init') != 'systemd' %}
         ['supervisor-analytics', 'redis-server']
+    {%- else %}
+        ['contrail-collector', 'contrail-analytics-api', 'contrail-query-engine', 'contrail-alarm-gen', 'contrail-snmp-collector', 'contrail-topology', 'contrail-analytics-nodemgr', 'redis-server']
+    {%- endif %}
   RedHat:
     pkgs:
         ['contrail-analytics']
     redis_config: '/etc/redis.conf'
     services:
+    {%- if grains.get('init') != 'systemd' %}
         ['supervisor-analytics', 'redis']
+    {%- else %}
+        ['contrail-collector', 'contrail-analytics-api', 'contrail-query-engine', 'contrail-alarm-gen', 'contrail-snmp-collector', 'contrail-topology', 'contrail-analytics-nodemgr', 'redis']
+    {%- endif %}
 compute:
   Debian:
     pkgs:
         ['contrail-utils', 'iproute2', 'haproxy']
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
         ['supervisor-vrouter']
+    {%- else %}
+        ['contrail-vrouter-agent', 'contrail-vrouter-nodemgr']
+    {%- endif %}
     dpdk:
         enabled: False
   RedHat:
     pkgs:
         ['contrail-openstack-vrouter', 'contrail-utils', 'haproxy', 'contrail-vrouter-source']
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
         ['supervisor-vrouter']
+    {%- else %}
+        ['contrail-vrouter-agent', 'contrail-vrouter-nodemgr']
+    {%- endif %}
     dpdk:
         enabled: False
 config:
@@ -46,43 +63,70 @@ config:
     pkgs:
         ['contrail-config-openstack', 'ifmap-server']
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
         ['supervisor-config']
+    {%- else %}
+        ['contrail-api', 'contrail-schema', 'contrail-svc-monitor', 'contrail-device-manager', 'contrail-config-nodemgr']
+    {%- endif %}
   RedHat:
     pkgs:
         ['contrail-openstack-config']
     services:
+    {%- if grains.get('init') != 'systemd' %}
         ['supervisor-config']
+    {%- else %}
+        ['contrail-api', 'contrail-schema', 'contrail-svc-monitor', 'contrail-device-manager', 'contrail-config-nodemgr']
+    {%- endif %}
 control:
   Debian:
     pkgs:
         ['contrail-control', 'contrail-dns']
     services:
+    {%- if grains.get('init') != 'systemd' %}
         ['contrail-control', 'supervisor-control']
+    {%- else %}
+        ['contrail-control', 'contrail-named', 'contrail-dns', 'contrail-control-nodemgr']
+    {%- endif %}
   RedHat:
     pkgs:
          ['contrail-openstack-control']
     services:
-         ['contrail-control', 'supervisor-control']
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
+        ['contrail-control', 'supervisor-control']
+    {%- else %}
+        ['contrail-control', 'contrail-named', 'contrail-dns', 'contrail-control-nodemgr']
+    {%- endif %}
 database:
   Debian:
     {%- if grains.get('oscodename') == 'trusty' %}
     pkgs:
          ['cassandra', 'zookeeper', 'supervisor', 'openjdk-7-jre-headless', 'contrail-database']
-    {%- else %}
+    {%- elif version < 4.0 %}
     pkgs:
          ['cassandra', 'zookeeper', 'supervisor', 'openjdk-8-jre-headless', 'contrail-database']
+    {%- else %}
+    pkgs:
+         ['cassandra', 'zookeeper', 'openjdk-8-jre-headless', 'contrail-database']
     {%- endif %}
     cassandra_config: '/etc/cassandra/'
     compaction_throughput_mb_per_sec: 16
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
          ['supervisord-contrail-database', 'zookeeper']
+    {%- else %}
+         ['contrail-database', 'contrail-database-nodemgr', 'zookeeper']
+    {%- endif %}
   RedHat:
     pkgs:
          ['contrail-openstack-database', 'zookeeper', 'supervisor', 'java-1.7.0-openjdk-headless']
     cassandra_config: '/etc/cassandra/conf/'
     compaction_throughput_mb_per_sec: 16
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
          ['supervisord-contrail-database', 'zookeeper']
+    {%- else %}
+         ['contrail-database', 'contrail-database-nodemgr', 'zookeeper']
+    {%- endif %}
 web:
   Debian:
     pkgs:
@@ -127,26 +171,42 @@ collector:
          ['contrail-analytics', 'python-cassandra-driver']
     redis_config: '/etc/redis/redis.conf'
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
         ['supervisor-analytics', 'redis-server']
+    {%- else %}
+        ['contrail-collector', 'contrail-analytics-api', 'contrail-query-engine', 'contrail-alarm-gen', 'contrail-snmp-collector', 'contrail-topology', 'contrail-analytics-nodemgr', 'redis-server']
+    {%- endif %}
   RedHat:
     pkgs:
          ['contrail-analytics', 'python-cassandra-driver']
     redis_config: '/etc/redis.conf'
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
         ['supervisor-analytics', 'redis']
+    {%- else %}
+        ['contrail-collector', 'contrail-analytics-api', 'contrail-query-engine', 'contrail-alarm-gen', 'contrail-snmp-collector', 'contrail-topology', 'contrail-analytics-nodemgr', 'redis']
+    {%- endif %}
 compute:
   Debian:
     pkgs:
          ['contrail-utils', 'iproute2', 'haproxy']
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
         ['supervisor-vrouter']
+    {%- else %}
+        ['contrail-vrouter-agent', 'contrail-vrouter-nodemgr']
+    {%- endif %}
     dpdk:
         enabled: False
   RedHat:
     pkgs:
          ['contrail-openstack-vrouter', 'contrail-utils', 'haproxy', 'contrail-vrouter-source']
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
         ['supervisor-vrouter']
+    {%- else %}
+        ['contrail-vrouter-agent', 'contrail-vrouter-nodemgr']
+    {%- endif %}
     dpdk:
         enabled: False
 config:
@@ -154,23 +214,39 @@ config:
     pkgs:
          ['contrail-config-openstack', 'ifmap-server']
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
         ['supervisor-config']
+    {%- else %}
+        ['contrail-api', 'contrail-schema', 'contrail-svc-monitor', 'contrail-device-manager', 'contrail-config-nodemgr']
+    {%- endif %}
   RedHat:
     pkgs:
          ['contrail-openstack-config']
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
         ['supervisor-config']
+    {%- else %}
+        ['contrail-api', 'contrail-schema', 'contrail-svc-monitor', 'contrail-device-manager', 'contrail-config-nodemgr']
+    {%- endif %}
 control:
   Debian:
     pkgs:
          ['contrail-control', 'contrail-dns']
     services:
-         ['contrail-control', 'supervisor-control']
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
+        ['contrail-control', 'supervisor-control']
+    {%- else %}
+        ['contrail-control', 'contrail-named', 'contrail-dns', 'contrail-control-nodemgr']
+    {%- endif %}
   RedHat:
     pkgs:
          ['contrail-openstack-control']
     services:
-         ['contrail-control', 'supervisor-control']
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
+        ['contrail-control', 'supervisor-control']
+    {%- else %}
+        ['contrail-control', 'contrail-named', 'contrail-dns', 'contrail-control-nodemgr']
+    {%- endif %}
 database:
   Debian:
     {%- if grains.get('oscodename') == 'trusty' %}
@@ -183,14 +259,22 @@ database:
     cassandra_config: '/etc/cassandra/'
     compaction_throughput_mb_per_sec: 16
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
          ['supervisord-contrail-database', 'zookeeper']
+    {%- else %}
+         ['contrail-database', 'contrail-database-nodemgr', 'zookeeper']
+    {%- endif %}
   RedHat:
     pkgs:
          ['contrail-openstack-database', 'zookeeper', 'supervisor', 'java-1.7.0-openjdk-headless']
     cassandra_config: '/etc/cassandra/conf/'
     compaction_throughput_mb_per_sec: 16
     services:
+    {%- if grains.get('init') != 'systemd' or version < 4.0 %}
          ['supervisord-contrail-database', 'zookeeper']
+    {%- else %}
+         ['contrail-database', 'contrail-database-nodemgr', 'zookeeper']
+    {%- endif %}
 web:
   Debian:
     pkgs:

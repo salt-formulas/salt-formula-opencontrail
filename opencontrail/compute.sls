@@ -69,6 +69,8 @@ net.ipv4.ip_local_reserved_ports:
 
 {%- if compute.version >= 3.0 %}
 
+{%- if compute.version <= 4.0 or grains.get('init') != 'systemd' %}
+
 /etc/contrail/supervisord_vrouter_files/contrail-vrouter-nodemgr.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ compute.version }}/contrail-vrouter-nodemgr.ini
@@ -76,6 +78,8 @@ net.ipv4.ip_local_reserved_ports:
     - pkg: opencontrail_compute_packages
   - require_in:
     - service: opencontrail_compute_services
+
+{%- endif %}
 
 /etc/udev/rules.d/vhost-net.rules:
   file.managed:
@@ -101,6 +105,8 @@ opencontrail_vrouter_package:
   - require_in:
     - pkg: opencontrail_compute_packages
 
+{%- if compute.version <= 4.0 or grains.get('init') != 'systemd' %}
+
 /etc/contrail/supervisord_vrouter_files/contrail-vrouter-dpdk.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ compute.version }}/contrail-vrouter-dpdk.ini
@@ -110,6 +116,8 @@ opencontrail_vrouter_package:
     - pkg: opencontrail_vrouter_package
   - require_in:
     - service: opencontrail_compute_services
+
+{%- endif %}
 
 modules_dpdk:
   file.append:
@@ -164,6 +172,8 @@ contrail_load_vrouter_kernel_module:
   - watch_in:
     - service: opencontrail_compute_services
 
+{%- if compute.version <= 4.0 or grains.get('init') != 'systemd' %}
+
 /etc/contrail/supervisord_vrouter_files/contrail-tor-agent-{{ agent.id }}.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ compute.version }}/tor/contrail-tor-agent.ini
@@ -172,6 +182,8 @@ contrail_load_vrouter_kernel_module:
       agent_name: {{ agent_name }}
   - watch_in:
     - service: opencontrail_compute_services
+
+{%- endif %}
 
 {%- endfor %}
 {%- endif %}

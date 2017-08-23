@@ -21,6 +21,7 @@ opencontrail_client_packages:
 opencontrail_client_virtual_router_{{ virtual_router_name }}:
   contrail.virtual_router_present:
   - name: {{ virtual_router.get('name', virtual_router_name) }}
+  - router_type: {{ virtual_router.get('router_type', virtual_router_name)}}
   - ip_address: {{ virtual_router.ip_address }}
   - dpdk_enabled: {{ virtual_router.get('dpdk_enabled', False) }}
   - user: {{ client.identity.user }}
@@ -32,6 +33,21 @@ opencontrail_client_virtual_router_{{ virtual_router_name }}:
   - api_base_url: '/'
 
 {%- endfor %}
+
+{%- if pillar.opencontrail.get('compute',{}).get('tor', {}).get('enabled', False) %}
+
+{%- for tor_name, tor in pillar.opencontrail.compute.tor.get('agent', {}).items() %}
+
+opencontrail_client_tor_router_{{ tor_name }}:
+  contrail.virtual_router_present:
+  - name: {{ pillar.linux.system.name }}-{{ tor.id }}
+  - router_type: tor-agent
+  - ip_address: {{ tor.address }}
+
+{%- endfor %}
+
+{%- endif %}
+
 
 {%- for config_node_name, config_node in client.get('config_node', {}).items() %}
 

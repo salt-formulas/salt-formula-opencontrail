@@ -113,6 +113,8 @@ opencontrail_database_packages:
     - service: opencontrail_database_services
     - service: opencontrail_zookeeper_service
 
+{%- if database.version <= 4.0 or grains.get('init') != 'systemd' %}
+
 /etc/contrail/supervisord_database_files/contrail-database-nodemgr.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ database.version }}/database/contrail-database-nodemgr.ini
@@ -122,6 +124,7 @@ opencontrail_database_packages:
     - service: opencontrail_database_services
     - service: opencontrail_zookeeper_service
 
+{%- endif %}
 {%- endif %}
 
 {% if grains.os_family == "Debian" %}
@@ -162,7 +165,7 @@ zookeeper_service:
 opencontrail_database_services:
   service.running:
   - enable: true
-{%- if common.vendor == "juniper" %}
+{%- if common.vendor == "juniper" or (database.version >= 4.0 and grains.get('init') == 'systemd') %}
   - name: contrail-database
 {%- else %}
   - name: supervisor-database

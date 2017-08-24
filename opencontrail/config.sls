@@ -44,6 +44,8 @@ publisher_init:
   - require:
     - pkg: opencontrail_config_packages
 
+{%- if grains.get('init') != 'systemd' %}
+
 /etc/contrail/supervisord_config_files/contrail-discovery.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/config/contrail-discovery.ini
@@ -57,6 +59,8 @@ publisher_init:
   - require:
     - pkg: opencontrail_config_packages
 
+{%- endif %}
+
 /etc/contrail/contrail-discovery.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/contrail-discovery.conf
@@ -65,6 +69,8 @@ publisher_init:
     - pkg: opencontrail_config_packages
 
 {%- endif %}
+
+{%- if grains.get('init') != 'systemd' %}
 
 /etc/contrail/supervisord_config_files/contrail-api.ini:
   file.managed:
@@ -78,6 +84,8 @@ publisher_init:
   - source: salt://opencontrail/files/{{ config.version }}/config/contrail-api
   - require:
     - pkg: opencontrail_config_packages
+
+{%- endif %}
 
 /etc/contrail/contrail-api.conf:
   file.managed:
@@ -143,7 +151,7 @@ publisher_init:
   - require:
     - pkg: opencontrail_config_packages
 
-{%- if config.version >= 3.0 %}
+{%- if config.version >= 3.0 and grains.get('init') != 'systemd' %}
 
 /etc/contrail/supervisord_config_files/contrail-config-nodemgr.ini:
   file.managed:

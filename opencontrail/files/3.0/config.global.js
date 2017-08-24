@@ -276,7 +276,7 @@ config.logs.level = 'debug';
  * Default: false
  *
 ******************************************************************************/
-config.getDomainProjectsFromApiServer = false;
+config.getDomainProjectsFromApiServer = {{ web.get('projects_from_api', 'false')|lower }};
 /*****************************************************************************
 * Boolean flag L2_enable indicates the default forwarding-mode of a network.
 * Allowed values : true / false

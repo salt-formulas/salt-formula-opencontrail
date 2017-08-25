@@ -590,6 +590,21 @@ Gateway mode: can be server/ vcpe (default is none)
         gateway_mode: server
 
 
+Set up metadata secret for the Vrouter
+-------------------------------------
+
+In order to get cloud-init within the instance to properly fetch 
+instance metadata, metadata_proxy_secret in the Vrouter agent config
+should match the value in nova.conf. The administrator should define
+it in the pillar:
+
+.. code-block:: yaml
+
+    opencontrail:
+      compute:
+        metadata:
+          secret: opencontrail
+
 Keystone v3
 -----------
 

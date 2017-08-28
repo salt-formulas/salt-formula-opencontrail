@@ -111,8 +111,11 @@ agent:
   {%- endif %}
   {%- if control.get('enabled', False) or compute.get('enabled', False) %}
     contrail:
+      template: opencontrail/files/telegraf.conf
     {%- if control.get('enabled', False) %}
-      ifmap_count: "true"
+      # ifmap_count is always disabled because it puts too much load on the IF-MAP server
+      # and the metric is pretty much useless.
+      ifmap_count: "false"
     {%- endif %}
       checks:
     {%- if control.get('enabled', False) %}

@@ -146,6 +146,9 @@ def virtual_router_create(name, ip_address, router_type=None, dpdk_enabled=False
     vnc_client = _auth(**kwargs)
     gsc_obj = _get_config(vnc_client)
     vrouter_objs = virtual_router_list(**kwargs)
+    router_types = ['tor-agent', 'tor-service-node', 'embedded']
+    if router_type not in router_types:
+        router_type = None
     if name in vrouter_objs:
         vrouter = virtual_router_get(name)
         vrouter_obj = vnc_client._object_read('virtual-router', id=vrouter[name]['uuid'])

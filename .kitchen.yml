@@ -56,14 +56,14 @@ platforms:
 
 suites:
 
-  # - name: single
-  #   provisioner:
-  #     pillars-from-files:
-  #       opencontrail.sls: tests/pillar/single.sls
-  # - name: single40
-  #   provisioner:
-  #     pillars-from-files:
-  #       opencontrail.sls: tests/pillar/single40.sls
+  - name: single
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/single.sls
+  - name: single40
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/single40.sls
   - name: analytics
     provisioner:
       pillars-from-files:
@@ -80,22 +80,22 @@ suites:
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/control40.sls
-  # - name: cluster
-  #   provisioner:
-  #     pillars-from-files:
-  #       opencontrail.sls: tests/pillar/cluster.sls
-  # - name: cluster40
-  #   provisioner:
-  #     pillars-from-files:
-  #       opencontrail.sls: tests/pillar/cluster40.sls
-  # - name: tor
-  #   provisioner:
-  #     pillars-from-files:
-  #       opencontrail.sls: tests/pillar/tor.sls
-  # - name: tor40
-  #   provisioner:
-  #     pillars-from-files:
-  #       opencontrail.sls: tests/pillar/tor40.sls
+  - name: cluster
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/cluster.sls
+  - name: cluster40
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/cluster40.sls
+  - name: tor
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/tor.sls
+  - name: tor40
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/tor40.sls
   - name: vrouter
     provisioner:
       pillars-from-files:

@@ -34,6 +34,7 @@ publisher_init:
 /etc/ifmap-server/log4j.properties:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/config/log4j.properties
+  - template: jinja
   - require:
     - pkg: opencontrail_config_packages
 

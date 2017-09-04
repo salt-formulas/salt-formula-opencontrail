@@ -102,6 +102,7 @@ Config, control, analytics, database, web -- altogether on one node.
         members:
         - host: 127.0.0.1
           id: 1
+        rootlogger: "INFO, CONSOLE"
       control:
         version: 2.2
         enabled: true

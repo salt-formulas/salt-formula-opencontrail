@@ -192,7 +192,7 @@ opencontrail_config_services:
   {%- if grains.get('noservices') %}
   - onlyif: /bin/false
   {%- endif %}
-  - watch: 
+  - watch:
     {%- if config.version <= 3.0 %}
     - file: /etc/contrail/contrail-discovery.conf
     - file: /etc/ifmap-server/basicauthusers.properties

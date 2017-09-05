@@ -134,4 +134,82 @@ opencontrail_client_linklocal_service_{{ linklocal_service_name }}:
 
 {%- endfor %}
 
+{%- for physical_router_name, physical_router in client.get('physical_router', {}).items() %}
+
+opencontrail_client_physical_router_{{ physical_router_name }}:
+  contrail.physical_router_present:
+  - name: {{ physical_router.name }}
+  - dataplane_ip: {{ physical_router.dataplane_ip }}
+  - management_ip: {{ physical_router.get('management_ip') }}
+  - vendor_name: {{ physical_router.get('vendor_name') }}
+  - product_name: {{ physical_router.get('product_name') }}
+  - vnc_managed: {{ physical_router.get('vnc_managed', True) }}
+  - agents: {{ physical_router.get('agents') }}
+  - user: {{ client.identity.user }}
+  - password: {{ client.identity.password }}
+  - project: {{ client.identity.tenant }}
+  - auth_host_ip: {{ client.identity.host }}
+  - api_server_ip: {{ client.api.host }}
+  - api_server_port: {{ client.api.port }}
+  - api_base_url: '/'
+
+{%- for physical_interface_name, physical_interface in physical_router.get('interface', {}).items() %}
+
+opencontrail_client_physical_interface_{{ physical_interface_name }}:
+  contrail.physical_interface_present:
+  - name: {{ physical_interface_name }}
+  - physical_router: {{ physical_router_name }}
+  - requires:
+    - opencontrail_client_physical_router_{{ physical_router_name }}
+
+
+{%- for logical_interface_name, logical_interface in physical_interface.get('logical_interface', {}).items() %}
+
+{%- for virtual_machine_interface_name, virtual_machine_interface in logical_interface.get('virtual_machine_interface', {}).items() %}
+
+opencontrail_client_virtual_machine_interface_{{ virtual_machine_interface_name }}:
+  contrail.virtual_machine_interface_present:
+  - name: {{ virtual_machine_interface.name }}
+  - virtual_network: {{ virtual_machine_interface.virtual_network }}
+  - ip_address: {{ virtual_machine_interface.get('ip_address') }}
+  - mac_address: {{ virtual_machine_interface.get('mac_address') }}
+  - security_group: {{ virtual_machine_interface.get('security_group') }}
+  - user: {{ client.identity.user }}
+  - password: {{ client.identity.password }}
+  - project: {{ client.identity.tenant }}
+  - auth_host_ip: {{ client.identity.host }}
+  - api_server_ip: {{ client.api.host }}
+  - api_server_port: {{ client.api.port }}
+  - api_base_url: '/'
+  - requires_in:
+    - opencontrail_client_logical_interface_{{ logical_interface_name }}
+
+{%- endfor %} # end for virtual_machine_interface
+
+opencontrail_client_logical_interface_{{ logical_interface_name }}:
+  contrail.logical_interface_present:
+  - name: {{ logical_interface.name }}
+  - parent_names:
+    - {{ physical_interface.name }}
+    - {{ physical_router.name }}
+  - parent_type: 'physical-interface'
+  - vlan_tag: {{ logical_interface.get('vlan_tag') }}
+  - interface_type: {{ logical_interface.get('interface_type', 'L2') }}
+  - vmis: {{ logical_interface.get('virtual_machine_interface', {}) }}
+  - user: {{ client.identity.user }}
+  - password: {{ client.identity.password }}
+  - project: {{ client.identity.tenant }}
+  - auth_host_ip: {{ client.identity.host }}
+  - api_server_ip: {{ client.api.host }}
+  - api_server_port: {{ client.api.port }}
+  - api_base_url: '/'
+  - requires:
+    - opencontrail_client_physical_interface_{{ physical_interface_name }}
+
+{%- endfor %} # end for logical_interaface
+
+{%- endfor %} # end for physical_interface
+
+{%- endfor %} # end for physical_router
+
 {%- endif %}

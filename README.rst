@@ -590,11 +590,32 @@ Gateway mode: can be server/ vcpe (default is none)
       compute:
         gateway_mode: server
 
+TSN nodes
+---------
+
+Configure TSN nodes
+
+.. code-block:: yaml
+
+  opencontrail:
+    compute:
+      enabled: true
+      tor:
+        enabled: true
+        bind:
+          port: 8086
+        agent:
+          tor01:
+            id: 0
+            port: 6632
+            host: 127.0.0.1
+            address: 127.0.0.1
+
 
 Set up metadata secret for the Vrouter
 -------------------------------------
 
-In order to get cloud-init within the instance to properly fetch 
+In order to get cloud-init within the instance to properly fetch
 instance metadata, metadata_proxy_secret in the Vrouter agent config
 should match the value in nova.conf. The administrator should define
 it in the pillar:
@@ -740,7 +761,7 @@ Cassandra listen interface
 --------------------------
 
 .. code-block:: yaml
-  
+
     database:
       ....
       bind:
@@ -953,6 +974,51 @@ Enforcing Link Local Services
            - 10.10.10.10
            ipf_port: 80
 
+Enforcing physical routers
+
+.. code-block:: yaml
+
+  opencontrail:
+    client:
+      ...
+      physical_router:
+        router1:
+          name: router1
+          dataplane_ip: 1.2.3.4
+          management_ip: 1.2.3.4
+          vendor_name: ovs
+          product_name: ovs
+          agents:
+           - tsn0-0
+           - tsn0
+
+Enforcing physical/logical interfaces for routers
+
+
+.. code-block:: yaml
+
+  opencontrail
+    client:
+    ...
+    physical_router:
+      router1:
+        ...
+        interface:
+          port1:
+            name: port1
+            logical_interface:
+              port1_l:
+                name: 'port1.0'
+                vlan_tag: 0
+                interface_type: L2
+                virtual_machine_interface:
+                  port1_port:
+                    name: port1_port
+                    ip_address: 192.168.90.107
+                    mac_address: '2e:92:a8:af:c2:21'
+                    security_group: 'default'
+                    virtual_network: 'virtual-network'
+
 
 Usage
 =====
@@ -1001,7 +1067,7 @@ When vrf_name = ---ERROR--- then something goes wrong
 
 Display IF MAP table
 
-Look for neighbours, if VM has 2, it's ok 
+Look for neighbours, if VM has 2, it's ok
 
 	http://<control-node>:8083/Snh_IFMapTableShowReq?table_name=
 

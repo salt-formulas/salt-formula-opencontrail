@@ -375,7 +375,8 @@ def physical_interface_absent(name, physical_router, **kwargs):
     return ret
 
 
-def logical_interface_present(name, parent_names, parent_type, vlan_tag=None, interface_type="L2", **kwargs):
+def logical_interface_present(name, parent_names, parent_type, vlan_tag=None, interface_type="L2",
+                              vmis=None, **kwargs):
     '''
     Ensures that the Contrail logical interface exists.
 
@@ -383,7 +384,8 @@ def logical_interface_present(name, parent_names, parent_type, vlan_tag=None, in
     :param parent_names:  	List of parents
     :param parent_type		Parent resource type. Any of ['physical-router', 'physical-interface']
     :param vlan_tag:		VLAN tag (.1Q) classifier for this logical interface.
-    :param interface_type	Logical interface type can be L2 or L3.
+    :param interface_type:	Logical interface type can be L2 or L3.
+    :param vmis:                Virtual machine interface name associate with
     '''
     ret = {'name': name,
            'changes': {},
@@ -394,7 +396,7 @@ def logical_interface_present(name, parent_names, parent_type, vlan_tag=None, in
         pass
     else:
         result = __salt__['contrail.logical_interface_create'](name, parent_names, parent_type, vlan_tag,
-                                                               interface_type, **kwargs)
+                                                               interface_type, vmis=vmis, **kwargs)
         if 'Error' in result:
             return False
 
@@ -592,4 +594,43 @@ def database_node_present(name, ip_address, **kwargs):
     else:
         ret['comment'] = 'Database node {0} has been created'.format(name)
         ret['changes']['DatabaseNode'] = result
+    return ret
+
+
+def virtual_machine_interface_present(name,
+                                      virtual_network,
+                                      mac_address=None,
+                                      ip_address=None,
+                                      security_group=None,
+                                       **kwargs):
+    '''
+    Ensures that the Contrail virtual machine interface exists.
+
+    :param name:             Virtual machine interface name
+    :param virtual_network:  Network name
+    :param mac_address:      Mac address of vmi interface
+    :param ip_address:       Virtual machine interface ip address
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': 'Virtual machine interface "{0}" already exists'.format(name)}
+
+    vmis = __salt__['contrail.virtual_machine_interface_list'](**kwargs)
+
+    for vmi in vmis:
+      if vmi['name'] == name:
+        return ret
+
+    vmi = __salt__['contrail.virtual_machine_interface_create'](name, virtual_network,
+                                                                mac_address=mac_address,
+                                                                ip_address=ip_address,
+                                                                security_group=security_group,
+                                                                **kwargs)
+    if vmi['name'] == name:
+        ret['comment'] = 'Virtual machine interface {0} has been created'.format(name)
+        ret['result'] = True
+    else:
+        ret['comment'] = 'Virtual machine interface {0} creation failed'.format(name)
+        ret['result'] = False
     return ret

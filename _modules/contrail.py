@@ -16,6 +16,7 @@
 from netaddr import IPNetwork
 from vnc_api.vnc_api import PhysicalRouter, PhysicalInterface, LogicalInterface
 from vnc_api.vnc_api import EncapsulationPrioritiesType
+from vnc_api.vnc_api import VirtualMachineInterface, MacAddressesType
 
 try:
     from vnc_api import vnc_api
@@ -80,6 +81,17 @@ def _get_rt_inst_obj(vnc_client):
                  'ip-fabric', '__default__'])
 
     return rt_inst_obj
+
+def _get_fq_name(vnc_client, resource_name, project_name, domain='default-domain'):
+    res = [domain]
+    if project_name:
+        res.append(project_name)
+    if resource_name:
+        res.append(resource_name)
+    return res
+
+def _get_project_obj(vnc_client, name, domain='default-domain'):
+    return vnc_client.project_read(fq_name=[domain, name])
 
 
 def _get_ip(ip_w_pfx):
@@ -501,7 +513,7 @@ def logical_interface_get(name, parent_names, parent_type=None, **kwargs):
 
 
 def logical_interface_create(name, parent_names, parent_type='physical-interface', vlan_tag=None, interface_type="l2",
-                             **kwargs):
+                             vmis=None, **kwargs):
     '''
     Create specific Contrail logical interface
 
@@ -514,6 +526,7 @@ def logical_interface_create(name, parent_names, parent_type='physical-interface
     ret = {}
     vnc_client = _auth(**kwargs)
     gsc_obj = _get_config(vnc_client)
+
     liface_obj = logical_interface_get(name, parent_names, parent_type, **kwargs)
     if 'Error' not in liface_obj:
         return {'OK': 'Logical interface ' + name + ' already exists'}
@@ -538,7 +551,14 @@ def logical_interface_create(name, parent_names, parent_type='physical-interface
             return {'Error': "Virtual Network have to be defined for L3 interface type"}
 
         liface_obj = LogicalInterface(name, parent_obj, vlan_tag, interface_type.lower())
+
+        for vmi_name, vmi in vmis.iteritems():
+            vmi = vnc_client.virtual_machine_interface_read(
+                fq_name=_get_fq_name(vnc_client, resource_name=vmi_name,
+                                     project_name=kwargs.get('tenant', 'admin')))
+            liface_obj.add_virtual_machine_interface(vmi)
         vnc_client.logical_interface_create(liface_obj)
+
     return "Created"
 
 
@@ -1193,12 +1213,76 @@ def virtual_machine_interface_list(**kwargs):
 
         salt '*' contrail.virtual_machine_interfaces
     '''
+    ret = []
+    vnc_client = _auth(**kwargs)
+    project = _get_project_obj(vnc_client, name=kwargs.get('tenant', 'admin'))
+    project_uuid = project.get_uuid()
+
+    vm_ifaces = vnc_client.virtual_machine_interfaces_list(
+        detail=True, parent_id=project_uuid)
+
+    for vm_iface in vm_ifaces:
+        ret.append(vm_iface.__dict__)
+
+    return ret
+
+
+def virtual_machine_interface_create(name,
+                                     virtual_network,
+                                     mac_address=None,
+                                     ip_address=None,
+                                     security_group=None,
+                                     **kwargs):
+    '''
+    Create specific Contrail  virtual machine interface (Port)
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.virtual_machine_interface_create port01 net01 mac_address='01:02:03:04:05:06'
+        router_types:
+        - tor-agent
+        - tor-service-node
+        - embedded
+    '''
     ret = {}
     vnc_client = _auth(**kwargs)
-    vm_ifaces = vnc_client._objects_list('virtual-machine-interface', detail=True)
-    for vm_iface in vm_ifaces:
-        ret[vm_iface.name] = vm_iface.__dict__
-    return ret
+    project = _get_project_obj(vnc_client, name=kwargs.get('tenant', 'admin'))
+
+    vm_int = VirtualMachineInterface(name, parent_obj=project)
+
+    if mac_address:
+      mac_address_obj = MacAddressesType([mac_address])
+      vm_int.set_virtual_machine_interface_mac_addresses(mac_address_obj)
+
+    if security_group:
+      sgo = vnc_client.security_group_read(fq_name=_get_fq_name(
+          vnc_client, security_group, kwargs.get('tenant', 'admin')))
+      vm_int.set_security_group(sgo)
+
+    vnet_uuid = virtual_network_get(virtual_network, **kwargs)[virtual_network]['_uuid']
+    vnet_obj = vnc_client.virtual_network_read(id=vnet_uuid)
+    vm_int.set_virtual_network(vnet_obj)
+
+    vmi_uuid = vnc_client.virtual_machine_interface_create(vm_int)
+    vmi = vnc_client.virtual_machine_interface_read(id=vmi_uuid)
+
+    vm_int.set_port_security_enabled(False)
+    vnc_client.virtual_machine_interface_update(vm_int)
+
+    #Allocate IP to VMI
+    ip = vnc_api.InstanceIp(name + '.ip')
+    ip.set_virtual_machine_interface(vmi)
+    ip.set_virtual_network(vnet_obj)
+
+    ip_uuid = vnc_client.instance_ip_create(ip)
+
+    if ip_address:
+        ip.set_instance_ip_address(ip_address)
+        vnc_client.instance_ip_update(ip)
+
+    return vmi.__dict__
 
 
 def virtual_network_list(**kwargs):
@@ -1217,4 +1301,24 @@ def virtual_network_list(**kwargs):
     virtual_networks = vnc_client._objects_list('virtual-network', detail=True)
     for virtual_network in virtual_networks:
         ret[virtual_network.name] = virtual_network.__dict__
+    return ret
+
+
+def virtual_network_get(name, **kwargs):
+    '''
+    Return a specific Contrail virtual network
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.virtual_network_get net01
+    '''
+    ret = {}
+    vnet_objs = virtual_network_list(**kwargs)
+    if name in vnet_objs:
+        ret[name] = vnet_objs.get(name)
+    if len(ret) != 1 :
+        return {'result': False,
+                'Error': 'Error in retrieving virtual networks.'}
     return ret

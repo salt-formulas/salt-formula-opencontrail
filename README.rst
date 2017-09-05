@@ -592,9 +592,9 @@ Gateway mode: can be server/ vcpe (default is none)
 
 
 Set up metadata secret for the Vrouter
--------------------------------------
+--------------------------------------
 
-In order to get cloud-init within the instance to properly fetch 
+In order to get cloud-init within the instance to properly fetch
 instance metadata, metadata_proxy_secret in the Vrouter agent config
 should match the value in nova.conf. The administrator should define
 it in the pillar:
@@ -605,6 +605,23 @@ it in the pillar:
       compute:
         metadata:
           secret: opencontrail
+
+Add auth info for Barbican on compute nodes
+-------------------------------------------
+
+.. code-block:: yaml
+
+    opencontrail:
+      compute:
+        lbaas:
+          enabled: true
+          secret_manager:
+            engine: barbican
+            identity:
+              user: admin
+              password: "supersecretpassword123"
+              tenant: admin
+
 
 Keystone v3
 -----------

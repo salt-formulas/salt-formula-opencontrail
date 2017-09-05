@@ -26,6 +26,21 @@ net.ipv4.ip_local_reserved_ports:
 
 {%- endif %}
 
+{%- if compute.get('lbaas', {}).get('enabled', False) %}
+
+{%- if compute.lbaas.get('secret_manager', {}).get('engine', 'noop') == 'barbican' %}
+
+/etc/contrail/contrail-lbaas-auth.conf:
+  file.managed:
+  - source: salt://opencontrail/files/{{ compute.version }}/contrail-lbaas-auth.conf
+  - template: jinja
+  - require:
+    - pkg: opencontrail_compute_packages
+
+{%- endif %}
+
+{%- endif %}
+
 /etc/contrail/contrail-vrouter-nodemgr.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ compute.version }}/contrail-vrouter-nodemgr.conf

@@ -1,0 +1,16 @@
+parameters:
+  _param:
+    opencontrail_barbican_user_domain: 'default'
+    opencontrail_barbican_project_domain: 'default'
+  opencontrail:
+    compute:
+      lbaas:
+        enabled: true
+        secret_manager:
+          engine: barbican
+          identity:
+            user: "${_param:opencontrail_barbican_user}"
+            password: "${_param:opencontrail_barbican_password}"
+            tenant: "${_param:opencontrail_barbican_tenant}"
+            user_domain: "${_param:opencontrail_barbican_user_domain}"
+            project_domain: "${_param:opencontrail_barbican_project_domain}"

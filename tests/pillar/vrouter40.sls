@@ -44,3 +44,11 @@ opencontrail:
           port: 6632
           ssl:
             enabled: True
+    lbaas:
+      enabled: true
+      secret_manager:
+        engine: barbican
+        identity:
+          user: admin
+          password: "supersecretpassword123"
+          tenant: admin

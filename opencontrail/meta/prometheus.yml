@@ -340,18 +340,6 @@ server:
       annotations:
         summary: 'Too many vRouter active flows'
         description: 'There are too many active vRouter flows on node {{ $labels.host }} (current value={{ $value }}, threshold={%- endraw %}{{ vrouter_flows_active_toohigh_threshold }})'
-    ContrailFlowsCreatedTooMany:
-      if: >-
-    {%- set vrouter_flows_created_toohigh_threshold = monitoring.vrouter_flows_created_too_high_threshold %}
-        min(contrail_vrouter_flows_created) >= {{ vrouter_flows_created_toohigh_threshold }}
-{%- raw %}
-      for: 2m
-      labels:
-        severity: warning
-        service: contrail-compute
-      annotations:
-        summary: 'Too many vRouter created flows'
-        description: 'There are too many created vRouter flows on node {{ $labels.host }} (current value={{ $value }}, threshold={%- endraw %}{{ vrouter_flows_created_toohigh_threshold }})'
     ContrailFlowsDiscardTooMany:
       if: >-
     {%- set vrouter_flows_discard_toohigh_threshold = monitoring.vrouter_flows_discard_too_high_threshold %}
@@ -424,7 +412,7 @@ server:
       annotations:
         summary: 'Too many vRouter flows with invalid label'
         description: 'There are too many vRouter flows with invalid label on node {{ $labels.host }} (current value={{ $value }}, threshold={%- endraw %}{{ vrouter_flows_invalid_label_toohigh_threshold }})'
-    ContrailFlowsQueueLimitExeededTooMany:
+    ContrailFlowsQueueLimitExceededTooMany:
       if: >-
     {%- set vrouter_flows_flow_queue_limit_exceeded_toohigh_threshold = monitoring.vrouter_flows_flow_queue_limit_exceeded_too_high_threshold %}
         min(contrail_vrouter_flows_flow_queue_limit_exceeded) >= {{ vrouter_flows_flow_queue_limit_exceeded_toohigh_threshold }}

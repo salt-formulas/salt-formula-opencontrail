@@ -113,7 +113,7 @@ opencontrail_database_packages:
     - service: opencontrail_database_services
     - service: opencontrail_zookeeper_service
 
-{%- if database.version <= 4.0 or grains.get('init') != 'systemd' %}
+{%- if database.version < 4.0 or grains.get('init') != 'systemd' %}
 
 /etc/contrail/supervisord_database_files/contrail-database-nodemgr.ini:
   file.managed:

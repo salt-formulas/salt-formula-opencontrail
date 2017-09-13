@@ -31,7 +31,7 @@
 
   {%- if database.get('enabled', False) %}
     {%- set database_processes = (
-        'zookeeper-server', 'kafka-server', 'cassandra-server',
+        'kafka-server', 'cassandra-server',
         'contrail-nodemgr-database', 'contrail-supervisord-database',
         ) %}
   {%- endif %}
@@ -495,6 +495,20 @@ server:
         description: '{{ contrail_process }} service is down on node {% raw %}{{ $labels.host }}{% endraw %}'
       {%- endfor %}
     {%- endif %}
+
+    {%- if database.get('enabled', False) %}
+    ZookeeperDown:
+      if: >-
+        zookeeper_up != 1
+      for: 2m
+      labels:
+        severity: warning
+        service: zookeeper
+      annotations:
+        summary: 'Zookeeper service down'
+        description: 'Zookeeper service is down on node {{ $labels.host }}.'
+    {%- endif %}
+
     {%- if exporters is defined %}
       {%- include "prometheus/_exporters_config.sls" %}
     {%- endif %}

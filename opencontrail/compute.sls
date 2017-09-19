@@ -26,6 +26,21 @@ net.ipv4.ip_local_reserved_ports:
 
 {%- endif %}
 
+{%- if compute.get('lbaas', {}).get('enabled', False) %}
+
+{%- if compute.lbaas.get('secret_manager', {}).get('engine', 'noop') == 'barbican' %}
+
+/etc/contrail/contrail-lbaas-auth.conf:
+  file.managed:
+  - source: salt://opencontrail/files/{{ compute.version }}/contrail-lbaas-auth.conf
+  - template: jinja
+  - require:
+    - pkg: opencontrail_compute_packages
+
+{%- endif %}
+
+{%- endif %}
+
 /etc/contrail/contrail-vrouter-nodemgr.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ compute.version }}/contrail-vrouter-nodemgr.conf
@@ -69,6 +84,8 @@ net.ipv4.ip_local_reserved_ports:
 
 {%- if compute.version >= 3.0 %}
 
+{%- if compute.version <= 4.0 or grains.get('init') != 'systemd' %}
+
 /etc/contrail/supervisord_vrouter_files/contrail-vrouter-nodemgr.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ compute.version }}/contrail-vrouter-nodemgr.ini
@@ -76,6 +93,8 @@ net.ipv4.ip_local_reserved_ports:
     - pkg: opencontrail_compute_packages
   - require_in:
     - service: opencontrail_compute_services
+
+{%- endif %}
 
 /etc/udev/rules.d/vhost-net.rules:
   file.managed:
@@ -101,6 +120,8 @@ opencontrail_vrouter_package:
   - require_in:
     - pkg: opencontrail_compute_packages
 
+{%- if compute.version <= 4.0 or grains.get('init') != 'systemd' %}
+
 /etc/contrail/supervisord_vrouter_files/contrail-vrouter-dpdk.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ compute.version }}/contrail-vrouter-dpdk.ini
@@ -110,6 +131,8 @@ opencontrail_vrouter_package:
     - pkg: opencontrail_vrouter_package
   - require_in:
     - service: opencontrail_compute_services
+
+{%- endif %}
 
 modules_dpdk:
   file.append:
@@ -151,8 +174,37 @@ contrail_load_vrouter_kernel_module:
 {%- endif %}
 {%- endif %}
 
+{%- if compute.get('tor', {}).get('enabled', False) %}
+
+{% for agent_name, agent in compute.tor.agent.iteritems() %}
+
+/etc/contrail/contrail-tor-agent-{{ agent.id }}.conf:
+  file.managed:
+  - source: salt://opencontrail/files/{{ compute.version }}/contrail-tor-agent.conf
+  - template: jinja
+  - defaults:
+      agent_name: {{ agent_name }}
+  - watch_in:
+    - service: opencontrail_compute_services
+
+{%- if compute.version <= 4.0 or grains.get('init') != 'systemd' %}
+
+/etc/contrail/supervisord_vrouter_files/contrail-tor-agent-{{ agent.id }}.ini:
+  file.managed:
+  - source: salt://opencontrail/files/{{ compute.version }}/tor/contrail-tor-agent.ini
+  - template: jinja
+  - defaults:
+      agent_name: {{ agent_name }}
+  - watch_in:
+    - service: opencontrail_compute_services
+
+{%- endif %}
+
+{%- endfor %}
+{%- endif %}
+
 opencontrail_compute_services:
-  service.enabled:
+  service.running:
   - names: {{ compute.services }}
   {%- if grains.get('noservices') %}
   - onlyif: /bin/false

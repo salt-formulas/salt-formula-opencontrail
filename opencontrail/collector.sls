@@ -65,7 +65,7 @@ opencontrail_collector_packages:
   - require:
     - pkg: opencontrail_collector_packages
 
-{%- if collector.version >= 3.0 %}
+{%- if collector.version >= 3.0 and grains.get('init') != 'systemd' %}
 
 /etc/contrail/supervisord_analytics_files/contrail-analytics-nodemgr.ini:
   file.managed:

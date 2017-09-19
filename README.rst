@@ -102,6 +102,7 @@ Config, control, analytics, database, web -- altogether on one node.
         members:
         - host: 127.0.0.1
           id: 1
+        rootlogger: "INFO, CONSOLE"
       control:
         version: 2.2
         enabled: true
@@ -137,6 +138,7 @@ Config, control, analytics, database, web -- altogether on one node.
         name: 'Contrail'
         original_token: 0
         compaction_throughput_mb_per_sec: 16
+        concurrent_compactors: 1
         data_dirs:
         - /var/lib/cassandra
         id: 1
@@ -565,6 +567,7 @@ Vrouter configuration on a compute node(s)
       compute:
         version: 2.2
         enabled: True
+        hostname: node-12.domain.tld
         discovery:
           host: 127.0.0.1
         interface:
@@ -574,6 +577,72 @@ Vrouter configuration on a compute node(s)
           mask: /24
           dns: 127.0.0.1
           mtu: 9000
+
+
+Compute nodes with gateway_mode
+-------------------------------
+
+Gateway mode: can be server/ vcpe (default is none)
+
+.. code-block:: yaml
+
+    opencontrail:
+      compute:
+        gateway_mode: server
+
+TSN nodes
+---------
+
+Configure TSN nodes
+
+.. code-block:: yaml
+
+  opencontrail:
+    compute:
+      enabled: true
+      tor:
+        enabled: true
+        bind:
+          port: 8086
+        agent:
+          tor01:
+            id: 0
+            port: 6632
+            host: 127.0.0.1
+            address: 127.0.0.1
+
+
+Set up metadata secret for the Vrouter
+--------------------------------------
+
+In order to get cloud-init within the instance to properly fetch
+instance metadata, metadata_proxy_secret in the Vrouter agent config
+should match the value in nova.conf. The administrator should define
+it in the pillar:
+
+.. code-block:: yaml
+
+    opencontrail:
+      compute:
+        metadata:
+          secret: opencontrail
+
+Add auth info for Barbican on compute nodes
+-------------------------------------------
+
+.. code-block:: yaml
+
+    opencontrail:
+      compute:
+        lbaas:
+          enabled: true
+          secret_manager:
+            engine: barbican
+            identity:
+              user: admin
+              password: "supersecretpassword123"
+              tenant: admin
+
 
 Keystone v3
 -----------
@@ -709,7 +778,7 @@ Cassandra listen interface
 --------------------------
 
 .. code-block:: yaml
-  
+
     database:
       ....
       bind:
@@ -922,11 +991,10 @@ Enforcing Link Local Services
            - 10.10.10.10
            ipf_port: 80
 
+
 Configuring OpenStack default quotasx
 
 .. code-block:: yaml
-
-  opencontrail:
     config:
       quota:
         network: 5
@@ -940,6 +1008,52 @@ Configuring OpenStack default quotasx
         member: -1
         health_monitor: -1
         vip: -1
+
+Enforcing physical routers
+h
+.. code-block:: yaml
+
+  opencontrail:
+    client:
+      ...
+      physical_router:
+        router1:
+          name: router1
+          dataplane_ip: 1.2.3.4
+          management_ip: 1.2.3.4
+          vendor_name: ovs
+          product_name: ovs
+          agents:
+           - tsn0-0
+           - tsn0
+
+Enforcing physical/logical interfaces for routers
+
+
+.. code-block:: yaml
+
+  opencontrail
+    client:
+    ...
+    physical_router:
+      router1:
+        ...
+        interface:
+          port1:
+            name: port1
+            logical_interface:
+              port1_l:
+                name: 'port1.0'
+                vlan_tag: 0
+                interface_type: L2
+                virtual_machine_interface:
+                  port1_port:
+                    name: port1_port
+                    ip_address: 192.168.90.107
+                    mac_address: '2e:92:a8:af:c2:21'
+                    security_group: 'default'
+                    virtual_network: 'virtual-network'
+
 
 
 Usage
@@ -989,7 +1103,7 @@ When vrf_name = ---ERROR--- then something goes wrong
 
 Display IF MAP table
 
-Look for neighbours, if VM has 2, it's ok 
+Look for neighbours, if VM has 2, it's ok
 
 	http://<control-node>:8083/Snh_IFMapTableShowReq?table_name=
 

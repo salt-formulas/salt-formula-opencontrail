@@ -2,7 +2,7 @@
 driver:
   name: docker
   hostname: opencontrail
-  use_sudo: true
+  use_sudo: false
 
 provisioner:
   name: salt_solo
@@ -56,29 +56,53 @@ platforms:
 
 suites:
 
-  # - name: single<%= ENV['OC_VERSION'] || '' %>
-  #   provisioner:
-  #     pillars-from-files:
-  #       opencontrail.sls: tests/pillar/single<%= ENV['OC_VERSION'] || '' %>.sls
-  - name: analytics<%= ENV['OC_VERSION'] || '' %>
+  - name: single
     provisioner:
       pillars-from-files:
-        opencontrail.sls: tests/pillar/analytics<%= ENV['OC_VERSION'] || '' %>.sls
-  - name: control<%= ENV['OC_VERSION'] || '' %>
+        opencontrail.sls: tests/pillar/single.sls
+  - name: single40
     provisioner:
       pillars-from-files:
-        opencontrail.sls: tests/pillar/control<%= ENV['OC_VERSION'] || '' %>.sls
-  # - name: cluster<%= ENV['OC_VERSION'] || '' %>
-  #   provisioner:
-  #     pillars-from-files:
-  #       opencontrail.sls: tests/pillar/cluster<%= ENV['OC_VERSION'] || '' %>.sls
-  - name: tor<%= ENV['OC_VERSION'] || '' %>
+        opencontrail.sls: tests/pillar/single40.sls
+  - name: analytics
     provisioner:
       pillars-from-files:
-        opencontrail.sls: tests/pillar/tor<%= ENV['OC_VERSION'] || '' %>.sls
-  - name: vrouter<%= ENV['OC_VERSION'] || '' %>
+        opencontrail.sls: tests/pillar/analytics.sls
+  - name: analytics40
     provisioner:
       pillars-from-files:
-        opencontrail.sls: tests/pillar/vrouter<%= ENV['OC_VERSION'] || '' %>.sls
+        opencontrail.sls: tests/pillar/analytics40.sls
+  - name: control
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/control.sls
+  - name: control40
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/control40.sls
+  - name: cluster
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/cluster.sls
+  - name: cluster40
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/cluster40.sls
+  - name: tor
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/tor.sls
+  - name: tor40
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/tor40.sls
+  - name: vrouter
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/vrouter.sls
+  - name: vrouter40
+    provisioner:
+      pillars-from-files:
+        opencontrail.sls: tests/pillar/vrouter40.sls
 
 # vim: ft=yaml sw=2 ts=2 sts=2 tw=125

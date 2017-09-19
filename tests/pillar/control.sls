@@ -62,6 +62,8 @@ opencontrail:
       id: 2
     - host: 127.0.0.1
       id: 3
+    list_optimization_enabled: true
+    rootlogger: "INFO, CONSOLE"
   control:
     version: 3.0
     enabled: true

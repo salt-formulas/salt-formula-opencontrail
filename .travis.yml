@@ -18,19 +18,43 @@ install:
   - bundle install
 
 env:
-  - PLATFORM=trevorj/salty-whales:trusty
-  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323
-  - OC_REPO=oc323
-  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 OC_VERSION=4_0
-  - OC_REPO=oc40 OC_VERSION=4_0
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=single
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=analytics
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=control
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=cluster
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=tor
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=vrouter
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=single
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=analytics
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=control
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=cluster
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=tor
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=vrouter
+  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=single
+  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=analytics
+  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=control
+  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=cluster
+  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=tor
+  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=vrouter
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=single40
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=analytics40
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=control40
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=cluster40
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=tor40
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=vrouter40
+  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc40 SUITE=single40
+  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc40 SUITE=analytics40
+  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc40 SUITE=control40
+  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc40 SUITE=cluster40
+  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc40 SUITE=tor40
+  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc40 SUITE=vrouter40
 
 before_script:
   - set -o pipefail
   - make test | tail
 
 script:
-  - test ! -e .kitchen.yml || bundle exec kitchen converge $SUITE || true
-  - test ! -e .kitchen.yml || bundle exec kitchen verify $SUITE -t tests/integration
+  - KITCHEN_LOCAL_YAML=.kitchen.travis.yml bundle exec kitchen test -t tests/integration
 
 notifications:
   webhooks:

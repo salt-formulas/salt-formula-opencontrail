@@ -69,7 +69,7 @@
           "tableColumn": "",
           "targets": [
             {
-              "expr": "max(cassandra_net_FailureDetector_UpEndpointCount{host=~\"$host\"})",
+              "expr": "min(cassandra_net_FailureDetector_UpEndpointCount{host=~\"$host\"})",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "",
@@ -706,7 +706,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "irate(assandra_metrics_Compaction_Value{host=~\"$host\",name=\"CompletedTasks\"}[1m])",
+              "expr": "irate(cassandra_metrics_Compaction_Value{host=~\"$host\",name=\"CompletedTasks\"}[1m])",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "Completed {{ host }}",
@@ -969,10 +969,10 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "cassandra_jvm_Memory_HeapMemoryUsage_max{host=~\"$host\"}",
+              "expr": "cassandra_jvm_Memory_HeapMemoryUsage{host=~\"$host\", attribute=~\"$attribute\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "{{ host }}",
+              "legendFormat": "{{ attribute }} {{ host }}",
               "refId": "A",
               "step": 2
             }
@@ -980,7 +980,7 @@
           "thresholds": [],
           "timeFrom": null,
           "timeShift": null,
-          "title": "Heap Usage Max",
+          "title": "Heap Usage",
           "tooltip": {
             "shared": true,
             "sort": 0,
@@ -1046,19 +1046,11 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "cassandra_jvm_MemoryPool_Usage_used{host=~\"$host\",name=\"CMS Old Gen\"}",
+              "expr": "cassandra_jvm_MemoryPool_Usage{host=~\"$host\", name=~\"$type\", attribute=~\"$attribute\"}",
               "format": "time_series",
               "intervalFactor": 2,
-              "legendFormat": "OldGen {{ host }}",
+              "legendFormat": "{{ attribute }} {{ name }} {{ host }}",
               "refId": "A",
-              "step": 2
-            },
-            {
-              "expr": "cassandra_jvm_MemoryPool_Usage_used{host=~\"$host\",name=\"CMS Perm Gen\"}",
-              "format": "time_series",
-              "intervalFactor": 2,
-              "legendFormat": "PermGen {{ host }}",
-              "refId": "B",
               "step": 2
             }
           ],
@@ -1081,7 +1073,7 @@
           },
           "yaxes": [
             {
-              "format": "short",
+              "format": "decbytes",
               "label": null,
               "logBase": 1,
               "max": null,
@@ -1137,6 +1129,48 @@
         "tagsQuery": "",
         "type": "query",
         "useTags": false
+     },
+     {
+        "allValue": ".*",
+        "current": {},
+        "datasource": "prometheus",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "attribute",
+        "options": [],
+        "query": "label_values(cassandra_jvm_Memory_HeapMemoryUsage{host=~\"$host\"},attribute)",
+        "refresh": 1,
+        "refresh_on_load": true,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
+     },
+     {
+        "allValue": ".*",
+        "current": {},
+        "datasource": "prometheus",
+        "hide": 0,
+        "includeAll": true,
+        "label": null,
+        "multi": true,
+        "name": "type",
+        "options": [],
+        "query": "label_values(cassandra_jvm_MemoryPool_Usage{host=~\"$host\"},name)",
+        "refresh": 1,
+        "refresh_on_load": true,
+        "regex": "",
+        "sort": 1,
+        "tagValuesQuery": "",
+        "tags": [],
+        "tagsQuery": "",
+        "type": "query",
+        "useTags": false
      }
     ]
   },
@@ -1171,6 +1205,6 @@
   },
   "timezone": "browser",
   "title": "Cassandra",
-  "version": 1
+  "version": 3
 }
 {% endraw %}

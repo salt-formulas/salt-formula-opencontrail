@@ -38,7 +38,7 @@ collector:
 compute:
   Debian:
     pkgs:
-        ['contrail-utils', 'iproute2', 'haproxy']
+        ['contrail-utils', 'iproute2', 'haproxy', '{{ ['linux-headers-', grains.get('kernelrelease')]|join('') }}']
     services:
     {%- if grains.get('init') != 'systemd' or version < 4.0 %}
         ['supervisor-vrouter']
@@ -189,7 +189,7 @@ collector:
 compute:
   Debian:
     pkgs:
-         ['contrail-utils', 'iproute2', 'haproxy']
+         ['contrail-utils', 'iproute2', 'haproxy', '{{ ['linux-headers-', grains.get('kernelrelease')]|join('') }}']
     services:
     {%- if grains.get('init') != 'systemd' or version < 4.0 %}
         ['supervisor-vrouter']

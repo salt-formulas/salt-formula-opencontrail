@@ -877,6 +877,22 @@ Enforcing virtual routers
           ip_address: 172.16.0.12
           dpdk_enabled: True
 
+Enforcing global vrouter config
+
+.. code-block:: yaml
+
+  opencontrail:
+    client:
+      ...
+      global_vrouter_config:
+        name: global-vrouter-config
+        parent_type: global-system-config
+        encap_priority: "MPLSoUDP,MPLSoGRE"
+        vxlan_vn_id_mode: automatic
+        fq_names:
+          - 'default-global-system-config'
+          - 'default-global-vrouter-config'
+
 Enforcing control nodes
 
 .. code-block:: yaml

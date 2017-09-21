@@ -228,6 +228,33 @@ Enforce the database node existence
         name: ntw01
         ip_address: 10.0.0.33
 
+
+Enforce the service appliance set existence
+-------------------------------------------
+
+.. code-block:: yaml
+
+    create service appliance:
+      contrail.service_appliance_set_present:
+        - name: testappliance
+        - driver: 'neutron_lbaas.drivers.avi.avi_ocdriver.OpencontrailAviLoadbalancerDriver'
+        - ha_mode: active-backup
+        - properties:
+            address: 10.1.11.3
+            user: admin
+            password: avi123
+            cloud: Default-Cloud
+
+
+Enforce the service appliance set entry absence
+-----------------------------------------------
+
+.. code-block:: yaml
+
+    delete service appliance:
+     contrail.service_appliance_set_absent:
+       - name: testappliance
+
 '''
 
 
@@ -633,4 +660,39 @@ def virtual_machine_interface_present(name,
     else:
         ret['comment'] = 'Virtual machine interface {0} creation failed'.format(name)
         ret['result'] = False
+    return ret
+
+
+def service_appliance_set_present(name,
+                                  properties=None,
+                                  driver=None,
+                                  ha_mode=None,
+                                  **kwargs):
+    '''
+    Ensures that the Contrail service appliance set exists.
+
+    :param name:             Service appliance set name
+    :param properties:       Key:Value pairs that are used by the provider driver and opaque to sytem.
+    :param driver:           Name of the provider driver for this service appliance set.
+    :param ha_mode:          High availability mode for the service appliance set, active-active or active-backup.
+    '''
+    ret = __salt__['contrail.service_appliance_set_create'](name, properties, driver, ha_mode, **kwargs)
+    if len(ret['changes']) == 0:
+        pass
+    return ret
+
+
+def service_appliance_set_absent(name, **kwargs):
+    '''
+    Ensure that the Contrail service appliance set doesn't exist
+
+    :param name: The name of the service appliance set that should not exist
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': 'Service appliance set "{0}" is already absent'.format(name)}
+    physical_router = __salt__['contrail.service_appliance_set_get'](name, **kwargs)
+    if 'Error' not in physical_router:
+        ret = __salt__['contrail.service_appliance_set_delete'](name, **kwargs)
     return ret

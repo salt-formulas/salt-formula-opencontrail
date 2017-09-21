@@ -17,6 +17,7 @@ from netaddr import IPNetwork
 from vnc_api.vnc_api import PhysicalRouter, PhysicalInterface, LogicalInterface
 from vnc_api.vnc_api import EncapsulationPrioritiesType
 from vnc_api.vnc_api import VirtualMachineInterface, MacAddressesType
+from vnc_api.vnc_api import ServiceApplianceSet, KeyValuePairs, KeyValuePair
 
 try:
     from vnc_api import vnc_api
@@ -82,6 +83,7 @@ def _get_rt_inst_obj(vnc_client):
 
     return rt_inst_obj
 
+
 def _get_fq_name(vnc_client, resource_name, project_name, domain='default-domain'):
     res = [domain]
     if project_name:
@@ -89,6 +91,7 @@ def _get_fq_name(vnc_client, resource_name, project_name, domain='default-domain
     if resource_name:
         res.append(resource_name)
     return res
+
 
 def _get_project_obj(vnc_client, name, domain='default-domain'):
     return vnc_client.project_read(fq_name=[domain, name])
@@ -1253,13 +1256,13 @@ def virtual_machine_interface_create(name,
     vm_int = VirtualMachineInterface(name, parent_obj=project)
 
     if mac_address:
-      mac_address_obj = MacAddressesType([mac_address])
-      vm_int.set_virtual_machine_interface_mac_addresses(mac_address_obj)
+        mac_address_obj = MacAddressesType([mac_address])
+        vm_int.set_virtual_machine_interface_mac_addresses(mac_address_obj)
 
     if security_group:
-      sgo = vnc_client.security_group_read(fq_name=_get_fq_name(
-          vnc_client, security_group, kwargs.get('tenant', 'admin')))
-      vm_int.set_security_group(sgo)
+        sgo = vnc_client.security_group_read(fq_name=_get_fq_name(
+            vnc_client, security_group, kwargs.get('tenant', 'admin')))
+        vm_int.set_security_group(sgo)
 
     vnet_uuid = virtual_network_get(virtual_network, **kwargs)[virtual_network]['_uuid']
     vnet_obj = vnc_client.virtual_network_read(id=vnet_uuid)
@@ -1271,7 +1274,7 @@ def virtual_machine_interface_create(name,
     vm_int.set_port_security_enabled(False)
     vnc_client.virtual_machine_interface_update(vm_int)
 
-    #Allocate IP to VMI
+    # Allocate IP to VMI
     ip = vnc_api.InstanceIp(name + '.ip')
     ip.set_virtual_machine_interface(vmi)
     ip.set_virtual_network(vnet_obj)
@@ -1318,7 +1321,113 @@ def virtual_network_get(name, **kwargs):
     vnet_objs = virtual_network_list(**kwargs)
     if name in vnet_objs:
         ret[name] = vnet_objs.get(name)
-    if len(ret) != 1 :
+    if len(ret) != 1:
         return {'result': False,
                 'Error': 'Error in retrieving virtual networks.'}
+    return ret
+
+
+def service_appliance_set_list(**kwargs):
+    '''
+    Return a list of Contrail service appliance set
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.service_appliance_set_list
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    service_appliance_sets = vnc_client._objects_list('service-appliance-set', detail=True)
+    for service_appliance_set in service_appliance_sets:
+        ret[service_appliance_set.name] = service_appliance_set.__dict__
+    return ret
+
+
+def service_appliance_set_get(name, **kwargs):
+    '''
+    Return a specific Contrail service appliance set
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.service_appliance_set_get name
+    '''
+    ret = {}
+    sas_objs = service_appliance_set_list(**kwargs)
+    if name in sas_objs:
+        ret[name] = sas_objs.get(name)
+    if len(ret) != 1:
+        return {'result': False,
+                'Error': "Error in the retrieving service apliance set."}
+    return ret
+
+
+def service_appliance_set_create(name, properties=None, driver=None, ha_mode=None, **kwargs):
+    '''
+    Create Contrail service appliance set
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.service_appliance_set_create name
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': ''}
+    vnc_client = _auth(**kwargs)
+    gsc_obj = _get_config(vnc_client)
+    sas_objs = service_appliance_set_list(**kwargs)
+    if name in sas_objs:
+        ret['commnet'] = 'Service appliance set  ' + name + ' already exists'
+    else:
+        service_appliance_set_obj = ServiceApplianceSet(
+            name, gsc_obj)
+        if properties:
+            pairs = KeyValuePairs()
+            for k, v in properties.items():
+                pairs.add_key_value_pair(KeyValuePair(k, v))
+            service_appliance_set_obj.set_service_appliance_set_properties(pairs)
+        if driver:
+            service_appliance_set_obj.set_service_appliance_driver(driver)
+        if ha_mode:
+            service_appliance_set_obj.set_service_appliance_ha_mode(ha_mode)
+        if __opts__['test']:
+            ret['result'] = None
+            ret['comment'] = "ServiceApplianceSet " + name + " will be created"
+        else:
+            vnc_client.service_appliance_set_create(service_appliance_set_obj)
+            ret['comment'] = "ServiceApplianceSet " + name + " has been created"
+            ret['changes'] = {'ServiceApplianceSet': {'old': '', 'new': name}}
+    return ret
+
+
+def service_appliance_set_delete(name, **kwargs):
+    '''
+    Delete specific Contrail service appliance set
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.service_appliance_set_delete name
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': ''}
+    vnc_client = _auth(**kwargs)
+    gsc_obj = _get_config(vnc_client)
+    sas_obj = ServiceApplianceSet(name, gsc_obj)
+    if __opts__['test']:
+        ret['result'] = None
+        ret['comment'] = "Service appliance set " + name + " will be deleted"
+    else:
+        vnc_client.service_appliance_set_delete(fq_name=sas_obj.get_fq_name())
+        ret['comment'] = "ServiceApplianceSet " + name + " has been deleted"
+        ret['changes'] = {'ServiceApplianceSet': {'old': name, 'new': ''}}
     return ret

@@ -516,7 +516,7 @@ server:
         service: zookeeper
       annotations:
         summary: 'Zookeeper service down'
-        description: 'Zookeeper service is down on node {{ $labels.host }}.'
+        description: 'Zookeeper service is down on node {% raw %}{{ $labels.host }}{% endraw %}.'
     {%- endif %}
 
     {%- if exporters is defined %}

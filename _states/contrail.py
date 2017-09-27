@@ -89,7 +89,7 @@ Enforce the physical interface absence
     physical_interface_delete ge-0/1/10:
       contrail.physical_interface_absent:
         name: ge-0/1/10
-
+        physical_router: phr01
 
 Enforce the logical interface present
 ----------------------------------
@@ -121,8 +121,8 @@ Enforce the logical interface absence
         - parent_type: physical-interface
 
 
-Enforce the global vrouter existence
-------------------------------------
+Enforce the global vrouter config existence
+-------------------------------------------
 
 .. code-block:: yaml
 
@@ -138,8 +138,8 @@ Enforce the global vrouter existence
         - default-global-vrouter-config
 
 
-Enforce the global vrouter absence
-----------------------------------
+Enforce the global vrouter config absence
+-----------------------------------------
 
 .. code-block:: yaml
 
@@ -203,8 +203,19 @@ Enforce the analytics node existence
 
     analytics_node01:
       contrail.analytics_node_present:
-        name: nal01
-        ip_address: 10.0.0.13
+        - name: nal01
+        - ip_address: 10.0.0.13
+
+
+Enforce the analytics node absence
+------------------------------------
+
+.. code-block:: yaml
+
+    analytics_node01_delete:
+      contrail.analytics_node_absent:
+        - name: nal01
+
 
 
 Enforce the config node existence
@@ -214,19 +225,41 @@ Enforce the config node existence
 
     config_node01:
       contrail.config_node_present:
-        name: ntw01
-        ip_address: 10.0.0.23
+        - name: ntw01
+        - ip_address: 10.0.0.23
 
 
-Enforce the database node existence
------------------------------------
+Enforce the config node absence
+-------------------------------
 
 .. code-block:: yaml
 
-    config_node01:
-      contrail.database_node_present:
-        name: ntw01
-        ip_address: 10.0.0.33
+    config_node01_delete:
+      contrail.config_node_absent:
+        - name: ntw01
+
+
+Enforce the BGP router existence
+--------------------------------
+
+.. code-block:: yaml
+
+    BGP router mx01:
+      contrail.bgp_router_present:
+        - name: mx01
+        - ip_address: 10.0.0.133
+        - type: mx
+        - asn: 64512
+
+
+Enforce the BGP router absence
+------------------------------
+
+.. code-block:: yaml
+
+    BGP router mx01:
+      contrail.bgp_router_absence:
+        - name: mx01
 
 
 Enforce the service appliance set existence
@@ -234,26 +267,49 @@ Enforce the service appliance set existence
 
 .. code-block:: yaml
 
-    create service appliance:
-      contrail.service_appliance_set_present:
-        - name: testappliance
-        - driver: 'neutron_lbaas.drivers.avi.avi_ocdriver.OpencontrailAviLoadbalancerDriver'
-        - ha_mode: active-backup
-        - properties:
-            address: 10.1.11.3
-            user: admin
-            password: avi123
-            cloud: Default-Cloud
+   create service appliance:
+     contrail.service_appliance_set_present:
+       - name: testappliance
+       - driver: 'neutron_lbaas.drivers.avi.avi_ocdriver.OpencontrailAviLoadbalancerDriver'
+       - ha_mode: active-backup
+       - properties:
+           address: 10.1.11.3
+           user: admin
+           password: avi123
+           cloud: Default-Cloud
 
 
 Enforce the service appliance set entry absence
 -----------------------------------------------
 
-.. code-block:: yaml
+ .. code-block:: yaml
 
     delete service appliance:
      contrail.service_appliance_set_absent:
        - name: testappliance
+
+
+Enforce the database node existence
+-----------------------------------
+
+.. code-block:: yaml
+
+    database_node01:
+      contrail.database_node_present:
+        - name: dbs01
+        - ip_address: 10.0.0.33
+
+Enforce the database node absence
+-----------------------------------
+
+.. code-block:: yaml
+
+    database_node01:
+      contrail.database_node_absent:
+        - name: dbs01
+
+
+
 
 '''
 
@@ -273,17 +329,9 @@ def virtual_router_present(name, ip_address, router_type=None, dpdk_enabled=Fals
     :param ip_address:  Virtual router IP address
     :param router_type: Any of ['tor-agent', 'tor-service-node', 'embedded']
     '''
-    ret = {'name': name,
-           'changes': {},
-           'result': True,
-           'comment': 'Virtual router "{0}" already exists'.format(name)}
-    result = __salt__['contrail.virtual_router_create'](name, ip_address, router_type, dpdk_enabled, **kwargs)
-    if 'OK' in result:
-        ret['comment'] = result
+    ret = __salt__['contrail.virtual_router_create'](name, ip_address, router_type, dpdk_enabled, **kwargs)
+    if len(ret['changes']) == 0:
         pass
-    else:
-        ret['comment'] = 'Virtual router {0} has been created'.format(name)
-        ret['changes']['VirtualRouter'] = result
     return ret
 
 
@@ -299,9 +347,7 @@ def virtual_router_absent(name, **kwargs):
            'comment': 'Virtual router "{0}" is already absent'.format(name)}
     virtual_router = __salt__['contrail.virtual_router_get'](name, **kwargs)
     if 'Error' not in virtual_router:
-        result = __salt__['contrail.virtual_router_delete'](name, **kwargs)
-        ret['comment'] = 'Virtual router {0} has been deleted'.format(name)
-        ret['changes']['VirtualRouter'] = result
+        ret = __salt__['contrail.virtual_router_delete'](name, **kwargs)
     return ret
 
 
@@ -327,19 +373,12 @@ def physical_router_present(name, parent_type=None,
     :param junos_service_ports:	Juniper JUNOS specific service interfaces name to perform services like NAT.
     :param agents: 		List of virtual-router references
     '''
-    ret = {'name': name,
-           'changes': {},
-           'result': True,
-           'comment': 'Physical router "{0}" already exists'.format(name)}
-    result = __salt__['contrail.physical_router_create'](name, parent_type, management_ip, dataplane_ip, vendor_name,
-                                                         product_name, vnc_managed, junos_service_ports, agents,
-                                                         **kwargs)
-    if 'OK' in result:
-        ret['comment'] = result
+
+    ret = __salt__['contrail.physical_router_create'](name, parent_type, management_ip, dataplane_ip, vendor_name,
+                                                      product_name, vnc_managed, junos_service_ports, agents,
+                                                      **kwargs)
+    if len(ret['changes']) == 0:
         pass
-    else:
-        ret['comment'] = 'Physical router {0} has been created'.format(name)
-        ret['changes']['PhysicalRouter'] = result
     return ret
 
 
@@ -355,9 +394,7 @@ def physical_router_absent(name, **kwargs):
            'comment': 'Physical router "{0}" is already absent'.format(name)}
     physical_router = __salt__['contrail.physical_router_get'](name, **kwargs)
     if 'Error' not in physical_router:
-        result = __salt__['contrail.physical_router_delete'](name, **kwargs)
-        ret['comment'] = 'Physical router {0} has been deleted'.format(name)
-        ret['changes']['PhysicalRouter'] = result
+        ret = __salt__['contrail.physical_router_delete'](name, **kwargs)
     return ret
 
 
@@ -368,18 +405,9 @@ def physical_interface_present(name, physical_router, **kwargs):
     :param name:                Physical interface name
     :param physical_router:     Name of existing physical router
     '''
-    ret = {'name': name,
-           'changes': {},
-           'result': True,
-           'comment': 'Physical interface "{0}" already exists'.format(name)}
-
-    result = __salt__['contrail.physical_interface_create'](name, physical_router, **kwargs)
-    if 'OK' in result:
-        ret['comment'] = result
+    ret = __salt__['contrail.physical_interface_create'](name, physical_router, **kwargs)
+    if len(ret['changes']) == 0:
         pass
-    else:
-        ret['comment'] = 'Physical interface {0} has been created'.format(name)
-        ret['changes']['PhysicalInterface'] = result
     return ret
 
 
@@ -396,9 +424,7 @@ def physical_interface_absent(name, physical_router, **kwargs):
            'comment': 'Physical interface "{0}" is already absent'.format(name)}
     physical_interface = __salt__['contrail.physical_interface_get'](name, physical_router, **kwargs)
     if 'Error' not in physical_interface:
-        result = __salt__['contrail.physical_interface_delete'](name, physical_router, **kwargs)
-        ret['comment'] = 'Physical interface {0} has been deleted'.format(name)
-        ret['changes']['PhysicalInterface'] = result
+        ret = __salt__['contrail.physical_interface_delete'](name, physical_router, **kwargs)
     return ret
 
 
@@ -414,21 +440,10 @@ def logical_interface_present(name, parent_names, parent_type, vlan_tag=None, in
     :param interface_type:	Logical interface type can be L2 or L3.
     :param vmis:                Virtual machine interface name associate with
     '''
-    ret = {'name': name,
-           'changes': {},
-           'result': True,
-           'comment': 'Logical interface "{0}" already exists'.format(name)}
-    logical_interface = __salt__['contrail.logical_interface_get'](name, parent_names, parent_type, **kwargs)
-    if 'Error' not in logical_interface:
+    ret = __salt__['contrail.logical_interface_create'](name, parent_names, parent_type, vlan_tag,
+                                                        interface_type, vmis=vmis, **kwargs)
+    if len(ret['changes']) == 0:
         pass
-    else:
-        result = __salt__['contrail.logical_interface_create'](name, parent_names, parent_type, vlan_tag,
-                                                               interface_type, vmis=vmis, **kwargs)
-        if 'Error' in result:
-            return False
-
-        ret['comment'] = 'Logical interface {0} has been created'.format(name)
-        ret['changes']['LogicalInterface'] = result
     return ret
 
 
@@ -446,9 +461,7 @@ def logical_interface_absent(name, parent_names, parent_type=None, **kwargs):
            'comment': 'logical interface "{0}" is already absent'.format(name)}
     logical_interface = __salt__['contrail.logical_interface_get'](name, parent_names, parent_type, **kwargs)
     if 'Error' not in logical_interface:
-        result = __salt__['contrail.logical_interface_delete'](name, parent_names, parent_type, **kwargs)
-        ret['comment'] = 'Logical interface {0} has been deleted'.format(name)
-        ret['changes']['LogicalInterface'] = result
+        ret = __salt__['contrail.logical_interface_delete'](name, parent_names, parent_type, **kwargs)
     return ret
 
 
@@ -463,19 +476,10 @@ def global_vrouter_config_present(name, parent_type, encap_priority="MPLSoUDP,MP
     :param vxlan_vn_id_mode:	Method of allocation of VxLAN VNI(s).
     :param fq_names:		Fully Qualified Name of resource devided <string>array
     '''
-    ret = {'name': name,
-           'changes': {},
-           'result': True,
-           'comment': 'Global vrouter config "{0}" already exists'.format(name)}
-
-    result = __salt__['contrail.global_vrouter_config_create'](name, parent_type, encap_priority, vxlan_vn_id_mode,
-                                                               *fq_names, **kwargs)
-    if 'OK' in result:
-        ret['comment'] = result
+    ret = __salt__['contrail.global_vrouter_config_create'](name, parent_type, encap_priority, vxlan_vn_id_mode,
+                                                            *fq_names, **kwargs)
+    if len(ret['changes']) == 0:
         pass
-    else:
-        ret['comment'] = 'Global vrouter config {0} has been created'.format(name)
-        ret['changes']['GlobalVRouterConfig'] = result
     return ret
 
 
@@ -491,9 +495,7 @@ def global_vrouter_config_absent(name, **kwargs):
            'comment': 'Global vrouter config "{0}" is already absent'.format(name)}
     vrouter_conf = __salt__['contrail.global_vrouter_config_get'](name, **kwargs)
     if 'Error' not in vrouter_conf:
-        result = __salt__['contrail.global_vrouter_config_delete'](name, **kwargs)
-        ret['comment'] = 'Global vrouter config {0} has been deleted'.format(name)
-        ret['changes']['GlobalVRouterConfig'] = result
+        ret = __salt__['contrail.global_vrouter_config_delete'](name, **kwargs)
     return ret
 
 
@@ -512,13 +514,9 @@ def linklocal_service_present(name, lls_ip, lls_port, ipf_addresses, ipf_port, *
            'result': True,
            'comment': 'Link local service "{0}" already exists'.format(name)}
 
-    result = __salt__['contrail.linklocal_service_create'](name, lls_ip, lls_port, ipf_addresses, ipf_port, **kwargs)
-    if 'OK' in result:
-        ret['comment'] = result
+    ret = __salt__['contrail.linklocal_service_create'](name, lls_ip, lls_port, ipf_addresses, ipf_port, **kwargs)
+    if len(ret['changes']) == 0:
         pass
-    else:
-        ret['comment'] = 'Link local service "{0}" has been created'.format(name)
-        ret['changes']['LinkLocalService'] = result
     return ret
 
 
@@ -531,12 +529,10 @@ def linklocal_service_absent(name, **kwargs):
     ret = {'name': name,
            'changes': {},
            'result': True,
-           'comment': ' "{0}" is already absent'.format(name)}
+           'comment': 'Linklocal service "{0}" is already absent'.format(name)}
     lls = __salt__['contrail.linklocal_service_get'](name, **kwargs)
     if 'Error' not in lls:
-        result = __salt__['contrail.linklocal_service_delete'](name, **kwargs)
-        ret['comment'] = 'Link local service "{0}" has been deleted'.format(name)
-        ret['changes']['LinkLocalService'] = result
+        ret = __salt__['contrail.linklocal_service_delete'](name, **kwargs)
     return ret
 
 
@@ -551,13 +547,25 @@ def analytics_node_present(name, ip_address, **kwargs):
            'result': True,
            'comment': 'Analytics node {0} already exists'.format(name)}
 
-    result = __salt__['contrail.analytics_node_create'](name, ip_address, **kwargs)
-    if 'OK' in result:
-        ret['comment'] = result
+    ret = __salt__['contrail.analytics_node_create'](name, ip_address, **kwargs)
+    if len(ret['changes']) == 0:
         pass
-    else:
-        ret['comment'] = 'Analytics node {0} has been created'.format(name)
-        ret['changes']['AnalyticsNode'] = result
+    return ret
+
+
+def analytics_node_absent(name, **kwargs):
+    '''
+    Ensure that the Contrail analytics node doesn't exist
+
+    :param name: The name of the analytics node that should not exist
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': 'Analytics node "{0}" is already absent'.format(name)}
+    node = __salt__['contrail.analytics_node_get'](name, **kwargs)
+    if 'Error' not in node:
+        ret = __salt__['contrail.analytics_node_delete'](name, **kwargs)
     return ret
 
 
@@ -567,18 +575,25 @@ def config_node_present(name, ip_address, **kwargs):
 
     :param name:        Config node name
     '''
+    ret = __salt__['contrail.config_node_create'](name, ip_address, **kwargs)
+    if len(ret['changes']) == 0:
+        pass
+    return ret
+
+
+def config_node_absent(name, **kwargs):
+    '''
+    Ensure that the Contrail config node doesn't exist
+
+    :param name: The name of the config node that should not exist
+    '''
     ret = {'name': name,
            'changes': {},
            'result': True,
-           'comment': 'Config node {0} already exists'.format(name)}
-    result = __salt__['contrail.config_node_create'](name, ip_address, **kwargs)
-
-    if 'OK' in result:
-        ret['comment'] = result
-        pass
-    else:
-        ret['comment'] = 'Config node {0} has been created'.format(name)
-        ret['changes']['ConfigNode'] = result
+           'comment': 'Config node "{0}" is already absent'.format(name)}
+    node = __salt__['contrail.config_node_get'](name, **kwargs)
+    if 'Error' not in node:
+        ret = __salt__['contrail.config_node_delete'](name, **kwargs)
     return ret
 
 
@@ -593,13 +608,25 @@ def bgp_router_present(name, type, ip_address, asn=64512, **kwargs):
            'result': True,
            'comment': 'BGP router {0} already exists'.format(name)}
 
-    result = __salt__['contrail.bgp_router_create'](name, type, ip_address, asn, **kwargs)
-    if 'OK' in result:
-        ret['comment'] = result
+    ret = __salt__['contrail.bgp_router_create'](name, type, ip_address, asn, **kwargs)
+    if len(ret['changes']) == 0:
         pass
-    else:
-        ret['comment'] = 'BGP router {0} has been created'.format(name)
-        ret['changes']['BgpRouter'] = result
+    return ret
+
+
+def bgp_router_absent(name, **kwargs):
+    '''
+    Ensure that the Contrail BGP router doesn't exist
+
+    :param name: The name of the BGP router that should not exist
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': 'BGP router "{0}" is already absent'.format(name)}
+    node = __salt__['contrail.bgp_router_get'](name, **kwargs)
+    if 'Error' not in node:
+        ret = __salt__['contrail.bgp_router_delete'](name, **kwargs)
     return ret
 
 
@@ -613,14 +640,25 @@ def database_node_present(name, ip_address, **kwargs):
            'changes': {},
            'result': True,
            'comment': 'Database node {0} already exists'.format(name)}
-
-    result = __salt__['contrail.database_node_create'](name, ip_address, **kwargs)
-    if 'OK' in result:
-        ret['coment'] = result
+    ret = __salt__['contrail.database_node_create'](name, ip_address, **kwargs)
+    if len(ret['changes']) == 0:
         pass
-    else:
-        ret['comment'] = 'Database node {0} has been created'.format(name)
-        ret['changes']['DatabaseNode'] = result
+    return ret
+
+
+def database_node_absent(name, **kwargs):
+    '''
+    Ensure that the Contrail database node doesn't exist
+
+    :param name: The name of the database node that should not exist
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': 'Database node "{0}" is already absent'.format(name)}
+    node = __salt__['contrail.database_node_get'](name, **kwargs)
+    if 'Error' not in node:
+        ret = __salt__['contrail.database_node_delete'](name, **kwargs)
     return ret
 
 
@@ -629,7 +667,7 @@ def virtual_machine_interface_present(name,
                                       mac_address=None,
                                       ip_address=None,
                                       security_group=None,
-                                       **kwargs):
+                                      **kwargs):
     '''
     Ensures that the Contrail virtual machine interface exists.
 

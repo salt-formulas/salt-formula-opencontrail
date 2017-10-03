@@ -45,9 +45,9 @@ parameters:
             priority: 1100
             package: '*'
         mk_openstack:
-          source: "deb [arch=amd64] http://apt-mk.mirantis.com/{{ grains.get('oscodename') }}/ ${_param:apt_mk_version} mitaka"
+          source: "deb [arch=amd64] http://apt.mirantis.com/{{ grains.get('oscodename') }}/ ${_param:apt_mk_version} mitaka"
           architectures: amd64
-          key_url: "http://apt-mk.mirantis.com/public.gpg"
+          key_url: "http://apt.mirantis.com/public.gpg"
           pin:
           - pin: 'release a=${_param:apt_mk_version}'
             priority: 1100

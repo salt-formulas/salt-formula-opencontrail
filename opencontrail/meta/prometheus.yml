@@ -359,7 +359,7 @@ server:
     ContrailFlowsDropTooMany:
       if: >-
     {%- set vrouter_flows_flow_action_drop_toohigh_threshold = monitoring.vrouter_flows_flow_action_drop_too_high_threshold %}
-        min(contrail_vrouter_flows_flow_action_drop) by (host) >= {{ vrouter_flows_flow_action_drop_toohigh_threshold }}
+        rate(contrail_vrouter_flows_flow_action_drop[5m]) >= {{ vrouter_flows_flow_action_drop_toohigh_threshold }}
 {%- raw %}
       for: 2m
       labels:
@@ -367,7 +367,7 @@ server:
         service: contrail-compute
       annotations:
         summary: 'Too many vRouter dropped flows'
-        description: 'There are too many dropped vRouter flows on node {{ $labels.host }} (current value={{ $value }}, threshold={%- endraw %}{{ vrouter_flows_flow_action_drop_toohigh_threshold }})'
+        description: 'There are too many dropped vRouter flows on node {{ $labels.host }} (current value={{ $value }} flows/s, threshold={%- endraw %}{{ vrouter_flows_flow_action_drop_toohigh_threshold }} flows/s)'
     ContrailFlowsFragErrTooMany:
       if: >-
     {%- set vrouter_flows_frag_err_toohigh_threshold = monitoring.vrouter_flows_frag_err_too_high_threshold %}

@@ -331,5 +331,7 @@ client:
         'vrouter_flows_invalid_label_too_high_threshold': 100,
         'vrouter_flows_flow_queue_limit_exceeded_too_high_threshold': 100,
         'vrouter_flows_flow_table_full_too_high_threshold': 100,
+        'services_failed_warning_threshold_percent': 0.3,
+        'services_failed_critical_threshold_percent': 0.6,
     },
 }, grain='os_family', merge=salt['pillar.get']('opencontrail:monitoring')) %}

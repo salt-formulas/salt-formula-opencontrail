@@ -405,7 +405,7 @@ server:
     ContrailFlowsActiveTooMany:
       if: >-
     {%- set vrouter_flows_active_toohigh_threshold = monitoring.vrouter_flows_active_too_high_threshold %}
-        min(contrail_vrouter_flows_active) by (host) >= {{ vrouter_flows_active_toohigh_threshold }}
+        deriv(contrail_vrouter_flows_active[5m]) >= {{ vrouter_flows_active_toohigh_threshold }}
 {%- raw %}
       for: 2m
       labels:
@@ -417,7 +417,7 @@ server:
     ContrailFlowsDiscardTooMany:
       if: >-
     {%- set vrouter_flows_discard_toohigh_threshold = monitoring.vrouter_flows_discard_too_high_threshold %}
-        min(contrail_vrouter_flows_discard) by (host) >= {{ vrouter_flows_discard_toohigh_threshold }}
+        rate(contrail_vrouter_flows_discard[5m]) >= {{ vrouter_flows_discard_toohigh_threshold }}
 {%- raw %}
       for: 2m
       labels:
@@ -453,7 +453,7 @@ server:
     ContrailFlowsInvalidNHTooMany:
       if: >-
     {%- set vrouter_flows_invalid_nh_toohigh_threshold = monitoring.vrouter_flows_invalid_nh_too_high_threshold %}
-        min(contrail_vrouter_flows_invalid_nh) by (host) >= {{ vrouter_flows_invalid_nh_toohigh_threshold }}
+        rate(contrail_vrouter_flows_invalid_nh[5m]) >= {{ vrouter_flows_invalid_nh_toohigh_threshold }}
 {%- raw %}
       for: 2m
       labels:
@@ -465,7 +465,7 @@ server:
     ContrailFlowsInvalidITFTooMany:
       if: >-
     {%- set vrouter_flows_composite_invalid_interface_toohigh_threshold = monitoring.vrouter_flows_composite_invalid_interface_too_high_threshold %}
-        min(contrail_vrouter_flows_composite_invalid_interface) by (host) >= {{ vrouter_flows_composite_invalid_interface_toohigh_threshold }}
+        rate(contrail_vrouter_flows_composite_invalid_interface[5m]) >= {{ vrouter_flows_composite_invalid_interface_toohigh_threshold }}
 {%- raw %}
       for: 2m
       labels:
@@ -489,7 +489,7 @@ server:
     ContrailFlowsQueueLimitExceededTooMany:
       if: >-
     {%- set vrouter_flows_flow_queue_limit_exceeded_toohigh_threshold = monitoring.vrouter_flows_flow_queue_limit_exceeded_too_high_threshold %}
-        min(contrail_vrouter_flows_flow_queue_limit_exceeded) by (host) >= {{ vrouter_flows_flow_queue_limit_exceeded_toohigh_threshold }}
+        rate(contrail_vrouter_flows_flow_queue_limit_exceeded[5m]) >= {{ vrouter_flows_flow_queue_limit_exceeded_toohigh_threshold }}
 {%- raw %}
       for: 2m
       labels:

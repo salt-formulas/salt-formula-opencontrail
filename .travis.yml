@@ -18,24 +18,24 @@ install:
   - bundle install
 
 env:
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=single
-  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=analytics
-  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=control
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=cluster
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=tor
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=vrouter
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=single
-  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=analytics
-  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=control
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=cluster
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=tor
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=vrouter
-  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=single
-  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=analytics
-  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=control
-  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=cluster
-  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=tor
-  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=vrouter
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=single3
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=analytics3
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=control3
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=cluster3
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=tor3
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=vrouter3
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=single3
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=analytics3
+  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=control3
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=cluster3
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=tor3
+  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=vrouter3
+  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=single3
+  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=analytics3
+  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=control3
+  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=cluster3
+  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=tor3
+  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=vrouter3
   # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=single40
   - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=analytics40
   - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=control40

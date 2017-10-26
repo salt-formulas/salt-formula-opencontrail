@@ -6,6 +6,11 @@ local_plugin:
     plugin: python
     template: opencontrail/files/collectd_contrail_ifmap_elements_count.conf
   {%- endif %}
+  {%- if config.get('enabled', False) %}
+  contrail_ifmap_age:
+    plugin: python
+    template: opencontrail/files/collectd_contrail_ifmap_age.conf
+  {%- endif %}
   {%- if database.get('cassandra', False) %}
   collectd_cassandra_jmx:
     plugin: java

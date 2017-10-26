@@ -73,6 +73,16 @@ opencontrail:
     - host: 127.0.0.1
       id: 1
   collector:
+    identity:
+      engine: keystone
+      version: '2.0'
+      region: RegionOne
+      host: 127.0.0.1
+      port: 35357
+      user: admin
+      password: password
+      token: token
+      tenant: admin
     version: 4.0
     enabled: true
     bind:

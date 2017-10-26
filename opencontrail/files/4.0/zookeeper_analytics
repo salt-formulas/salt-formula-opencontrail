@@ -4,7 +4,7 @@
 # by default we allow local JMX connections
 #JMXLOCALONLY=false
 
-JAVA_OPTS="-Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.host=127.0.0.1 -Dcom.sun.management.jmxremote.port=7199 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dzookeeper.jmx.log4j.disable=false"
+JAVA_OPTS="-Djava.rmi.server.hostname=127.0.0.1 -Dcom.sun.management.jmxremote.host=127.0.0.1 -Dcom.sun.management.jmxremote.port=7198 -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Dzookeeper.jmx.log4j.disable=false"
 
 # Make sure to include the original classpath since it contains the zookeeper
 # jars

@@ -1,6 +1,7 @@
 opencontrail:
   common:
     version: 4.0
+    config_only: true
     identity:
       engine: keystone
       host: 127.0.0.1
@@ -13,6 +14,7 @@ opencontrail:
       port: 9696
   config:
     version: 4.0
+    config_only: true
     enabled: true
     api:
       host: 127.0.0.1
@@ -67,6 +69,7 @@ opencontrail:
     list_optimization_enabled: true
   control:
     version: 4.0
+    config_only: true
     enabled: true
     name: ntw-01
     bind:
@@ -97,6 +100,7 @@ opencontrail:
       id: 3
   database:
     version: 4.0
+    config_only: true
     cassandra:
       version: 2
     enabled: true
@@ -124,6 +128,7 @@ opencontrail:
       - host: 127.0.0.1
   web:
     version: 4.0
+    config_only: true
     enabled: True
     network:
       host: 127.0.0.1

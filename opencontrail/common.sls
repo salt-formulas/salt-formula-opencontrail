@@ -1,8 +1,10 @@
 {%- from "opencontrail/map.jinja" import common with context %}
 
+{%- if not common.get('config_only', False) %}
 opencontrail_common_packages:
   pkg.installed:
   - names: {{ common.pkgs }}
+{% endif %}
 
 
 /var/crashes:

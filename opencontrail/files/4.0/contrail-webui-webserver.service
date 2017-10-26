@@ -1,0 +1,12 @@
+[Unit]
+Description=Contrail WebUI Web Server
+ConditionPathExists=/etc/contrail/config.global.js
+[Service]
+WorkingDirectory=/var/lib/contrail-webui/contrail-web-core
+User=contrail
+Group=contrail
+ExecStart=/usr/bin/node webServerStart.js
+PIDFile=/var/run/contrail-web-webserver.pid
+KillMode=process
+Restart=on-failure
+RestartPreventExitStatus=255

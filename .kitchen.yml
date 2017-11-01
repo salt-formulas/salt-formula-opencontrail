@@ -56,7 +56,7 @@ platforms:
 
 suites:
 
-  - name: single
+  - name: single3
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/single.sls
@@ -64,7 +64,7 @@ suites:
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/single40.sls
-  - name: analytics
+  - name: analytics3
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/analytics.sls
@@ -72,7 +72,7 @@ suites:
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/analytics40.sls
-  - name: control
+  - name: control3
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/control.sls
@@ -80,7 +80,7 @@ suites:
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/control40.sls
-  - name: cluster
+  - name: cluster3
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/cluster.sls
@@ -88,7 +88,7 @@ suites:
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/cluster40.sls
-  - name: tor
+  - name: tor3
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/tor.sls
@@ -96,7 +96,7 @@ suites:
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/tor40.sls
-  - name: vrouter
+  - name: vrouter3
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/vrouter.sls

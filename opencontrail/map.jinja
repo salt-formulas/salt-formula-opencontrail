@@ -98,16 +98,10 @@ control:
     {%- endif %}
 database:
   Debian:
-    {%- if grains.get('oscodename') == 'trusty' %}
     pkgs:
-         ['cassandra', 'zookeeper', 'supervisor', 'openjdk-7-jre-headless', 'contrail-database']
-    {%- elif version < 4.0 %}
-    pkgs:
-         ['cassandra', 'zookeeper', 'supervisor', 'openjdk-8-jre-headless', 'contrail-database']
-    {%- else %}
-    pkgs:
-         ['cassandra', 'zookeeper', 'openjdk-8-jre-headless', 'contrail-database']
-    {%- endif %}
+    {%- set openjdkPackage = 'openjdk-8-jre-headless' if grains.get('oscodename') == 'xenial' else 'openjdk-7-jre-headless' %}
+    {%- set databasePackage = 'contrail-openstack-database' if version >= 4.0 else 'contrail-database' %}
+         ['cassandra', 'zookeeper', '{{ openjdkPackage }}' , '{{ databasePackage }}']
     cassandra_config: '/etc/cassandra/'
     compaction_throughput_mb_per_sec: 16
     services:
@@ -249,13 +243,9 @@ control:
     {%- endif %}
 database:
   Debian:
-    {%- if grains.get('oscodename') == 'trusty' %}
     pkgs:
-         ['cassandra', 'zookeeper', 'supervisor', 'openjdk-7-jre-headless', 'contrail-openstack-database']
-    {%- else %}
-    pkgs:
-         ['cassandra', 'zookeeper', 'supervisor', 'openjdk-8-jre-headless', 'contrail-openstack-database']
-    {%- endif %}
+    {%- set openjdkPackage = 'openjdk-8-jre-headless' if grains.get('oscodename') == 'xenial' else 'openjdk-7-jre-headless' %}
+         ['cassandra', 'zookeeper', '{{ openjdkPackage }}', 'contrail-openstack-database']
     cassandra_config: '/etc/cassandra/'
     compaction_throughput_mb_per_sec: 16
     services:

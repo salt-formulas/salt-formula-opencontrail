@@ -745,6 +745,28 @@ default - currently `enable`.
         override_rpf_default_by: 'disable'
       ...
 
+Cassandra GC logging
+--------------------
+
+From Contrail version 3 you can set a way you want to handle Cassandra GC logs.
+The behavior is controlled by `cassandra_gc_logging`. Valid values are
+'rotation' (default), 'legacy' and false.
+
+- 'rotation' is supported by JDK 6u34 7u2 or later and handles rotation of log
+files automatically.
+- 'legacy' is a way to support older JDKs and you will need to handle logs by
+other means. This can be handled for example by using
+`- service.opencontrail.database.cassandra_log_cleanup` in your reclass model.
+- false will disable the cassandra gc logging
+
+.. code-block:: yaml
+
+    opencontrail:
+      ...
+      database:
+        cassandra_gc_logging: false
+      ...
+
 
 Disable Contrail API authentication
 -----------------------------------

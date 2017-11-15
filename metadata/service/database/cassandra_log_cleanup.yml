@@ -1,0 +1,12 @@
+parameters:
+  _param:
+    opencontrail_cassandra_gc_log_cleanup_mtime: '+7'
+    opencontrail_cassandra_gc_log_cleanup_dir: '/var/log/cassandra/'
+  linux:
+    system:
+      job:
+        cassandra_gc_logs_cleanup:
+          command: "find ${_param:opencontrail_cassandra_gc_log_cleanup_dir} -name 'gc-*.log' -type f -mtime ${_param:opencontrail_cassandra_gc_log_cleanup_mtime} -exec rm {} \\;"
+          identifier: cassandra_gc_logs_cleanup
+          hour: 0
+          minute: 0

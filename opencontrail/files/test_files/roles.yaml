@@ -1,0 +1,24 @@
+{%- from "opencontrail/map.jinja" import test with context %}
+{%- set host_controls = test.control.host.members %}
+{%- set host_analytics = test.analytics.host.members %}
+{%- set host_computes = test.compute.host.members %}
+contrail-controller:
+{%- for host in host_controls %}
+  - {{ host }}
+{%- endfor %}
+contrail-config:
+{%- for host in host_controls %}
+  - {{ host }}
+{%- endfor %}
+contrail-analytics:
+{%- for host in host_analytics %}
+  - {{ host }}
+{%- endfor %}
+contrail-db:
+{%- for host in host_analytics %}
+  - {{ host }}
+{%- endfor %}
+contrail-compute:
+{%- for host in host_computes %}
+  - {{ host }}
+{%- endfor %}

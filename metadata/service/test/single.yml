@@ -1,0 +1,44 @@
+applications:
+- opencontrail
+parameters:
+  opencontrail:
+    test:
+      enabled: True
+  #working dir full path to the dir where we want to have needed files
+      working_dir: '/opt/opencontrail_test'
+      url:
+        api: ${_param:opencontrail_control_address}
+        analytics: ${_param:opencontrail_analytics_address}
+      control:
+        host:
+          members:
+          - ${_param:opencontrail_control_node01_hostname}.${_param:cluster_domain}
+          - ${_param:opencontrail_control_node02_hostname}.${_param:cluster_domain}
+          - ${_param:opencontrail_control_node03_hostname}.${_param:cluster_domain}
+      analytics:
+        host:
+          members:
+          - ${_param:opencontrail_analytics_node01_hostname}.${_param:cluster_domain}
+          - ${_param:opencontrail_analytics_node02_hostname}.${_param:cluster_domain}
+          - ${_param:opencontrail_analytics_node03_hostname}.${_param:cluster_domain}
+      compute:
+        host:
+          members:
+          - ${_param:openstack_compute_node01_hostname}.${_param:cluster_domain}
+          - ${_param:openstack_compute_node02_hostname}.${_param:cluster_domain}
+      identity:
+        version: ${_param:keystone_version}
+        service_token: ${_param:keystone_service_token}
+        service_tenant: service
+        admin_tenant: admin
+        admin_name: admin
+        admin_password: ${_param:keystone_admin_password}
+        password: ${_param:keystone_admin_password}
+        cacert: '/etc/ssl/certs/ca-certificates.crt'
+        bind:
+          address: 0.0.0.0
+          private_address: ${_param:keystone_service_host}
+          private_port: 35357
+          public_address: ${_param:keystone_service_host}
+          public_port: 5000
+        region: RegionOne

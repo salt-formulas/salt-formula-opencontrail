@@ -1,0 +1,20 @@
+{
+  'cloud_management': {
+    'driver': 'tcpcloud',
+    'args': {
+      'address': '127.0.0.1',
+      'username': 'root',
+      'master_sudo': True,
+      'slave_username': 'root',
+      'slave_name_regexp': '^(?!cfg)',
+    }
+},
+  'power_managements': [
+    {
+       'driver': 'libvirt',
+       'args': {
+          'connection_uri': "qemu+unix:///system"
+       }
+    }
+  ]
+}

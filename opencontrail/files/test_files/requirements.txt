@@ -1,0 +1,13 @@
+# Now it's better to use only gerrit repo because of bad syncing between gerrit and git
+git+https://review.gerrithub.io/Mirantis/stepler
+git+https://github.com/morganfainberg/positional.git
+git+https://github.com/gdyuldin/contrail-python-api@R3.0
+ansible==2.3.2.0
+dpath
+jmespath==0.9.0
+contextlib2==0.5.4; python_version < '3.2'
+kazoo==2.2.1
+logbook
+xmltodict
+pytest-html
+ansible==2.3.2.0

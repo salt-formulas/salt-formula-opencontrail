@@ -1,0 +1,13 @@
+{%- from "opencontrail/map.jinja" import test with context %}
+  export OS_IDENTITY_API_VERSION=3
+  export OS_AUTH_URL=http://{{ test.identity.bind.private_address }}:{{ test.identity.bind.private_port }}/v3
+  export OS_PROJECT_DOMAIN_NAME=Default
+  export OS_USER_DOMAIN_NAME=Default
+  export OS_PROJECT_NAME={{ test.identity.admin_tenant }}
+  export OS_TENANT_NAME={{ test.identity.admin_tenant }}
+  export OS_USERNAME={{ test.identity.admin_name }}
+  export OS_PASSWORD={{ test.identity.admin_password }}
+  export OS_REGION_NAME={{ test.identity.region }}
+  export OS_INTERFACE=internal
+  export OS_ENDPOINT_TYPE="internal"
+  export OS_CACERT="{{ test.identity.cacert }}"

@@ -1029,8 +1029,26 @@ Enforcing Link Local Services
            - 10.10.10.10
            ipf_port: 80
 
-Enforcing physical routers
 
+Configuring OpenStack default quotasx
+
+.. code-block:: yaml
+    config:
+      quota:
+        network: 5
+        subnet: 10
+        router: 10
+        floating_ip: 100
+        secgroup: 1000
+        secgroup_rule: 1000
+        port: 1000
+        pool: -1
+        member: -1
+        health_monitor: -1
+        vip: -1
+
+Enforcing physical routers
+h
 .. code-block:: yaml
 
   opencontrail:
@@ -1073,6 +1091,7 @@ Enforcing physical/logical interfaces for routers
                     mac_address: '2e:92:a8:af:c2:21'
                     security_group: 'default'
                     virtual_network: 'virtual-network'
+
 
 
 Usage

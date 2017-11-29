@@ -1,0 +1,40 @@
+#!/bin/bash
+
+if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
+  echo -e  "\nUsage: $0 {analytics|analyticsdb|controller|all} {<command_to_send>|console}\n"
+  echo "Examples: "
+  echo "$0 controller contrail-status"
+  echo "$0 controller service contrail-database restart"
+  echo "$0 all contrail-status"
+  echo "$0 controller console "
+  echo -e "\n"
+  exit 0
+fi
+
+NODES=("analytics" "analyticsdb" "controller")
+
+if [ "$1" == "all" ] ; then
+  for el in ${NODES[*]}; do
+    NODE=$(docker ps | grep _"$el"_ | awk '{print $1}')
+    if [[ -n $NODE ]] ; then
+      echo -e "\n\n FOR NODE $el\n*****************************************\n"
+      docker exec $NODE ${@:2}
+    fi
+  done
+else
+  CORRECT=$(echo ${NODES[@]} | grep -o $1 | wc -w)
+
+  if [ "$CORRECT" -gt 0 ] && [ "$1" != "all" ]; then
+    if [ "$2" == "console" ]; then
+      echo "Starting console:"
+      NODE=$(docker ps | grep _$1_ | awk '{print $1}')
+      docker exec -it $NODE bash
+    else
+      NODE=$(docker ps | grep _$1_ | awk '{print $1}')
+      docker exec $NODE ${@:2}
+    fi
+  else
+    echo "Unknow target, use -h or --help paramater for help"
+    exit 0
+  fi
+fi

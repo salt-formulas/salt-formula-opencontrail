@@ -4,10 +4,26 @@
 include:
 - opencontrail.common
 
+{%- if not config.get('config_only', False) %}
 opencontrail_config_packages:
   pkg.installed:
   - names: {{ config.pkgs }}
   - force_yes: True
+  - require_in:
+    - /etc/contrail/vnc_api_lib.ini
+    - /etc/contrail/contrail-api.conf
+    - /etc/contrail/contrail-device-manager.conf
+    - /etc/contrail/contrail-config-nodemgr.conf
+    {%- if config.identity.engine == "keystone" %}
+    - /etc/contrail/contrail-keystone-auth.conf
+    {%- endif %}
+    - /etc/contrail/contrail-schema.conf
+    - /etc/contrail/contrail-svc-monitor.conf
+    {%- if grains.get('init') != 'systemd' %}
+    - /etc/contrail/supervisord_config_files/contrail-api.ini
+    - /etc/init.d/contrail-api
+    {%- endif %}
+{%- endif %}
 
 {% if config.version == 2.2 or config.version == 3.0 %}
 
@@ -77,14 +93,10 @@ publisher_init:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/config/contrail-api.ini
   - makedirs: true
-  - require:
-    - pkg: opencontrail_config_packages
 
 /etc/init.d/contrail-api:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/config/contrail-api
-  - require:
-    - pkg: opencontrail_config_packages
 
 {%- endif %}
 
@@ -92,65 +104,51 @@ publisher_init:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/contrail-api.conf
   - template: jinja
-  - require:
-    - pkg: opencontrail_config_packages
 
 /etc/contrail/vnc_api_lib.ini:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/vnc_api_lib.ini
   - template: jinja
-  - require:
-    - pkg: opencontrail_config_packages
 
 /etc/contrail/contrail-device-manager.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/contrail-device-manager.conf
   - template: jinja
-  - require:
-    - pkg: opencontrail_config_packages
-  - watch_in:
-    - service: opencontrail_config_services
 
 /etc/contrail/contrail-config-nodemgr.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/contrail-config-nodemgr.conf
   - template: jinja
-  - require:
-    - pkg: opencontrail_config_packages
-  - watch_in:
-    - service: opencontrail_config_services
 
-/etc/sudoers.d/contrail_sudoers:
-  file.managed:
-  - source: salt://opencontrail/files/{{ config.version }}/config/contrail_sudoers
-  - template: jinja
-  - require:
-    - pkg: opencontrail_config_packages
 
 {%- if config.identity.engine == "keystone" %}
 /etc/contrail/contrail-keystone-auth.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/contrail-keystone-auth.conf
   - template: jinja
-  - require:
-    - pkg: opencontrail_config_packages
-  - watch_in:
-    - service: opencontrail_config_services
 {%- endif %}
 
 /etc/contrail/contrail-schema.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/contrail-schema.conf
   - template: jinja
-  - require:
-    - pkg: opencontrail_config_packages
+
 
 /etc/contrail/contrail-svc-monitor.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/contrail-svc-monitor.conf
   - template: jinja
-  - require:
-    - pkg: opencontrail_config_packages
+
+{%- if config.get('config_only', False) %}
+opencontrail_config_doctrail:
+  file.managed:
+  - name: /usr/bin/doctrail
+  - template: jinja
+  - source: salt://opencontrail/files/{{ config.version }}/doctrail
+  - mode: 755
+{%- endif %}
+
+{%- if not config.get('config_only', False) %}
 
 {%- if config.version >= 3.0 and grains.get('init') != 'systemd' %}
 
@@ -185,6 +183,15 @@ publisher_init:
 
 {%- endif %}
 
+
+/etc/sudoers.d/contrail_sudoers:
+  file.managed:
+    - source: salt://opencontrail/files/{{ config.version }}/config/contrail_sudoers
+    - template: jinja
+    - require:
+      - pkg: opencontrail_config_packages
+
+
 opencontrail_config_services:
   service.running:
   - enable: true
@@ -202,6 +209,11 @@ opencontrail_config_services:
     - file: /etc/contrail/contrail-api.conf
     - file: /etc/contrail/vnc_api_lib.ini
     - file: /etc/sudoers.d/contrail_sudoers
+    - file: /etc/contrail/contrail-device-manager.conf
+    - file: /etc/contrail/contrail-config-nodemgr.conf
+    {%- if config.identity.engine == "keystone" %}
+    - file: /etc/contrail/contrail-keystone-auth.conf
+    {%- endif %}
 
 {%- if grains.get('virtual_subtype', None) == "Docker" %}
 
@@ -211,6 +223,8 @@ opencontrail_config_entrypoint:
   - template: jinja
   - source: salt://opencontrail/files/entrypoint.sh.config
   - mode: 755
+
+{%- endif %}
 
 {%- endif %}
 

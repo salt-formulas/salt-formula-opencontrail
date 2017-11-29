@@ -1,6 +1,7 @@
 opencontrail:
   common:
     version: 4.0
+    config_only: true
     identity:
       engine: keystone
       host: 127.0.0.1
@@ -12,7 +13,18 @@ opencontrail:
       host: 127.0.0.1
       port: 9696
   collector:
+    identity:
+      engine: keystone
+      version: '2.0'
+      region: RegionOne
+      host: 127.0.0.1
+      port: 35357
+      user: admin
+      password: password
+      token: token
+      tenant: admin
     version: 4.0
+    config_only: true
     enabled: true
     bind:
       address: 127.0.0.1
@@ -45,6 +57,7 @@ opencontrail:
       - host: 127.0.0.1
   database:
     version: 4.0
+    config_only: true
     cassandra:
       version: 2
     enabled: true

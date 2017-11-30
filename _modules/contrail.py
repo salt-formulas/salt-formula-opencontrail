@@ -1051,6 +1051,17 @@ def bgp_router_create(name, type, ip_address, asn=64512, **kwargs):
     bgp_router_objs = bgp_router_list(**kwargs)
     if name in bgp_router_objs:
         bgp_router_obj = vnc_client._object_read('bgp-router', id=bgp_router_objs[name]['_uuid'])
+
+        if bgp_router_obj.bgp_router_parameters.autonomous_system != asn:
+            ret['changes'].update({"autonomous_system": {'old': bgp_router_obj.bgp_router_parameters.autonomous_system, 'new': asn}})
+        if bgp_router_obj.bgp_router_parameters.vendor != vendor:
+            ret['changes'].update({"vendor": {'old': bgp_router_obj.bgp_router_parameters.vendor, 'new': vendor}})
+        if bgp_router_obj.bgp_router_parameters.address != ip_address:
+            ret['changes'].update({"ip_address": {'old': bgp_router_obj.bgp_router_parameters.address, 'new': ip_address}})
+
+        if len(ret['changes']) == 0:
+            return ret
+
         bgp_router_obj.set_bgp_router_parameters(router_params)
         if __opts__['test']:
             ret['result'] = None
@@ -1058,7 +1069,6 @@ def bgp_router_create(name, type, ip_address, asn=64512, **kwargs):
             return ret
         vnc_client.bgp_router_update(bgp_router_obj)
         ret['comment'] = "BGP router " + name + " has been updated"
-        ret['changes'] = {'new': name}
         return ret
     else:
         bgp_router_obj = BgpRouter(name, rt_inst_obj, bgp_router_parameters=router_params)
@@ -1087,16 +1097,17 @@ def bgp_router_delete(name, **kwargs):
            'result': True,
            'comment': ''}
     vnc_client = _auth(**kwargs)
-    gsc_obj = _get_config(vnc_client)
-    bgp_router_obj = BgpRouter(name, gsc_obj)
 
     if __opts__['test']:
         ret['result'] = None
         ret['comment'] = "BGP router " + name + " will be deleted"
         return ret
-    vnc_client.bgp_router_delete(bgp_router_obj.get_uuid())
-    ret['comment'] = "BGP router " + name + " has been deleted"
-    ret['changes'] = {'BGP router': {'old': '', 'new': name}}
+
+    bgp_router = bgp_router_get(name)
+    if name in bgp_router:
+        vnc_client.bgp_router_delete(fq_name=bgp_router[name]['fq_name'])
+        ret['comment'] = "BGP router " + name + " has been deleted"
+        ret['changes'] = {'BGP router': {'old': '', 'new': name}}
     return ret
 
 
@@ -1199,17 +1210,21 @@ def database_node_delete(name, **kwargs):
     return ret
 
 
-def _get_vrouter_config(vnc_client):
+def _get_vrouter_config(vnc_client, gvc_name=None):
     try:
+        if not gvc_name:
+            gvc_list = global_vrouter_config_list()
+            gvc_name = gvc_list.values()[0]['name']
+
         config = vnc_client.global_vrouter_config_read(
-            fq_name=['default-global-system-config', 'default-global-vrouter-config'])
+            fq_name=['default-global-system-config', gvc_name])
     except Exception:
         config = None
 
     return config
 
 
-def linklocal_service_list(**kwargs):
+def linklocal_service_list(global_vrouter_config_name=None, **kwargs):
     '''
     Return a list of all Contrail link local services
 
@@ -1222,7 +1237,7 @@ def linklocal_service_list(**kwargs):
     ret = {}
     vnc_client = _auth(**kwargs)
 
-    current_config = _get_vrouter_config(vnc_client)
+    current_config = _get_vrouter_config(vnc_client, global_vrouter_config_name)
     if current_config is None:
         return ret
 
@@ -1258,7 +1273,7 @@ def linklocal_service_get(name, **kwargs):
     return ret
 
 
-def linklocal_service_create(name, lls_ip, lls_port, ipf_dns_or_ip, ipf_port, **kwargs):
+def linklocal_service_create(name, lls_ip, lls_port, ipf_dns_or_ip, ipf_port, global_vrouter_config_name=None, **kwargs):
     '''
     Create specific Contrail link local service
 
@@ -1276,7 +1291,7 @@ def linklocal_service_create(name, lls_ip, lls_port, ipf_dns_or_ip, ipf_port, **
            'result': True,
            'comment': ''}
     vnc_client = _auth(**kwargs)
-    current_config = _get_vrouter_config(vnc_client)
+    current_config = _get_vrouter_config(vnc_client, global_vrouter_config_name)
     service_entry = LinklocalServiceEntryType(
         linklocal_service_name=name,
         linklocal_service_ip=lls_ip,

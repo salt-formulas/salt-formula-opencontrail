@@ -87,6 +87,16 @@ parameters:
         members:
         - host: ${_param:single_address}
           port: 9160
+      identity:
+        engine: keystone
+        version: '2.0'
+        region: RegionOne
+        host: ${_param:single_address}
+        port: 35357
+        user: admin
+        password: '${_param:keystone_admin_password}'
+        token: '${_param:keystone_service_token}'
+        tenant: admin
     database:
       version: ${_param:opencontrail_version}
       cassandra:

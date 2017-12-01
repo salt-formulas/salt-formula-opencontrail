@@ -100,6 +100,16 @@ parameters:
           port: 9160
         - host: ${_param:cluster_node03_address}
           port: 9160
+      identity:
+        engine: keystone
+        version: '2.0'
+        region: RegionOne
+        host: ${_param:cluster_vip_address}
+        port: 35357
+        user: admin
+        password: '${_param:keystone_admin_password}'
+        token: '${_param:keystone_service_token}'
+        tenant: admin
     database:
       version: ${_param:opencontrail_version}
       cassandra:

@@ -1,0 +1,231 @@
+{%- if pillar.get('fluentd', {}).get('agent', {}).get('enabled', False) %}
+{%- from "opencontrail/map.jinja" import control, collector, compute, config, database, web with context %}
+{%- set positiondb = pillar.fluentd.agent.dir.positiondb %}
+agent:
+  config:
+    dollar: '$'
+    label:
+      opencontrail:
+        input:
+          {%- if control.get('enabled', False) %}
+          contrail_collector:
+            type: tail
+            tag: temp.opencontrail.collector.*
+            path: /var/log/contrail/contrail-collector.log, /var/log/contrail/contrail-control.log, /var/log/contrail/contrail-dns.log, /var/log/contrail/contrail-query-engine.log
+            path_key: log_location
+            pos_file: {{ positiondb }}/contrail.collector.pos
+            parser:
+              type: regexp
+              time_format: '%Y-%m-%d %a %H:%M:%S:%L.%L %Z'
+              time_key: Timestamp
+              keep_time_key: false
+              format: '/^(?<Timestamp>[^ ]+ [^ ]+ [^ ]+ [^ ]+)\s+?(?<Hostname>[^ ]+) \[Thread \d+?, Pid (?<Pid>[^ ]+)\]: (?<Payload>.*)$/'
+          {%- endif %}
+          contrail_supervisord:
+            type: tail
+            tag: temp.opencontrail.supervisord.*
+            path: /var/log/contrail/supervisord-*.log
+            path_key: log_location
+            pos_file: {{ positiondb }}/contrail.suppervisord.pos
+            parser:
+              type: regexp
+              time_format: '%Y-%m-%d %H:%M:%S,%L'
+              time_key: Timestamp
+              keep_time_key: false
+              format: '/^(?<Timestamp>[^ ]+ [^ ]+) (?<orig_severity_label>[^ ]+) (?<Payload>.*)$/'
+          contrail_main:
+            type: tail
+            tag: temp.opencontrail.main.*
+            path: /var/log/contrail/contrail-api.log, /var/log/contrail/contrail-analytics-api.log, /var/log/contrail/contrail-alarm-gen*.log, /var/log/contrail/contrail-*-stderr.log, /var/log/contrail/contrail-*svc-monitor*.log, /var/log/contrail/contrail-snmp*.log, /var/log/contrail/contrail-discovery.log, /var/log/contrail/contrail-schema.log, /var/log/contrail/contrail-topology.log, /var/log/contrail/device-manager-zk.log, /var/log/contrail/discovery.log
+            path_key: log_location
+            pos_file: {{ positiondb }}/contrail.main.pos
+            parser:
+              type: multiline
+              time_format: '%m/%d/%Y %H:%M:%S %P'
+              time_key: Timestamp
+              keep_time_key: false
+              format_firstline: '/^[^ ]+ [^ ]+ [^ ]+/'
+              format: '/^(?<Timestamp>[^ ]+ [^ ]+ [^ ]+) \[(?<programname>[^ ]+)\]: (?<Payload>.*)/'
+        filter:
+          enrich_main:
+            tag: temp.opencontrail.main.**
+            type: record_transformer
+            enable_ruby: true
+            record:
+              - name: severity_label
+                value: INFO
+              - name: Severity
+                value: 6
+          {%- if control.get('enabled', False) %}
+          enrich_collector:
+            tag: temp.opencontrail.collector.**
+            type: record_transformer
+            enable_ruby: true
+            record:
+              - name: severity_label
+                value: INFO
+              - name: Severity
+                value: 6
+              - name: programname
+                value: '${ tag_parts[5] }'
+          {%- endif %}
+          enrich_supervisord:
+            tag: temp.opencontrail.supervisord.**
+            type: record_transformer
+            remove_keys: orig_severity_label
+            enable_ruby: true
+            record:
+              - name: severity_label
+                value: ${ {'BLAT'=>'TRACE','TRAC'=>'TRACE','DEBG'=>'DEBUG','INFO'=>'INFO','WARN'=>'WARNING','ERRO'=>'ERROR','CRIT'=>'CRITICAL'}[record['orig_severity_label']] }
+              - name: Severity
+                value: ${ {'BLAT'=>7,'TRAC'=>7,'DEBG'=>7,'INFO'=>6,'WARN'=>4,'ERRO'=>3,'CRIT'=>2}[record['orig_severity_label']].to_i }
+              - name: programname
+                value: 'contrail-${ tag_parts[5] }'
+        match:
+          cast_service_tag:
+            tag: 'temp.opencontrail.**'
+            type: rewrite_tag_filter
+            rule:
+              - name: log_location
+                regexp: '^.*\/(.*)\.log$'
+                result: opencontrail.$1
+          push_to_default:
+            tag: 'opencontrail.**'
+            type: relabel
+            label: default_output
+  {%- if database.get('enabled', False) %}
+      cassandra_zookeeper:
+        input:
+          tail_cassandra_log_files:
+            type: tail
+            path: /var/log/cassandra/*.log
+            tag: temp.cassandra
+            pos_file: {{ positiondb }}/cassandra.pos
+            path_key: log_location
+            parser:
+              type: multiline
+              format: '/(?<Timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}\s[0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})\s+-\s+(?<java_severity_label>[A-Z]*)\s+-\s+(?<Payload>.*)/'
+              format_firstline: '/^[0-9]{4}-[0-9]{2}-[0-9]{2}\s[0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}/'
+              time_key: Timestamp
+              keep_time_key: false
+              time_format: '%Y-%m-%d %H:%M:%S,%N'
+          tail_zookeeper_log_files:
+            type: tail
+            path: /var/log/zookeeper/zookeeper.log
+            tag: opencontrail.zookeeper
+            pos_file: {{ positiondb }}/zookeeper.pos
+            parser:
+              type: multiline
+              format: '/(?<Timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}\s[0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})\s+-\s+(?<java_severity_label>[A-Z]*)\s+(?<Payload>.*)/'
+              format_firstline: '/^[0-9]{4}-[0-9]{2}-[0-9]{2}\s[0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}/'
+              time_key: Timestamp
+              keep_time_key: false
+              time_format: '%Y-%m-%d %H:%M:%S,%N'
+        filter:
+          cast_severity_and_severity_label:
+            tag: opencontrail.**
+            type: record_transformer
+            enable_ruby: true
+            remove_keys: java_severity_label
+            record:
+              - name: severity_label
+                value: ${ {'TRACE'=>'DEBUG', 'DEBUG'=>'DEBUG', 'INFO'=>'INFO', 'WARN'=>'WARNING', 'ERROR'=>'ERROR', 'FATAL'=>'EMERGENCY'}[record['java_severity_label']] }
+              - name: Severity
+                value: ${ {'TRACE'=>7, 'DEBUG'=>7, 'INFO'=>6, 'WARN'=>4, 'ERROR'=>3, 'FATAL'=>0}[record['java_severity_label']].to_i }
+          add_cassandra_programname:
+            tag: opencontrail.cassandra.**
+            type: record_transformer
+            enable_ruby: true
+            record:
+              - name: programname
+                value: cassandra
+          add_zookeeper_programname:
+            tag: opencontrail.zookeeper.**
+            type: record_transformer
+            enable_ruby: true
+            record:
+              - name: programname
+                value: zookeeper
+        match:
+          cast_service_tag:
+            tag: temp.cassandra
+            type: rewrite_tag_filter
+            rule:
+              - name: log_location
+                regexp: '^.*\/(.*)\.log$'
+                result: opencontrail.cassandra.$1
+          push_to_default:
+            tag: 'opencontrail.**'
+            type: relabel
+            label: default_output
+  {%- endif %}
+  {%- if control.get('enabled', False) %}
+      ifmap:
+        input:
+          tail_ifmap_log_files:
+            type: tail
+            path: /var/log/contrail/ifmap-server*.log
+            tag: opencontrail.ifmap
+            pos_file: {{ positiondb }}/ifmap.pos
+            parser:
+              type: multiline
+              format: '/(?<Timestamp>[0-9]{4}-[0-9]{2}-[0-9]{2}\s[0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3})\s+\[.+\]\s+(?<java_severity_label>[A-Z]*)\s+-\s+(?<Payload>.*)/'
+              format_firstline: '/^[0-9]{4}-[0-9]{2}-[0-9]{2}\s[0-9]{2}:[0-9]{2}:[0-9]{2},[0-9]{3}/'
+              time_key: Timestamp
+              keep_time_key: false
+              time_format: '%Y-%m-%d %H:%M:%S,%N'
+        filter:
+          cast_severity_and_severity_label:
+            tag: opencontrail.ifmap
+            type: record_transformer
+            enable_ruby: true
+            remove_keys: java_severity_label
+            record:
+              - name: severity_label
+                value: ${ {'TRACE'=>'DEBUG', 'DEBUG'=>'DEBUG', 'INFO'=>'INFO', 'WARN'=>'WARNING', 'ERROR'=>'ERROR', 'FATAL'=>'EMERGENCY'}[record['java_severity_label']] }
+              - name: Severity
+                value: ${ {'TRACE'=>7, 'DEBUG'=>7, 'INFO'=>6, 'WARN'=>4, 'ERROR'=>3, 'FATAL'=>0}[record['java_severity_label']].to_i }
+          add_ifmap_programname:
+            tag: opencontrail.ifmap
+            type: record_transformer
+            enable_ruby: true
+            record:
+              - name: programname
+                value: ifmap
+        match:
+          push_to_default:
+            tag: opencontrail.ifmap
+            type: relabel
+            label: default_output
+  {%- endif %}
+  {%- if web.get('enabled', False) and web.get('cache', {}).get('engine', '') == 'redis' %}
+      redis:
+        input:
+          tail_redis_log_file:
+            type: tail
+            path: /var/log/redis/redis-server.log
+            tag: opencontrail.redis
+            pos_file: {{ positiondb }}/redis.pos
+            parser:
+              type: multiline
+              format: '/\[(?<Pid>\d+)(|\s\|\ssignal\shandler)\]\s((?<TimestampWOYear>\d{2}\s\w+\s\d{2}:\d{2}:\d{2}\.\d{3})|\((?<UnixTimestamp>\d+)\))\s(\*\s|\#\s|)(?<Payload>.*)/'
+              format_firstline: '/\[(?<Pid>\d+)(|\s\|\ssignal\shandler)\]/'
+        filter:
+          add_redis_fields:
+            tag: opencontrail.redis
+            type: record_transformer
+            enable_ruby: true
+            record:
+              - name: programname
+                value: redis
+              - name: severity_label
+                value: INFO
+              - name: Severity
+                value: 6
+        match:
+          push_to_default:
+            tag: opencontrail.redis
+            type: relabel
+            label: default_output
+  {%- endif %}
+{%- endif %}

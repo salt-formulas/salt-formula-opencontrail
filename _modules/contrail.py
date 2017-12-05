@@ -22,7 +22,7 @@ from vnc_api.vnc_api import ServiceApplianceSet, KeyValuePairs, KeyValuePair
 try:
     from vnc_api import vnc_api
     from vnc_api.vnc_api import LinklocalServiceEntryType, \
-        LinklocalServicesTypes, GlobalVrouterConfig
+        LinklocalServicesTypes, GlobalVrouterConfig, GlobalSystemConfig
     from vnc_api.gen.resource_client import VirtualRouter, AnalyticsNode, \
         ConfigNode, DatabaseNode, BgpRouter
     from vnc_api.gen.resource_xsd import AddressFamilies, BgpSessionAttributes, \
@@ -31,6 +31,13 @@ try:
     HAS_CONTRAIL = True
 except ImportError:
     HAS_CONTRAIL = False
+
+
+try:
+    from vnc_api.gen.resource_xsd import GracefulRestartParametersType
+    HAS_OLD = False
+except ImportError:
+    HAS_OLD = True
 
 __opts__ = {}
 
@@ -703,7 +710,7 @@ def global_vrouter_config_get(name, **kwargs):
     return ret
 
 
-def global_vrouter_config_create(name, parent_type, encap_priority, vxlan_vn_id_mode, *fq_names, **kwargs):
+def global_vrouter_config_create(name, parent_type, encap_priority, vxlan_vn_id_mode, flow_export_rate, *fq_names, **kwargs):
     '''
     Create specific Contrail global vrouter config
 
@@ -731,6 +738,7 @@ def global_vrouter_config_create(name, parent_type, encap_priority, vxlan_vn_id_
             fq_name=fq_names,
             vxlan_network_identifier_mode=vxlan_vn_id_mode,
             parent_type=parent_type,
+            flow_export_rate=flow_export_rate,
         )
         if __opts__['test']:
             ret['result'] = None
@@ -1619,4 +1627,170 @@ def service_appliance_set_delete(name, **kwargs):
         vnc_client.service_appliance_set_delete(fq_name=sas_obj.get_fq_name())
         ret['comment'] = "ServiceApplianceSet " + name + " has been deleted"
         ret['changes'] = {'ServiceApplianceSet': {'old': name, 'new': ''}}
+    return ret
+
+def global_system_config_list(**kwargs):
+    '''
+    Return a list of all global system configs
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.global_system_config_list
+    '''
+
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    gsysconfs = vnc_client._objects_list('global-system-config', detail=True)
+    for gsysconf in gsysconfs:
+        ret[gsysconf.name] = gsysconf.__dict__
+    return ret
+
+
+def global_system_config_get(name, **kwargs):
+    '''
+    Return a specific Contrail global system config
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.global_system_config_get name
+    '''
+    ret = {}
+    vnc_client = _auth(**kwargs)
+    gsc_objs = vnc_client._objects_list('global-system-config', detail=True)
+    for gsc_obj in gsc_objs:
+        if name == gsc_obj.name:
+                ret[name] = gsc_obj.__dict__
+    if len(ret) == 0:
+        return {'Error': 'Error in retrieving global system config.'}
+    return ret
+
+
+def global_system_config_create(name, ans=64512, grp=None,  **kwargs):
+    '''
+    Create Contrail global system config
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.global_system_config_create name=default-global-system-config ans=64512
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': ''}
+    vnc_client = _auth(**kwargs)
+
+    gsc_objs = global_system_config_list(**kwargs)
+    if name in gsc_objs:
+        config_obj = vnc_client.global_system_config_read(fq_name=[name])
+        if config_obj.graceful_restart_parameters and not HAS_OLD:
+            curr_grp = str(config_obj.graceful_restart_parameters).replace(" ", "").split(",")
+            curr_grpd = dict(item.split('=') for item in curr_grp)
+
+        if grp and 'enable' in grp and not HAS_OLD:
+            grp_obj = GracefulRestartParametersType()
+            if 'enable' in grp:
+                grp_obj.enable = grp['enable']
+                if curr_grpd and str(grp['enable']) != str(curr_grpd['enable']):
+                    ret['changes']['enable'] = {"from": str(curr_grpd['enable']), "to": str(grp['enable'])}
+                elif not curr_grpd:
+                    ret['changes']['enable'] = {"from": None, "to": grp['enable']}
+            if 'restart_time' in grp:
+                grp_obj.restart_time = grp['restart_time']
+                if curr_grpd and grp['restart_time'] != int(curr_grpd['restart_time']):
+                    ret['changes']['restart_time'] = {"from": int(curr_grpd['restart_time']), "to": grp['restart_time']}
+                elif not curr_grpd:
+                    ret['changes']['restart_time'] = {"from": None, "to": grp['restart_time']}
+            if 'end_of_rib_timeout' in grp:
+                grp_obj.end_of_rib_timeout = grp['end_of_rib_timeout']
+                if curr_grpd and grp['end_of_rib_timeout'] != int(curr_grpd['end_of_rib_timeout']):
+                    ret['changes']['end_of_rib_timeout'] = {"from": int(curr_grpd['end_of_rib_timeout']), "to": grp['end_of_rib_timeout']}
+                elif not curr_grpd:
+                    ret['changes']['end_of_rib_timeout'] = {"from": None, "to": grp['end_of_rib_timeout']}
+            if 'bgp_helper_enable' in grp:
+                grp_obj.bgp_helper_enable = grp['bgp_helper_enable']
+                if curr_grpd and str(grp['bgp_helper_enable']) != str(curr_grpd['bgp_helper_enable']):
+                    ret['changes']['bgp_helper_enable'] = {"from": str(curr_grpd['bgp_helper_enable']), "to": grp['bgp_helper_enable']}
+                elif not curr_grpd:
+                    ret['changes']['bgp_helper_enable'] = {"from": None, "to": grp['bgp_helper_enable']}
+            if 'xmpp_helper_enable' in grp:
+                grp_obj.xmpp_helper_enable = grp['xmpp_helper_enable']
+                if curr_grpd and str(grp['xmpp_helper_enable']) != str(curr_grpd['xmpp_helper_enable']):
+                    ret['changes']['xmpp_helper_enable'] = {"from": str(curr_grpd['xmpp_helper_enable']), "to": grp['xmpp_helper_enable']}
+                elif not curr_grpd:
+                    ret['changes']['xmpp_helper_enable'] = {"from": None, "to": grp['xmpp_helper_enable']}
+            if 'long_lived_restart_time' in grp:
+                grp_obj.long_lived_restart_time = grp['long_lived_restart_time']
+                if curr_grpd and grp['long_lived_restart_time'] != int(curr_grpd['long_lived_restart_time']):
+                    ret['changes']['long_lived_restart_time'] = {"from": int(curr_grpd['long_lived_restart_time']), "to": grp['long_lived_restart_time']}
+                elif not curr_grpd:
+                    ret['changes']['long_lived_restart_time'] = {"from": None, "to": grp['long_lived_restart_time']}
+        else:
+            grp_obj = None
+
+        config_obj.graceful_restart_parameters = grp_obj
+
+        if ans:
+            if config_obj.autonomous_system != ans:
+                ret['changes']['autonomous_system'] = {"from": config_obj.autonomous_system, "to": ans}
+                config_obj.autonomous_system = ans
+
+        vnc_client.global_system_config_update(config_obj)
+        ret['comment'] = 'Global system config  ' + name + ' has been updated'
+    else:
+        config_obj = GlobalSystemConfig(name=name)
+        if grp and not HAS_OLD:
+            grp_obj = GracefulRestartParametersType()
+            if 'enable' in grp:
+                grp_obj.enable = grp['enable']
+            if 'restart_time' in grp:
+                grp_obj.restart_time = grp['restart_time']
+            if 'end_of_rib_timeout' in grp:
+                grp_obj.end_of_rib_timeout = grp['end_of_rib_timeout']
+            if 'bgp_helper_enable' in grp:
+                grp_obj.bgp_helper_enable = grp['bgp_helper_enable']
+            if 'xmpp_helper_enable' in grp:
+                grp_obj.xmpp_helper_enable = grp['xmpp_helper_enable']
+            if 'long_lived_restart_time' in grp:
+                grp_obj.long_lived_restart_time = grp['long_lived_restart_time']
+            config_obj.graceful_restart_parameters = grp_obj
+        if ans:
+            config_obj.autonomous_system = ans
+
+        vnc_client.global_system_config_create(config_obj)
+        ret['changes'] = {"created": "new"}
+        ret['comment'] = 'Global system config  ' + name + ' has been created '
+
+    return ret
+
+
+def global_system_config_delete(name, **kwargs):
+    '''
+    Delete specific Contrail global system config
+
+    CLI Example:
+
+    .. code-block:: bash
+
+        salt '*' contrail.global_system_config_delete name
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': ''}
+    vnc_client = _auth(**kwargs)
+
+    gsc_obj = GlobalSystemConfig(name)
+    if __opts__['test']:
+        ret['result'] = None
+        ret['comment'] = "Global system config " + name + " will be deleted"
+    else:
+        vnc_client.global_system_config_delete(fq_name=gsc_obj.get_fq_name())
+        ret['comment'] = "GlobalSystemConfig " + name + " has been deleted"
+        ret['changes'] = {'GlobalSystemConfig': {'old': name, 'new': ''}}
     return ret

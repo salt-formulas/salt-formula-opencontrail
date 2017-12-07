@@ -73,7 +73,7 @@ opencontrail_collector_packages:
   - template: jinja
 {%- endif %}
 
-{%- if collector.version >= 3.0 and grains.get('init') != 'systemd' %}
+{%- if collector.version == 3.0 %}
 
 /etc/contrail/supervisord_analytics_files/contrail-analytics-nodemgr.ini:
   file.managed:
@@ -83,6 +83,12 @@ opencontrail_collector_packages:
 /etc/contrail/supervisord_analytics.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ collector.version }}/collector/supervisord_analytics.conf
+
+/etc/contrail/supervisord_analytics_files/contrail-alarm-gen.ini:
+  file.managed:
+  - source: salt://opencontrail/files/{{ collector.version }}/contrail-alarm-gen.ini
+  - makedirs: True
+  - template: jinja
 
 {%- endif %}
 
@@ -104,9 +110,10 @@ opencontrail_collector_services:
     - file: /etc/contrail/contrail-snmp-collector.conf
     - file: /etc/contrail/contrail-analytics-nodemgr.conf
     - file: /etc/contrail/contrail-alarm-gen.conf
-    {%- if collector.version >= 3.0 and grains.get('init') != 'systemd' %}
+    {%- if collector.version == 3.0 %}
     - file: /etc/contrail/supervisord_analytics_files/contrail-analytics-nodemgr.ini
     - file: /etc/contrail/supervisord_analytics.conf
+    - file: /etc/contrail/supervisord_analytics_files/contrail-alarm-gen.ini
     {%- endif %}
 
 {%- if grains.get('virtual_subtype', None) == "Docker" %}

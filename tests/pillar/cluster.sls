@@ -89,6 +89,9 @@ opencontrail:
     discovery:
       host: 127.0.0.1
     data_ttl: 1
+    alarm_gen:
+      workers: 1
+      port_prefix: 59
     database:
       members:
       - host: 127.0.0.1

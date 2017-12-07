@@ -64,6 +64,8 @@ suites:
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/single40.sls
+    excludes:
+      - ubuntu-trusty
   - name: analytics3
     provisioner:
       pillars-from-files:
@@ -72,6 +74,8 @@ suites:
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/analytics40.sls
+    excludes:
+      - ubuntu-trusty
   - name: control3
     provisioner:
       pillars-from-files:
@@ -80,6 +84,8 @@ suites:
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/control40.sls
+    excludes:
+      - ubuntu-trusty
   - name: cluster3
     provisioner:
       pillars-from-files:
@@ -88,6 +94,8 @@ suites:
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/cluster40.sls
+    excludes:
+      - ubuntu-trusty
   - name: tor3
     provisioner:
       pillars-from-files:
@@ -96,13 +104,19 @@ suites:
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/tor40.sls
+    excludes:
+      - ubuntu-trusty
   - name: vrouter3
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/vrouter.sls
+    excludes:
+      - ubuntu-trusty
   - name: vrouter40
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/vrouter40.sls
+    excludes:
+      - ubuntu-trusty
 
 # vim: ft=yaml sw=2 ts=2 sts=2 tw=125

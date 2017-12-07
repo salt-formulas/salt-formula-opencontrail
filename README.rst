@@ -866,6 +866,18 @@ DPDK vRouter
           pci: 0000:81:00.1
       ...
 
+Increase number of alarm-gen workers
+------------------------------------
+
+Port prefix will increment used ports by workers starting with 5901.
+
+.. code-block:: yaml
+
+    collector:
+      alarm_gen:
+        workers: 1
+        port_prefix: 59
+
 Contrail client
 ---------------
 

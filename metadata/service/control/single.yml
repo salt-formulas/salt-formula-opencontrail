@@ -97,6 +97,9 @@ parameters:
         password: '${_param:keystone_admin_password}'
         token: '${_param:keystone_service_token}'
         tenant: admin
+      alarm_gen:
+        workers: 1
+        port_prefix: 59
     database:
       version: ${_param:opencontrail_version}
       cassandra:

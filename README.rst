@@ -1105,6 +1105,44 @@ Enforcing physical/logical interfaces for routers
                     virtual_network: 'virtual-network'
 
 
+Contrail DNS custom forwarders
+------------------------------
+
+By default Contrail uses the /etc/resolv.conf file to determine the upstream DNS servers.
+This can have some side-affects, like resolving internal DNS entries on you public instances.
+
+In order to overrule this default set, you can configure nameservers using pillar data.
+The formula is then responsible for configuring and generating a alternate resolv.conf file.
+
+Note: this has been patched recently in the Contrail distribution of Mirantis:
+https://github.com/Mirantis/contrail-controller/commit/ed9a25ccbcfebd7d079a93aecc5a1a7bf1265ea4
+https://github.com/Mirantis/contrail-controller/commit/94c844cf2e9bcfcd48587aec03d10b869e737ade
+
+
+To change forwarders for the default-dns option (which is handled by compute nodes):
+
+.. code-block:: yaml
+
+    compute:
+      ....
+      dns:
+        forwarders:
+        - 8.8.8.8
+        - 8.8.4.4
+      ....
+
+To change forwarders for vDNS zones (handled by control nodes):
+
+.. code-block:: yaml
+
+    control:
+      ....
+      dns:
+        forwarders:
+        - 8.8.8.8
+        - 8.8.4.4
+      ....
+
 
 Usage
 =====

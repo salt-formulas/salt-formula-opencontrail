@@ -68,6 +68,10 @@ opencontrail:
     name: ntw-01
     bind:
       address: 127.0.0.1
+    dns:
+      forwarders:
+      - 8.8.8.8
+      - 8.8.4.4
     discovery:
       host: 127.0.0.1
     master:

@@ -64,7 +64,7 @@ opencontrail_control_doctrail:
   - source: salt://opencontrail/files/{{ control.version }}/control/contrail-rndc.conf
   - makedirs: True
 
-{%- if control.version == 3.0 and control.get('dns', {}).get('forwarders', False) ) %}
+{%- if control.version == 3.0 and control.get('dns', {}).get('forwarders', False) %}
 contrail_control_resolv:
   file.managed:
   - name: /etc/contrail/resolv.conf

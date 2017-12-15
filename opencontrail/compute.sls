@@ -59,7 +59,7 @@ net.ipv4.ip_local_reserved_ports:
   - require:
     - pkg: opencontrail_compute_packages
 
-{%- if compute.version == 3.0 and compute.get('dns', {}).get('forwarders', False) ) %}
+{%- if compute.version == 3.0 and compute.get('dns', {}).get('forwarders', False) %}
 contrail_compute_resolv:
   file.managed:
   - name: /etc/contrail/resolv.conf

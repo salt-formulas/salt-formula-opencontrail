@@ -64,6 +64,18 @@ opencontrail_control_doctrail:
   - source: salt://opencontrail/files/{{ control.version }}/control/contrail-rndc.conf
   - makedirs: True
 
+{%- if control.version == 3.0 and control.get('dns', {}).get('forwarders', False) ) %}
+contrail_control_resolv:
+  file.managed:
+  - name: /etc/contrail/resolv.conf
+  - source: salt://opencontrail/files/{{ control.version }}/resolv.conf
+  - template: jinja
+  - defaults:
+      dns: {{ control.get('dns', {})|yaml }}
+  - require:
+    - file: /etc/contrail
+{%- endif %}
+
 {%- if control.version >= 3.0 and grains.get('init') != 'systemd' %}
 
 /etc/contrail/supervisord_control_files/contrail-control-nodemgr.ini:

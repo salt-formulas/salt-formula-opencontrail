@@ -122,13 +122,5 @@ vm.overcommit_memory:
   - require:
     - file: /etc/contrail
 {%- endif %}
-{%- endif %}
 
-{%- if common.version == 3.0 and pillar.opencontrail.get('compute', {}).get('dns', {}).get('forwarders', pillar.opencontrail.get('control', {}).get('dns', {}).get('forwarders', False) ) %}
-/etc/contrail/resolv.conf:
-  file.managed:
-  - source: salt://opencontrail/files/{{ common.version }}/resolv.conf
-  - template: jinja
-  - require:
-    - file: /etc/contrail
 {%- endif %}

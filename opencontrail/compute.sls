@@ -59,6 +59,18 @@ net.ipv4.ip_local_reserved_ports:
   - require:
     - pkg: opencontrail_compute_packages
 
+{%- if compute.version == 3.0 and compute.get('dns', {}).get('forwarders', False) ) %}
+contrail_compute_resolv:
+  file.managed:
+  - name: /etc/contrail/resolv.conf
+  - source: salt://opencontrail/files/{{ compute.version }}/resolv.conf
+  - template: jinja
+  - defaults:
+      dns: {{ compute.get('dns', {})|yaml }}
+  - require:
+    - file: /etc/contrail
+{%- endif %}
+
 {%- endif %}
 
 /etc/contrail/agent_param:

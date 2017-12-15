@@ -122,4 +122,5 @@ vm.overcommit_memory:
   - require:
     - file: /etc/contrail
 {%- endif %}
+
 {%- endif %}

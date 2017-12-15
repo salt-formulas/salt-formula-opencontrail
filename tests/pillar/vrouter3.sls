@@ -18,6 +18,10 @@ opencontrail:
       host: 127.0.0.1
     bind:
       address: 127.0.0.1
+    dns:
+      forwarders:
+      - 8.8.8.8
+      - 8.8.4.4
     interface:
       address: 127.0.0.1
       dev: eth0

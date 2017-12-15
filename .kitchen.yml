@@ -59,7 +59,7 @@ suites:
   - name: single3
     provisioner:
       pillars-from-files:
-        opencontrail.sls: tests/pillar/single.sls
+        opencontrail.sls: tests/pillar/single3.sls
   - name: single40
     provisioner:
       pillars-from-files:
@@ -69,7 +69,7 @@ suites:
   - name: analytics3
     provisioner:
       pillars-from-files:
-        opencontrail.sls: tests/pillar/analytics.sls
+        opencontrail.sls: tests/pillar/analytics3.sls
   - name: analytics40
     provisioner:
       pillars-from-files:
@@ -79,7 +79,7 @@ suites:
   - name: control3
     provisioner:
       pillars-from-files:
-        opencontrail.sls: tests/pillar/control.sls
+        opencontrail.sls: tests/pillar/control3.sls
   - name: control40
     provisioner:
       pillars-from-files:
@@ -89,7 +89,7 @@ suites:
   - name: cluster3
     provisioner:
       pillars-from-files:
-        opencontrail.sls: tests/pillar/cluster.sls
+        opencontrail.sls: tests/pillar/cluster3.sls
   - name: cluster40
     provisioner:
       pillars-from-files:
@@ -99,7 +99,7 @@ suites:
   - name: tor3
     provisioner:
       pillars-from-files:
-        opencontrail.sls: tests/pillar/tor.sls
+        opencontrail.sls: tests/pillar/tor3.sls
   - name: tor40
     provisioner:
       pillars-from-files:
@@ -109,7 +109,7 @@ suites:
   - name: vrouter3
     provisioner:
       pillars-from-files:
-        opencontrail.sls: tests/pillar/vrouter.sls
+        opencontrail.sls: tests/pillar/vrouter3.sls
     excludes:
       - ubuntu-trusty
   - name: vrouter40

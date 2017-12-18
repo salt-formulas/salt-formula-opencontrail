@@ -133,6 +133,7 @@ Enforce the global vrouter config existence
       - parent_type: "global-system-config"
       - encap_priority : "MPLSoUDP,MPLSoGRE"
       - vxlan_vn_id_mode : "automatic"
+      - flow_export_rate: 100
       - fq_names:
         - default-global-system-config
         - default-global-vrouter-config
@@ -299,6 +300,7 @@ Enforce the database node existence
         - name: dbs01
         - ip_address: 10.0.0.33
 
+
 Enforce the database node absence
 -----------------------------------
 
@@ -309,8 +311,31 @@ Enforce the database node absence
         - name: dbs01
 
 
+Enforce the global system config existence
+------------------------------------------
+
+.. code-block:: yaml
+    global_system_config_update:
+      contrail.global_system_config_present:
+        - name: default-global-system_config
+        - ans: 64512
+        - grp:
+            enable: true
+            restart_time: 400
+            bgp_helper_enable: true
+            xmpp_helper_enable: true
+            long_lived_restart_time: 400
+            end_of_rib_timeout: 40
 
 
+Enforce the global system config absence
+----------------------------------------
+
+.. code-block:: yaml
+
+    global_system_config_delete:
+      contrail.global_system_config_absent:
+        - name: global-system_config
 '''
 
 
@@ -466,7 +491,7 @@ def logical_interface_absent(name, parent_names, parent_type=None, **kwargs):
 
 
 def global_vrouter_config_present(name, parent_type, encap_priority="MPLSoUDP,MPLSoGRE", vxlan_vn_id_mode="automatic",
-                                  *fq_names, **kwargs):
+                                  flow_export_rate=None, *fq_names, **kwargs):
     '''
     Ensures that the Contrail global vrouter config exists.
 
@@ -475,9 +500,10 @@ def global_vrouter_config_present(name, parent_type, encap_priority="MPLSoUDP,MP
     :param encap_priority: 	Ordered list of encapsulations that vrouter will use in priority order
     :param vxlan_vn_id_mode:	Method of allocation of VxLAN VNI(s).
     :param fq_names:		Fully Qualified Name of resource devided <string>array
+    :param flow_export_rate:	Flow export rate is global config, rate at which each vrouter will sample and export flow records to analytics
     '''
     ret = __salt__['contrail.global_vrouter_config_create'](name, parent_type, encap_priority, vxlan_vn_id_mode,
-                                                            *fq_names, **kwargs)
+                                                            flow_export_rate, *fq_names, **kwargs)
     if len(ret['changes']) == 0:
         pass
     return ret
@@ -733,4 +759,34 @@ def service_appliance_set_absent(name, **kwargs):
     physical_router = __salt__['contrail.service_appliance_set_get'](name, **kwargs)
     if 'Error' not in physical_router:
         ret = __salt__['contrail.service_appliance_set_delete'](name, **kwargs)
+    return ret
+
+
+def global_system_config_present(name, ans=64512, grp=None, **kwargs):
+    '''
+    Ensures that the Contrail global system config exists or is updated
+
+    :param name:        Virtual router name
+    :param ans:         Autonomous system number
+    :param grp:         Graceful-Restart-Parameters - dict of parameters
+    '''
+    ret = __salt__['contrail.global_system_config_create'](name=name, ans=ans, grp=grp, **kwargs)
+    if len(ret['changes']) == 0:
+        pass
+    return ret
+
+
+def global_system_config_absent(name, **kwargs):
+    '''
+    Ensure that the Contrail global system config doesn't exist
+
+    :param name: The name of the global system config that should not exist
+    '''
+    ret = {'name': name,
+           'changes': {},
+           'result': True,
+           'comment': 'Global system config "{0}" is already absent'.format(name)}
+    gsc = __salt__['contrail.global_system_config_get'](name, **kwargs)
+    if 'Error' not in gsc:
+        ret = __salt__['contrail.global_system_config_delete'](name, **kwargs)
     return ret

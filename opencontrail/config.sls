@@ -226,6 +226,24 @@ opencontrail_config_entrypoint:
 
 {%- endif %}
 
+{%- else %}
+{%- if config.container_name is defined %}
+opencontrail_config_dockerng_services:
+  dockerng_service.running:
+    - services: {{ config.services }}
+    - container: {{ config.container_name }}
+    - watch:
+      - file: /etc/contrail/contrail-svc-monitor.conf
+      - file: /etc/contrail/contrail-schema.conf
+      - file: /etc/contrail/contrail-api.conf
+      - file: /etc/contrail/vnc_api_lib.ini
+      - file: /etc/contrail/contrail-device-manager.conf
+      - file: /etc/contrail/contrail-config-nodemgr.conf
+      {%- if config.identity.engine == "keystone" %}
+      - file: /etc/contrail/contrail-keystone-auth.conf
+      {%- endif %}
+{%- endif%}
+
 {%- endif %}
 
 {%- endif %}

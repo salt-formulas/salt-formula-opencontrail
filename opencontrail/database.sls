@@ -276,6 +276,28 @@ opencontrail_database_entrypoint:
 
 {%- endif %}
 
+{%- else %}
+{%- if database.container_name is defined %}
+opencontrail_database_dockerng_services:
+  dockerng_service.running:
+    - services:
+      - contrail-database
+      - kafka
+      - contrail-database-nodemgr
+      - zookeeper
+    - container: {{ database.container_name }}
+    - watch:
+      - file: {{ database.cassandra_config }}cassandra.yaml
+      - file: {{ database.cassandra_config }}cassandra-env.sh
+      - file: {{ database.cassandra_config }}logback.xml
+      - file: /etc/zookeeper/conf/zoo.cfg
+      - file: /etc/default/zookeeper
+      - file: /etc/contrail/contrail-database-nodemgr.conf
+      - file: /var/lib/zookeeper/myid
+      - file: /etc/zookeeper/conf/log4j.properties
+      - file: /usr/share/kafka/config/server.properties
+{%- endif %}
+
 {%- endif %}
 
 {%- endif %}

@@ -127,6 +127,22 @@ opencontrail_collector_entrypoint:
 
 {%- endif %}
 
+{%- else %}
+{%- if collector.container_name is defined %}
+opencontrail_collector_dockerng_services:
+  dockerng_service.running:
+  - services: {{ collector.services }}
+  - container: {{ collector.container_name }}
+  - watch:
+    - file: /etc/contrail/contrail-analytics-api.conf
+    - file: /etc/contrail/contrail-query-engine.conf
+    - file: /etc/contrail/contrail-collector.conf
+    - file: {{ collector.redis_config }}
+    - file: /etc/contrail/contrail-topology.conf
+    - file: /etc/contrail/contrail-snmp-collector.conf
+    - file: /etc/contrail/contrail-analytics-nodemgr.conf
+    - file: /etc/contrail/contrail-alarm-gen.conf
+{%- endif%}
 {%- endif %}
 
 {%- endif %}

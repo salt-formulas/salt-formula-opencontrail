@@ -57,6 +57,19 @@ opencontrail_web_entrypoint:
   file.managed:
   - source: salt://opencontrail/files/{{ web.version }}/contrail-webui-webserver.service
   - template: jinja
+
+{%- if web.container_name is defined %}
+opencontrail_web_dockerng_services:
+  dockerng_service.running:
+    - services:
+      - contrail-webui-middleware
+      - contrail-webui
+    - container: {{ web.container_name }}
+    - watch:
+      - file: /etc/contrail/config.global.js
+      - file: /etc/contrail/contrail-webui-userauth.js
+{%- endif%}
+
 {%- endif %}
 
 {%- endif %}

@@ -116,6 +116,18 @@ opencontrail_control_entrypoint:
   - mode: 755
 {%- endif %}
 
+{%- else %}
+{%- if control.container_name is defined %}
+opencontrail_control_dockerng_services:
+  dockerng_service.running:
+    - services: {{ control.services }}
+    - container: {{ control.container_name }}
+    - watch:
+      - file: /etc/contrail/dns/contrail-rndc.conf
+      - file: /etc/contrail/contrail-dns.conf
+      - file: /etc/contrail/contrail-control.conf
+      - file: /etc/contrail/contrail-control-nodemgr.conf
+{%- endif %}
 {%- endif %}
 
 {%- endif %}

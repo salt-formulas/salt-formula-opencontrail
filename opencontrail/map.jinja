@@ -25,6 +25,10 @@ collector:
     {%- else %}
         ['contrail-collector', 'contrail-analytics-api', 'contrail-query-engine', 'contrail-alarm-gen', 'contrail-snmp-collector', 'contrail-topology', 'contrail-analytics-nodemgr', 'redis-server']
     {%- endif %}
+    {%- if pillar.get('docker', {}).get('client', {}).get('compose', {}).get('opencontrail', {}).get('service', {}).get('analytics', {}).container_name is defined %}
+    container_name:
+        {{ pillar.docker.client.compose.opencontrail.service.analytics.container_name }}
+    {%- endif%}
   RedHat:
     pkgs:
         ['contrail-analytics']
@@ -35,6 +39,10 @@ collector:
     {%- else %}
         ['contrail-collector', 'contrail-analytics-api', 'contrail-query-engine', 'contrail-alarm-gen', 'contrail-snmp-collector', 'contrail-topology', 'contrail-analytics-nodemgr', 'redis']
     {%- endif %}
+    {%- if pillar.get('docker', {}).get('client', {}).get('compose', {}).get('opencontrail', {}).get('service', {}).get('analytics', {}).container_name is defined %}
+    container_name:
+        {{ pillar.docker.client.compose.opencontrail.service.analytics.container_name }}
+    {%- endif%}
 compute:
   Debian:
     pkgs:
@@ -68,6 +76,10 @@ config:
     {%- else %}
         ['contrail-api', 'contrail-schema', 'contrail-svc-monitor', 'contrail-device-manager', 'contrail-config-nodemgr']
     {%- endif %}
+    {%- if pillar.get('docker', {}).get('client', {}).get('compose', {}).get('opencontrail', {}).get('service', {}).get('controller', {}).container_name is defined %}
+    container_name:
+        {{ pillar.docker.client.compose.opencontrail.service.controller.container_name }}
+    {%- endif%}
   RedHat:
     pkgs:
         ['contrail-openstack-config']
@@ -77,6 +89,10 @@ config:
     {%- else %}
         ['contrail-api', 'contrail-schema', 'contrail-svc-monitor', 'contrail-device-manager', 'contrail-config-nodemgr']
     {%- endif %}
+    {%- if pillar.get('docker', {}).get('client', {}).get('compose', {}).get('opencontrail', {}).get('service', {}).get('controller', {}).container_name is defined %}
+    container_name:
+        {{ pillar.docker.client.compose.opencontrail.service.controller.container_name }}
+    {%- endif%}
 control:
   Debian:
     pkgs:
@@ -87,6 +103,10 @@ control:
     {%- else %}
         ['contrail-control', 'contrail-named', 'contrail-dns', 'contrail-control-nodemgr']
     {%- endif %}
+    {%- if pillar.get('docker', {}).get('client', {}).get('compose', {}).get('opencontrail', {}).get('service', {}).get('controller', {}).container_name is defined %}
+    container_name:
+        {{ pillar.docker.client.compose.opencontrail.service.controller.container_name }}
+    {%- endif%}
   RedHat:
     pkgs:
          ['contrail-openstack-control']
@@ -96,6 +116,10 @@ control:
     {%- else %}
         ['contrail-control', 'contrail-named', 'contrail-dns', 'contrail-control-nodemgr']
     {%- endif %}
+    {%- if pillar.get('docker', {}).get('client', {}).get('compose', {}).get('opencontrail', {}).get('service', {}).get('controller', {}).container_name is defined %}
+    container_name:
+        {{ pillar.docker.client.compose.opencontrail.service.controller.container_name }}
+    {%- endif%}
 database:
   Debian:
     pkgs:
@@ -110,6 +134,10 @@ database:
     {%- else %}
          ['contrail-database', 'contrail-database-nodemgr', 'zookeeper']
     {%- endif %}
+    {%- if pillar.get('docker', {}).get('client', {}).get('compose', {}).get('opencontrail', {}).get('service', {}).get('analyticsdb', {}).container_name is defined %}
+    container_name:
+        {{ pillar.docker.client.compose.opencontrail.service.analyticsdb.container_name }}
+    {%- endif%}
   RedHat:
     pkgs:
          ['contrail-openstack-database', 'zookeeper', 'supervisor', 'java-1.7.0-openjdk-headless']
@@ -121,6 +149,10 @@ database:
     {%- else %}
          ['contrail-database', 'contrail-database-nodemgr', 'zookeeper']
     {%- endif %}
+    {%- if pillar.get('docker', {}).get('client', {}).get('compose', {}).get('opencontrail', {}).get('service', {}).get('analyticsdb', {}).container_name is defined %}
+    container_name:
+        {{ pillar.docker.client.compose.opencontrail.service.analyticsdb.container_name }}
+    {%- endif%}
 web:
   Debian:
     pkgs:
@@ -130,6 +162,10 @@ web:
     database:
       engine: cassandra
       port: 9160
+    {%- if pillar.get('docker', {}).get('client', {}).get('compose', {}).get('opencontrail', {}).get('service', {}).get('controller', {}).container_name is defined  %}
+    container_name:
+        {{ pillar.docker.client.compose.opencontrail.service.controller.container_name }}
+    {%- endif%}
   RedHat:
     pkgs:
          ['contrail-web-controller']
@@ -138,6 +174,10 @@ web:
     database:
       engine: cassandra
       port: 9160
+    {%- if pillar.get('docker', {}).get('client', {}).get('compose', {}).get('opencontrail', {}).get('service', {}).get('controller', {}).container_name is defined %}
+    container_name:
+        {{ pillar.docker.client.compose.opencontrail.service.controller.container_name }}
+    {%- endif%}
 client:
   Debian:
     pkgs:
@@ -276,6 +316,10 @@ web:
     database:
       engine: cassandra
       port: 9160
+    {%- if pillar.docker.client.compose.opencontrail_api.service.controller.name is defined %}
+    container_name:
+        {{ pillar.docker.client.compose.opencontrail_api.service.controller.name }}
+    {%- endif%}
   RedHat:
     pkgs:
          ['contrail-web-controller']
@@ -284,6 +328,10 @@ web:
     database:
       engine: cassandra
       port: 9160
+    {%- if pillar.docker.client.compose.opencontrail_api.service.controller.name is defined %}
+    container_name:
+        {{ pillar.docker.client.compose.opencontrail_api.service.controller.name }}
+    {%- endif%}
 client:
   Debian:
     pkgs:

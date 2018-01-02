@@ -16,10 +16,22 @@ opencontrail_client_packages:
 {%- endif %}
 {%- endif %}
 
+{%- if client.global_system_config is defined %}
+global_system_config_create:
+  contrail.global_system_config_present:
+  - name: {{ client.global_system_config.get('name', 'default-global-system-config') }}
+  - ans: {{ client.global_system_config.get('ans', '64512') }}
+  {%- if client.global_system_config.grp is defined %}
+   - grp:
+    {{ client.global_system_config.get('grp')  | yaml(False) | indent(4) }}
+  {%- endif %}
+
+{%- endif %}
+
 {%- if client.global_vrouter_config is defined %}
 global_vrouter_config_create:
   contrail.global_vrouter_config_present:
-  - name: {{ client.global_vrouter_config.get('name', 'global-vrouter-config') }}
+  - name: {{ client.global_vrouter_config.get('name', 'default-global-vrouter-config') }}
   - parent_type: {{ client.global_vrouter_config.get('parent_type', 'global-system-config') }}
   - encap_priority: {{ client.global_vrouter_config.get('encap_priority', 'MPLSoUDP,MPLSoGRE') }}
   - vxlan_vn_id_mode: {{ client.global_vrouter_config.get('vxlan_vn_id_mode', 'automatic') }}

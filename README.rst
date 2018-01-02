@@ -911,6 +911,26 @@ Enforcing virtual routers
           ip_address: 172.16.0.12
           dpdk_enabled: True
 
+
+Enforcing global system config
+
+.. code-block:: yaml
+
+  opencontrail:
+    client:
+      ...
+      global_system_config:
+        name: default-global-system-config
+        asn: 64512
+        grp:
+          enable: true
+          restart_time: 60
+          end_of_rib_timeout: 30
+          bgp_helper_enable: false
+          xmpp_helper_enable: false
+          long_lived_restart_time: 300
+
+
 Enforcing global vrouter config
 
 .. code-block:: yaml
@@ -926,6 +946,8 @@ Enforcing global vrouter config
         fq_names:
           - 'default-global-system-config'
           - 'default-global-vrouter-config'
+
+
 
 Enforcing control nodes
 

@@ -1691,6 +1691,8 @@ def global_system_config_create(name, ans=64512, grp=None,  **kwargs):
         if config_obj.graceful_restart_parameters and not HAS_OLD:
             curr_grp = str(config_obj.graceful_restart_parameters).replace(" ", "").split(",")
             curr_grpd = dict(item.split('=') for item in curr_grp)
+        else:
+            curr_grpd = None
 
         if grp and 'enable' in grp and not HAS_OLD:
             grp_obj = GracefulRestartParametersType()

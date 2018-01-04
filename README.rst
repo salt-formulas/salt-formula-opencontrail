@@ -939,7 +939,7 @@ Enforcing global vrouter config
     client:
       ...
       global_vrouter_config:
-        name: global-vrouter-config
+        name: default-global-vrouter-config
         parent_type: global-system-config
         encap_priority: "MPLSoUDP,MPLSoGRE"
         vxlan_vn_id_mode: automatic

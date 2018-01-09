@@ -251,6 +251,8 @@ Enforce the BGP router existence
         - ip_address: 10.0.0.133
         - type: mx
         - asn: 64512
+        - key_type: md5
+        - key: password
 
 
 Enforce the BGP router absence
@@ -623,7 +625,7 @@ def config_node_absent(name, **kwargs):
     return ret
 
 
-def bgp_router_present(name, type, ip_address, asn=64512, **kwargs):
+def bgp_router_present(name, type, ip_address, asn=64512, key_type=None, key=None, **kwargs):
     '''
     Ensures that the Contrail BGP router exists.
 
@@ -634,7 +636,7 @@ def bgp_router_present(name, type, ip_address, asn=64512, **kwargs):
            'result': True,
            'comment': 'BGP router {0} already exists'.format(name)}
 
-    ret = __salt__['contrail.bgp_router_create'](name, type, ip_address, asn, **kwargs)
+    ret = __salt__['contrail.bgp_router_create'](name, type, ip_address, asn, key_type, key, **kwargs)
     if len(ret['changes']) == 0:
         pass
     return ret

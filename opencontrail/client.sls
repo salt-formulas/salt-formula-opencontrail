@@ -95,6 +95,8 @@ opencontrail_client_bgp_router_{{ bgp_router_name }}:
   - ip_address: {{ bgp_router.ip_address }}
   - type: {{ bgp_router.type }}
   - asn: {{ bgp_router.get('asn', 64512) }}
+  - key_type: {{ bgp_router.get('key_type') }}
+  - key: {{ bgp_router.get('key') }}
   - user: {{ client.identity.user }}
   - password: {{ client.identity.password }}
   - project: {{ client.identity.tenant }}

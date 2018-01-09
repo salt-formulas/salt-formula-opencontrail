@@ -26,7 +26,8 @@ try:
     from vnc_api.gen.resource_client import VirtualRouter, AnalyticsNode, \
         ConfigNode, DatabaseNode, BgpRouter
     from vnc_api.gen.resource_xsd import AddressFamilies, BgpSessionAttributes, \
-        BgpSession, BgpPeeringAttributes, BgpRouterParams
+        BgpSession, BgpPeeringAttributes, BgpRouterParams, AuthenticationData, \
+        AuthenticationKeyItem
 
     HAS_CONTRAIL = True
 except ImportError:
@@ -1014,7 +1015,7 @@ def bgp_router_get(name, **kwargs):
     return ret
 
 
-def bgp_router_create(name, type, ip_address, asn=64512, **kwargs):
+def bgp_router_create(name, type, ip_address, asn=64512, key_type=None, key=None, **kwargs):
     '''
     Create specific Contrail control node
 
@@ -1036,6 +1037,9 @@ def bgp_router_create(name, type, ip_address, asn=64512, **kwargs):
     if type != 'control-node':
         address_families.remove('erm-vpn')
 
+    key_type = None if key_type == 'None' else key_type
+    key = None if key == 'None' else key
+
     bgp_addr_fams = AddressFamilies(address_families)
     bgp_sess_attrs = [
        BgpSessionAttributes(address_families=bgp_addr_fams)]
@@ -1043,10 +1047,16 @@ def bgp_router_create(name, type, ip_address, asn=64512, **kwargs):
     bgp_peering_attrs = BgpPeeringAttributes(session=bgp_sessions)
     rt_inst_obj = _get_rt_inst_obj(vnc_client)
 
+    bgp_auth_data = None
+
     if type == 'control-node':
         vendor = 'contrail'
     elif type == 'router':
         vendor = 'mx'
+        if key_type == 'md5':
+            key_id = 0
+            key_items = AuthenticationKeyItem(key_id, key)
+            bgp_auth_data = AuthenticationData(key_type, [key_items])
     else:
         vendor = 'unknown'
 
@@ -1054,7 +1064,8 @@ def bgp_router_create(name, type, ip_address, asn=64512, **kwargs):
                                     vendor=vendor, autonomous_system=int(asn),
                                     identifier=_get_ip(ip_address),
                                     address=_get_ip(ip_address),
-                                    port=179, address_families=bgp_addr_fams)
+                                    port=179, address_families=bgp_addr_fams,
+                                    auth_data=bgp_auth_data)
 
     bgp_router_objs = bgp_router_list(**kwargs)
     if name in bgp_router_objs:
@@ -1066,6 +1077,18 @@ def bgp_router_create(name, type, ip_address, asn=64512, **kwargs):
             ret['changes'].update({"vendor": {'old': bgp_router_obj.bgp_router_parameters.vendor, 'new': vendor}})
         if bgp_router_obj.bgp_router_parameters.address != ip_address:
             ret['changes'].update({"ip_address": {'old': bgp_router_obj.bgp_router_parameters.address, 'new': ip_address}})
+        try:
+            if bgp_router_obj.bgp_router_parameters.auth_data.key_type != key_type:
+                ret['changes'].update({"key_type": {'old': bgp_router_obj.bgp_router_parameters.auth_data.key_type, 'new': key_type}})
+        except:
+            if key_type != None:
+                ret['changes'].update({"key_type": {'old': None, 'new': key_type}})
+        if key_type == 'md5':
+            try:
+                if bgp_router_obj.bgp_router_parameters.auth_data.key_items[0].key != key:
+                    ret['changes'].update({"key_type": {'old': bgp_router_obj.bgp_router_parameters.auth_data.key_items[0].key, 'new': key}})
+            except:
+                ret['changes'].update({"key_type": {'old': None, 'new': key}})
 
         if len(ret['changes']) == 0:
             return ret

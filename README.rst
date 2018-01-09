@@ -984,6 +984,8 @@ Enforcing edge BGP routers
           type: router
           ip_address: 172.16.0.22
           asn: 64512
+          key_type: md5
+          key: password
 
 Enforcing config nodes
 

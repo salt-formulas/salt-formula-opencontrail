@@ -1128,6 +1128,35 @@ Enforcing physical/logical interfaces for routers
                     security_group: 'default'
                     virtual_network: 'virtual-network'
 
+Enforcing virtual networks
+
+
+.. code-block:: yaml
+
+  opencontrail:
+    client:
+      virtual_networks:
+        net01:
+          name: 'network01'
+          ip_address: '172.16.111.0'
+          ip_prefix: 24
+          asn: 64512
+          route_target: 10000
+          external: True
+          allow_transit: False
+          forwarding_mode: 'l2_l3'
+          rpf: 'disable'
+          mirror_destination: False
+          domain: 'default-domain'
+          project: 'admin'
+          ipam_domain: 'default-domain'
+          ipam_project: 'default-project'
+          ipam_name: 'default-network-ipam'
+        net02:
+          name: 'network02'
+        net03:
+          name: 'network03'
+
 
 Contrail DNS custom forwarders
 ------------------------------

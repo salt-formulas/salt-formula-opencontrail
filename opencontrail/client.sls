@@ -236,4 +236,63 @@ opencontrail_client_logical_interface_{{ logical_interface_name }}:
 
 {%- endfor %} # end for physical_router
 
+{%- if client.virtual_networks is defined %}
+{%- for vn_name, vn in client.virtual_networks.items() %}
+create_network_{{ vn.name }}:
+  contrail.virtual_network_present:
+  - name: {{ vn.name }}
+  - conf:
+{%- if vn.ip_prefix is defined and vn.ip_prefix_len is defined %}
+      ip: {{ vn.ip_prefix }}
+      prefix: {{ vn.ip_prefix_len }}
+{%- endif %}
+
+{%- if vn.asn is defined and vn.route_target is defined %}
+      asn: {{ vn.asn }}
+      target: {{ vn.route_target }}
+{%- endif %}
+
+{%- if vn.external is defined %}
+      external: {{ vn.external }}
+{%- endif %}
+
+{%- if vn.allow_transit is defined %}
+      allow_transit: {{ vn.allow_transit }}
+{%- endif %}
+
+{%- if vn.forwarding_mode is defined %}
+      forwarding_mode: {{ vn.forwarding_mode }}
+{%- endif %}
+
+{%- if vn.rpf is defined %}
+      rpf: {{ vn.rpf }}
+{%- endif %}
+
+{%- if vn.mirror_destination is defined %}
+      mirror_destination: {{ vn.mirror_destination }}
+{%- endif %}
+
+{%- if vn.domain is defined %}
+      domain: {{ vn.domain }}
+{%- endif %}
+
+{%- if vn.project is defined %}
+      project: {{ vn.project }}
+{%- endif %}
+
+{%- if vn.ipam_domain is defined %}
+      ipam_domain: {{ vn.ipam_domain }}
+{%- endif %}
+
+{%- if vn.ipam_project is defined %}
+      ipam_project: {{ vn.ipam_project }}
+{%- endif %}
+
+{%- if vn.ipam_name is defined %}
+      ipam_name: {{ vn.ipam_name }}
+{%- endif %}
+
+{%- endfor %}
+{%- endif %}  # end for virtual_network
+
 {%- endif %}

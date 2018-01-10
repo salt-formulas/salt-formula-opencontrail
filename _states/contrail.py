@@ -338,6 +338,31 @@ Enforce the global system config absence
     global_system_config_delete:
       contrail.global_system_config_absent:
         - name: global-system_config
+
+
+Enforce the virtual network existence
+----------------------------------------
+
+.. code-block: yaml
+
+    virtual_network_create:
+      contrail.virtual_network_present:
+        - name: virtual_network_name
+        - conf:
+            domain: domain name
+            project: domain project
+            ipam_domain: ipam domain name
+            ipam_project: ipam project name
+            ipam_name: ipam name
+            ip_prefix: xxx.xxx.xxx.xxx
+            ip_prefix_len: 24
+            asn: 64512
+            target: 10000
+            external: False
+            allow_transit: False
+            forwading_mode: 'l2_l3'
+            rpf: 'disabled'
+            mirror_destination: False
 '''
 
 
@@ -791,4 +816,16 @@ def global_system_config_absent(name, **kwargs):
     gsc = __salt__['contrail.global_system_config_get'](name, **kwargs)
     if 'Error' not in gsc:
         ret = __salt__['contrail.global_system_config_delete'](name, **kwargs)
+    return ret
+
+
+def virtual_network_present(name, conf=None, **kwargs):
+    '''
+    Ensure that the virtual network exists.
+
+    :param name: Name of the virtual network
+    :param conf: Key:Value pairs used for network creation
+    '''
+
+    ret = __salt__['contrail.virtual_network_create'](name, conf, **kwargs)
     return ret

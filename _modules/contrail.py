@@ -1620,18 +1620,18 @@ def virtual_network_create(name, conf=None, **kwargs):
     # list of existing vn networks
     vn_networks = []
     vnc_client = _auth(**kwargs)
-    gsc_obj = vnc_client.project_read(fq_name=[domain,
-                                               project])
+    prj_obj = vnc_client.project_read(fq_name=[vn_domain,
+                                               vn_project])
     # check if the network exists
     vn_networks_list = vnc_client._objects_list('virtual_network')
-    fq = [domain, project, name]
+    fq = [vn_domain, vn_project, vn_name]
     for network in vn_networks_list['virtual-networks']:
         if fq == network['fq_name']:
             ret['comment'] = ("Virtual network with name "
                               + name + " already exists")
             return ret
 
-    vn_obj = VirtualNetwork(name)
+    vn_obj = VirtualNetwork(name, prj_obj)
     vn_type_obj = VirtualNetworkType()
     # get ipam from default project and domain
     ipam = vnc_client.network_ipam_read(fq_name=[ipam_domain,

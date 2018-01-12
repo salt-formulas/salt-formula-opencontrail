@@ -1624,7 +1624,7 @@ def virtual_network_create(name, conf=None, **kwargs):
                                                vn_project])
     # check if the network exists
     vn_networks_list = vnc_client._objects_list('virtual_network')
-    fq = [vn_domain, vn_project, vn_name]
+    fq = [vn_domain, vn_project, name]
     for network in vn_networks_list['virtual-networks']:
         if fq == network['fq_name']:
             ret['comment'] = ("Virtual network with name "

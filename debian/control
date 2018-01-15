@@ -11,6 +11,6 @@ Vcs-Git: https://github.com/openstack/salt-formula-opencontrail.git
 
 Package: salt-formula-opencontrail
 Architecture: all
-Depends: ${misc:Depends}, salt-master, reclass, salt-formula-linux
+Depends: ${misc:Depends}, salt-formula-linux
 Description: OpenContrail Salt formula
  Install and configure OpenContrail server and client.

@@ -118,6 +118,7 @@ opencontrail_control_entrypoint:
 
 {%- else %}
 {%- if control.container_name is defined %}
+{%- if salt['dockerng.exists'](control.container_name) %}
 opencontrail_control_dockerng_services:
   dockerng_service.running:
     - services: {{ control.services }}
@@ -127,6 +128,8 @@ opencontrail_control_dockerng_services:
       - file: /etc/contrail/contrail-dns.conf
       - file: /etc/contrail/contrail-control.conf
       - file: /etc/contrail/contrail-control-nodemgr.conf
+
+{%- endif %}
 {%- endif %}
 {%- endif %}
 

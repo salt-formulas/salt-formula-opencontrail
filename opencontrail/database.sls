@@ -278,6 +278,7 @@ opencontrail_database_entrypoint:
 
 {%- else %}
 {%- if database.container_name is defined %}
+{%- if salt['dockerng.exists'](database.container_name) %}
 opencontrail_database_dockerng_services:
   dockerng_service.running:
     - services:
@@ -296,6 +297,8 @@ opencontrail_database_dockerng_services:
       - file: /var/lib/zookeeper/myid
       - file: /etc/zookeeper/conf/log4j.properties
       - file: /usr/share/kafka/config/server.properties
+{%- endif %}
+
 {%- endif %}
 
 {%- endif %}

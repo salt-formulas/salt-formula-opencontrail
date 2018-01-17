@@ -228,6 +228,7 @@ opencontrail_config_entrypoint:
 
 {%- else %}
 {%- if config.container_name is defined %}
+{%- if salt['dockerng.exists'](config.container_name) %}
 opencontrail_config_dockerng_services:
   dockerng_service.running:
     - services: {{ config.services }}
@@ -242,6 +243,7 @@ opencontrail_config_dockerng_services:
       {%- if config.identity.engine == "keystone" %}
       - file: /etc/contrail/contrail-keystone-auth.conf
       {%- endif %}
+{%- endif%}
 {%- endif%}
 
 {%- endif %}

@@ -243,8 +243,8 @@ create_network_{{ vn.name }}:
   - name: {{ vn.name }}
   - conf:
 {%- if vn.ip_prefix is defined and vn.ip_prefix_len is defined %}
-      ip: {{ vn.ip_prefix }}
-      prefix: {{ vn.ip_prefix_len }}
+      ip_prefix: {{ vn.ip_prefix }}
+      ip_prefix_len: {{ vn.ip_prefix_len }}
 {%- endif %}
 
 {%- if vn.asn is defined and vn.route_target is defined %}

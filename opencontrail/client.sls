@@ -295,4 +295,32 @@ create_network_{{ vn.name }}:
 {%- endfor %}
 {%- endif %}  # end for virtual_network
 
+
+{%- if client.floating_ip_pools is defined %}
+{%- for pool_name, pool in client.floating_ip_pools.items() %}
+update_floating_ip_pool_{{ pool.vn_name }}-default:
+  contrail.floating_ip_pool_present:
+  - vn_name: {{ pool.vn_name }}
+  - vn_project: {{ pool.vn_project }}
+
+{%- if pool.vn_domain is defined %}
+  - vn_domain: {{ pool.vn_domain }}
+{%- endif %}
+
+{%- if pool.owner_access is defined %}
+  - owner_access: {{ pool.owner_access }}
+{%- endif %}
+
+{%- if pool.global_access is defined %}
+  - global_access: {{ pool.global_access }}
+{%- endif %}
+
+{%- if pool.list_of_projects is defined %}
+  - projects: {{ pool.list_of_projects }}
+
+{%- endif %}
+
+{%- endfor %}
+{%- endif %}  # end for floating_ip_pools
+
 {%- endif %}

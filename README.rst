@@ -1158,6 +1158,53 @@ Enforcing virtual networks
           name: 'network03'
 
 
+Enforcing floating ip pool setings.
+
+Virtual network with flag external needs to be created before managing the floating ip pool.
+Param vn_name is the name of the external network.
+
+.. code-block:: yaml
+
+  opencontrail:
+    client:
+      floating_ip_pools:
+        pool1:
+          vn_name: external-network
+          vn_project: admin
+          vn_domain: default-domain
+          owner_access: 7
+          global_access: 0
+          list_of_projects:
+            - [tenant1, 7]
+            - [tenant2, 7]
+            - [tenant3, 7]
+        pool2:
+          vn_name: floating-ips
+          vn_project: admin
+          vn_domain: default-domain
+          owner_access: 7
+          global_access: 0
+          list_of_projects:
+            - [tenant3, 7]
+
+
+If you want to remove all shares from the ip floating pool, define only empty list in 
+list of projects, like this:
+
+.. code-block:: yaml
+
+  opencontrail:
+    client:
+      floating_ip_pools:
+        pool1:
+          vn_name: external-network
+          vn_project: admin
+          vn_domain: default-domain
+          owner_access: 7
+          global_access: 0
+          list_of_projects: []
+
+
 Contrail DNS custom forwarders
 ------------------------------
 

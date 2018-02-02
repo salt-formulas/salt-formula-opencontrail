@@ -324,7 +324,7 @@ web:
     database:
       engine: cassandra
       port: 9160
-    {%- if pillar.docker.client.compose.opencontrail_api.service.controller.name is defined %}
+    {%- if pillar.get('docker',{}).get('client',{}).get('compose',{}).get('opencontrail_api',{}).get('service',{}).get('controller',{}).name is defined %}
     container_name:
         {{ pillar.docker.client.compose.opencontrail_api.service.controller.name }}
     {%- endif%}
@@ -336,7 +336,7 @@ web:
     database:
       engine: cassandra
       port: 9160
-    {%- if pillar.docker.client.compose.opencontrail_api.service.controller.name is defined %}
+    {%- if pillar.get('docker',{}).get('client',{}).get('compose',{}).get('opencontrail_api',{}).get('service',{}).get('controller',{}).name is defined %}
     container_name:
         {{ pillar.docker.client.compose.opencontrail_api.service.controller.name }}
     {%- endif%}

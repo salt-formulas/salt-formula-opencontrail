@@ -24,11 +24,11 @@ try:
     from vnc_api.vnc_api import LinklocalServiceEntryType, \
         LinklocalServicesTypes, GlobalVrouterConfig, GlobalSystemConfig
     from vnc_api.gen.resource_client import VirtualRouter, AnalyticsNode, \
-        ConfigNode, DatabaseNode, BgpRouter, VirtualNetwork
+        ConfigNode, DatabaseNode, BgpRouter, VirtualNetwork, FloatingIpPool
     from vnc_api.gen.resource_xsd import AddressFamilies, BgpSessionAttributes, \
         BgpSession, BgpPeeringAttributes, BgpRouterParams, AuthenticationData, \
         AuthenticationKeyItem, VirtualNetworkType, IpamSubnetType, SubnetType, \
-        VnSubnetsType, RouteTargetList
+        VnSubnetsType, RouteTargetList, ShareType
 
     HAS_CONTRAIL = True
 except ImportError:
@@ -108,6 +108,13 @@ def _get_project_obj(vnc_client, name, domain='default-domain'):
 
 def _get_ip(ip_w_pfx):
     return str(IPNetwork(ip_w_pfx).ip)
+
+
+def _create_floating_ip_pool(name, vn_obj, **kwargs):
+    vnc_client = _auth(**kwargs)
+    # create floating ip pool
+    fip_obj = FloatingIpPool(name=name, parent_obj=vn_obj)
+    vnc_client.floating_ip_pool_create(fip_obj)
 
 
 def virtual_router_list(**kwargs):
@@ -1679,6 +1686,14 @@ def virtual_network_create(name, conf=None, **kwargs):
                           .format(name))
     else:
         vnc_client.virtual_network_create(vn_obj)
+        # if network is external create floating ip pool
+        if 'external' in conf:
+            if conf['external']:
+                pool_name = 'default'
+                _create_floating_ip_pool(pool_name,
+                                         vn_obj,
+                                         **kwargs)
+
         ret['comment'] = ("Virtual network with name {0} was created"
                           .format(name))
     return ret
@@ -1956,3 +1971,135 @@ def global_system_config_delete(name, **kwargs):
         ret['comment'] = "GlobalSystemConfig " + name + " has been deleted"
         ret['changes'] = {'GlobalSystemConfig': {'old': name, 'new': ''}}
     return ret
+
+
+def list_floating_ip_pools(**kwargs):
+    '''
+    List all floating ip pools
+
+    CLI Example:
+    .. code-block:: bash
+        salt '*' contrail.list_floating_ip_pools
+    '''
+    vnc_client = _auth(**kwargs)
+    pools = vnc_client.floating_ip_pools_list()
+    # list of floating ip pools objects
+    fp_list = []
+
+    for pool in vnc_client.floating_ip_pools_list()['floating-ip-pools']:
+        fip_obj = vnc_client.floating_ip_pool_read(pool['fq_name'])
+        fp_list.append(fip_obj)
+        # print given pool
+        fip_obj.dump()
+
+def update_floating_ip_pool(vn_name, vn_project, vn_domain=None,
+                            owner_access=None, global_access=None,
+                            projects=None, **kwargs):
+    '''
+    Update specific floating ip pool
+
+
+    CLI Example
+    .. code-block:: bash
+        salt-call contrail.update_floating_ip_pool \
+                                  'FLOATING-TEST' \
+                                  'admin' \
+                                  'default-domain' \
+                                  7 7 \
+                                  [['pepa',4],['karel',7]]
+
+
+    params:
+    vn_name - name of the virtual network, which to use
+    vn-project - project which includes virtual network
+    vn-domain - domain wchich includes vn_project and vn_name
+    owner_access (int) - Permission rights for owner
+    global_access (int) - Permission rights for others
+    projects (list) - list of ShareType(tenant_name,tennat_permissions)
+    '''
+    ret = {'name': vn_name + "-default pool",
+           'changes': {},
+           'result': True,
+           'comment': ''}
+
+    if vn_domain is None:
+        vn_domain = 'default-domain'
+    fip_obj = None
+
+    vnc_client = _auth(**kwargs)
+    p_fq_name = [vn_domain, vn_project, vn_name, 'default']
+    fip_obj = vnc_client.floating_ip_pool_read(fq_name=p_fq_name)
+
+    changes = {}
+    # get perms from fip_obj (Floatin ip pool)
+    perms2 = fip_obj.get_perms2()
+    if owner_access is not None:
+        if perms2.get_owner_access() != owner_access:
+            changes['owner_access'] = {'old': str(perms2.get_owner_access()),
+                                       'new': str(owner_access)}
+            perms2.set_owner_access(owner_access)
+
+    if global_access is not None:
+        if perms2.get_global_access() != global_access:
+            changes['global_access'] = {'old': str(perms2.get_global_access()),
+                                        'new': str(global_access)}
+            perms2.set_global_access(global_access)
+
+    # list which represents the new state of perms
+    final_list = []
+    if projects:
+        for item in perms2.get_share():
+            for share in projects:
+                if item.get_tenant() == share[0]:
+                    # project is in the new and old list
+                    # check is the permission number is same
+                    if item.get_tenant_access() == share[1]:
+                        # this project and permission is without change, keep it
+                        final_list.append(item)
+                        break
+                    else:
+                        # project exists but change the permission
+                        final_list.append(ShareType(tenant=share[0],
+                                                    tenant_access=share[1]))
+                        # show changes
+                        n = str('share-'+share[0])
+                        old_str = "permission for project {0} was {1}"
+                        new_str = "permission for project {0} will be {1}"
+                        old = old_str.format(share[0],
+                                             str(item.get_tenant_access()))
+
+                        new = new_str.format(share[0], str(share[1]))
+                        changes[n] = {'old': old, 'new': new}
+                        break
+            else:
+                rm_name = "share-" + item.get_tenant()
+                changes[rm_name] = item.get_tenant() + " will be removed"
+
+        # check for the completly new projects
+        for item in projects:
+            for share in final_list:
+                if item[0] == share.get_tenant():
+                    break
+            else:
+                final_list.append(ShareType(tenant=item[0],
+                                            tenant_access=item[1]))
+                name = 'share-' + str(item[0])
+                c_str = '{0} will be added with permissions {1}'
+                changes[name] = c_str.format(name, item[1])
+    else:
+        for item in perms2.get_share():
+            rm_name = "share-" + item.get_tenant()
+            changes[rm_name] = item.get_tenant() + " will be removed"
+
+    if __opts__['test']:
+        ret['result'] = None
+        ret['comment'] = changes
+
+        return ret
+    else:
+        ret['comment'] = changes
+        perms2.set_share(final_list)
+        fip_obj.set_perms2(perms2)
+        vnc_client.floating_ip_pool_update(fip_obj)
+
+        return ret

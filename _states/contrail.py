@@ -363,6 +363,21 @@ Enforce the virtual network existence
             forwading_mode: 'l2_l3'
             rpf: 'disabled'
             mirror_destination: False
+
+
+
+Enforce Floating Ip Pool configuration
+----------------------------------------
+
+.. code-block: yaml
+
+    floating_ip_pool_present
+       - vn_name: virtual_network_name
+       - vn_project:
+       - vn_domain
+       - owner_access: owner_access_permission
+       - global_access: global_access_permission
+       - projects: list of project-permission pairs
 '''
 
 
@@ -828,4 +843,34 @@ def virtual_network_present(name, conf=None, **kwargs):
     '''
 
     ret = __salt__['contrail.virtual_network_create'](name, conf, **kwargs)
+    return ret
+
+def floating_ip_pool_present(vn_name,
+                             vn_project,
+                             vn_domain=None,
+                             owner_access=None,
+                             global_access=None,
+                             projects=None,
+                             **kwargs):
+    '''
+    Ensure that floating ip pool existst
+    Virtual network with flag external need to be created before this
+    function is called
+
+    :param vn_name: Name of the virtual network with external flag,
+                    tell us which floating ip pool we want to manage
+    :param vn_project: Name of the project in which floating pool exists
+    :param vn_domain: Name of the domain in which floating pool exists
+    :param owner_access: permissions rights for owner of the pool
+    :param global_access: permissions rights for other users than owner
+    :param projects: list of pairs (project, permission for given project)
+    '''
+
+    ret = __salt__['contrail.update_floating_ip_pool'](vn_name,
+                                                       vn_project,
+                                                       vn_domain,
+                                                       owner_access,
+                                                       global_access,
+                                                       projects,
+                                                       **kwargs)
     return ret

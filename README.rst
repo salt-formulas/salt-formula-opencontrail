@@ -781,6 +781,20 @@ Contrail version must >= 3.0. It is useful especially for Keystone v3.
         multi_tenancy: false
       ...
 
+Enable RBAC
+-----------
+
+
+.. code-block:: yaml
+
+    opencontrail:
+      ...
+      config:
+        aaa_mode: rbac
+        cloud_admin_role: admin
+        global_read_only_role: member
+      ...
+
 Switch from on demand to periodic keystone sync
 -----------------------------------------------
 

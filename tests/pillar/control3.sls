@@ -15,6 +15,8 @@ opencontrail:
     version: 3.0
     enabled: true
     multi_tenancy: false
+    aaa_mode: rbac
+    global_read_only_role: demo
     network:
       engine: neutron
       host: 127.0.0.1

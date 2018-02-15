@@ -13,6 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from vnc_api.vnc_api import *
+from vnc_api.gen.resource_xsd import *
+from cfgm_common.exceptions import *
+from cfgm_common.rbaclib import *
+import cfgm_common
+
 from netaddr import IPNetwork
 from vnc_api.vnc_api import PhysicalRouter, PhysicalInterface, LogicalInterface
 from vnc_api.vnc_api import EncapsulationPrioritiesType
@@ -2101,5 +2107,291 @@ def update_floating_ip_pool(vn_name, vn_project, vn_domain=None,
         perms2.set_share(final_list)
         fip_obj.set_perms2(perms2)
         vnc_client.floating_ip_pool_update(fip_obj)
+
+        return ret
+
+
+def show_rbac_rules(api_access_list_entries):
+    if api_access_list_entries is None:
+        return 'Empty RBAC group!'
+
+    rule_list = api_access_list_entries.get_rbac_rule()
+    response = 'Rules (%d):' % len(rule_list) + '----------\n'
+    for idx, rule in enumerate(rule_list):
+        o = rule.rule_object
+        f = rule.rule_field
+        ps = ', '.join([p.role_name+':'+p.role_crud for p in rule.rule_perms])
+        o_f = "%s.%s" % (o, f) if f else o
+        response += '%2d %-32s   %s\n' % (idx, o_f, ps)
+    return response
+
+
+def vnc_read_obj(vnc, obj_type, fq_name):
+    method_name = obj_type.replace('-', '_')
+    method = getattr(vnc, "%s_read" % (method_name))
+    try:
+        return method(fq_name=fq_name)
+    except NoIdError:
+        print '%s %s not found!' % (obj_type, fq_name)
+        return None
+
+
+def rbac_show_group(name, uuid, **kwargs):
+    '''
+    Show specific RBAC group
+
+
+    CLI Example
+    .. code-block:: bash
+        salt-call contrail.rbac_show_group name \
+            'default-domain:default-project:default'
+
+    params:
+    name - one of pair {name, uuid} addresing to access-list
+    uuid(str) - UUID in case of "uuid" specified OR full RBAC group name \
+        including domain and project
+
+    '''
+    vnc = _auth(**kwargs)
+    fq_name = vnc.id_to_fq_name(uuid) if name == 'uuid' else uuid.split(':')
+    ret = {'name': fq_name,
+           'changes': {},
+           'result': True,
+           'comment': ''}
+    rg = vnc_read_obj(vnc, 'api-access-list', fq_name)
+    if not rg:
+        ret['comment'] = 'No rules found'
+        return ret
+
+    ret['comment'] = show_rbac_rules(rg.get_api_access_list_entries())
+    return ret
+
+
+def rbac_create_group(uuid, **kwargs):
+    '''
+    Create RBAC group
+
+    CLI Example
+    .. code-block:: bash
+        salt-call contrail.rbac_create_group name \
+            'default-domain:default-project:default'
+
+    params:
+    name - one of pair {name, uuid} addresing to access-list
+    uuid(str) - UUID in case of "uuid" specified OR full RBAC group name \
+        including domain and project
+
+    '''
+    vnc = _auth(**kwargs)
+    fq_name = uuid.split(':')
+    ret = {'name': fq_name,
+           'changes': {},
+           'result': True,
+           'comment': ''}
+    if len(fq_name) != 2 and len(fq_name) != 3:
+        ret['comment'] = 'Fully qualified name of rbac group expected'
+        return ret
+
+    name = fq_name[-1]
+
+    if len(fq_name) == 2:
+        if fq_name[0] == 'default-global-system-config':
+            pobj = vnc.global_system_config_read(fq_name=fq_name[0:1])
+        else:
+            pobj = vnc.domain_read(fq_name=fq_name[0:1])
+    else:
+        pobj = vnc.project_read(fq_name=fq_name[0:2])
+
+    rentry = RbacRuleEntriesType([])
+    rg = ApiAccessList(name, parent_obj=pobj, api_access_list_entries=rentry)
+
+    if __opts__['test']:
+        ret['result'] = None
+        ret['comment'] = "RBAC group " + uuid + " will be created"
+
+        return ret
+    else:
+        vnc.api_access_list_create(rg)
+        rg2 = vnc.api_access_list_read(fq_name=fq_name)
+        rge = rg.get_api_access_list_entries()
+        show_rbac_rules(rge)
+        ret['comment'] = "RBAC group " + uuid + " has been created"
+
+        return ret
+
+
+def rbac_delete_group(name, uuid, **kwargs):
+    '''
+    Delete RBAC group
+
+    CLI Example
+    .. code-block:: bash
+        salt-call contrail.rbac_delete_group name \
+            'default-domain:default-project:default'
+
+    params:
+    name - one of pair {name, uuid} addresing to access-list
+    uuid(str) - UUID in case of "uuid" specified OR full RBAC group name \
+        including domain and project
+
+    '''
+    vnc = _auth(**kwargs)
+    fq_name = vnc.id_to_fq_name(uuid) if name == 'uuid' else uuid.split(':')
+    ret = {'name': fq_name,
+           'changes': {},
+           'result': True,
+           'comment': ''}
+    if len(fq_name) != 2 and len(fq_name) != 3:
+        ret['comment'] = 'Fully qualified name of rbac group expected'
+        return ret
+    name = fq_name[-1]
+
+    rg = vnc_read_obj(vnc, 'api-access-list', fq_name)
+    if not rg:
+        ret['comment'] = 'No rules found'
+        return ret
+    rge = rg.get_api_access_list_entries()
+    show_rbac_rules(rge)
+
+    if __opts__['test']:
+        ret['result'] = None
+        ret['comment'] = "RBAC group " + uuid + " will be deleted"
+
+        return ret
+    else:
+        vnc.api_access_list_delete(fq_name=fq_name)
+        ret['comment'] = "RBAC group " + uuid + " has been deleted"
+
+        return ret
+
+
+def rbac_add_rule(name, uuid, add_rule, **kwargs):
+    '''
+    Add rule to specific RBAC group
+
+    CLI Example
+    .. code-block:: bash
+        salt-call contrail.rbac_add_rule name \
+            'default-domain:default-project:default' \
+            '* admin:CRUD'
+
+    params:
+    name - one of pair {name, uuid} addresing to access-list
+    uuid(str) - UUID in case of "uuid" specified OR full RBAC group name \
+        including domain and project
+    rule(str) - Appropriate RBAC-based rule in format '<object, field> \
+        list of <role:CRUD>' to be added
+
+    '''
+    vnc = _auth(**kwargs)
+    fq_name = vnc.id_to_fq_name(uuid) if name == 'uuid' else uuid.split(':')
+    rule = build_rule(add_rule)
+    ret = {'name': fq_name,
+           'changes': {},
+           'result': True,
+           'comment': ''}
+    if rule is None:
+        ret['comment'] = 'A rule string must be specified for this operation'
+        return ret
+
+    # rbac rule entry consists of one or more rules
+    rg = vnc_read_obj(vnc, 'api-access-list', fq_name)
+    if not rg:
+        ret['comment'] = 'No rules found'
+        return ret
+
+    rge = rg.get_api_access_list_entries()
+    if rge is None:
+        rge = RbacRuleEntriesType([])
+    show_rbac_rules(rge)
+
+    # avoid duplicates
+    match = find_rule(rge, rule)
+    if not match:
+        rge.add_rbac_rule(rule)
+    else:
+        build_perms(rge.rbac_rule[match[0]-1], match[3])
+
+    show_rbac_rules(rge)
+
+    if __opts__['test']:
+        ret['result'] = None
+        ret['comment'] = "Rule " + add_rule
+        ret['comment'] += " will be created for RBAC group " + uuid
+
+        return ret
+    else:
+        rg.set_api_access_list_entries(rge)
+        vnc.api_access_list_update(rg)
+        ret['comment'] = "Rule " + add_rule
+        ret['comment'] += " has been added for RBAC group " + uuid
+
+        return ret
+
+
+def rbac_delete_rule(name, uuid, del_rule, **kwargs):
+    '''
+    Delete rule to specific RBAC group
+
+    CLI Example
+    .. code-block:: bash
+        salt-call contrail.rbac_delete_rule name \
+            'default-domain:default-project:default' \
+            '* admin:CRUD'
+
+    params:
+    name - one of pair {name, uuid} addresing to access-list
+    uuid(str) - UUID in case of "uuid" specified OR full RBAC group name \
+        including domain and project
+    rule(str) - Appropriate RBAC-based rule in format '<object, field> \
+        list of <role:CRUD>' to be deleted
+
+    '''
+    vnc = _auth(**kwargs)
+    fq_name = vnc.id_to_fq_name(uuid) if name == 'uuid' else uuid.split(':')
+    rg = vnc_read_obj(vnc, 'api-access-list', fq_name)
+    ret = {'name': fq_name,
+           'changes': {},
+           'result': True,
+           'comment': ''}
+    if not rg:
+        ret['comment'] = 'No rules found'
+        return ret
+    rge = rg.get_api_access_list_entries()
+    show_rbac_rules(rge)
+
+    del_idx = re.match("^[0-9]+$", del_rule)
+    if del_idx:
+        del_idx = int(del_idx.group())
+        rc = len(rge.rbac_rule)
+        if del_idx > rc or del_idx < 1:
+            ret['comment'] = 'Invalid rule index to delete.'
+            ret['comment'] += 'Value must be 1-%d' % rc
+            return ret
+        match = (del_idx, True)
+    else:
+        rule = build_rule(del_rule)
+        match = find_rule(rge, rule)
+
+    if not match:
+        ret['comment'] = "Rule not found. Unchanged"
+        return ret
+    elif match[1]:
+        rge.rbac_rule.pop(match[0]-1)
+    else:
+        build_perms(rge.rbac_rule[match[0]-1], match[2])
+    show_rbac_rules(rge)
+
+    if __opts__['test']:
+        ret['result'] = None
+        ret['comment'] = "Rule " + del_rule
+        ret['comment'] += " will be cleared from RBAC group " + uuid
+
+        return ret
+    else:
+        rg.set_api_access_list_entries(rge)
+        vnc.api_access_list_update(rg)
+        ret['comment'] = "Rule " + del_rule
+        ret['comment'] += " has been cleared from RBAC group " + uuid
 
         return ret

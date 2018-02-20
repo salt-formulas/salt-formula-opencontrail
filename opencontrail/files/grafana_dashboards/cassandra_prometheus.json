@@ -803,7 +803,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "cassandra_db_StorageService_Load{host=~\"$host\"}",
+              "expr": "cassandra_metrics_Storage_Count{name=\"Load\",host=~\"$host\"}",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{ host }}",
@@ -880,7 +880,7 @@
           "steppedLine": false,
           "targets": [
             {
-              "expr": "cassandra_db_StorageService_ExceptionCount{host=~\"$host\"}",
+              "expr": "cassandra_metrics_Storage_Count{name=\"Exceptions\",host=~\"$host\"}",
               "format": "time_series",
               "intervalFactor": 2,
               "legendFormat": "{{ host }}",

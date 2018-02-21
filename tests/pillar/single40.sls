@@ -56,6 +56,7 @@ opencontrail:
     name: ntw-01
     version: 4.0
     enabled: true
+    config_only: True
     bind:
       address: 127.0.0.1
     analytics:
@@ -115,6 +116,7 @@ opencontrail:
     data_dirs:
     - /var/lib/cassandra
     id: 1
+    config_only: True
     analytics:
       members:
       - host: 127.0.0.1

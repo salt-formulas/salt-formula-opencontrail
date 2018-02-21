@@ -49,9 +49,9 @@ verifier:
   sudo: true
 
 platforms:
-  - name: <%= ENV['PLATFORM'] || 'ubuntu-xenial' %>
+  - name: <%=ENV['PLATFORM'] ||  'saltstack-ubuntu-xenial-salt-stable' %>
     driver_config:
-      image: <%= ENV['PLATFORM'] || 'trevorj/salty-whales:xenial' %>
+      image: <%=ENV['PLATFORM'] || 'epcim/salt-formulas:saltstack-ubuntu-xenial-salt-stable'%>
       platform: ubuntu
 
 suites:
@@ -62,61 +62,57 @@ suites:
         opencontrail.sls: tests/pillar/single3.sls
   - name: single40
     provisioner:
+      grains:
+        init: 'systemd'
       pillars-from-files:
         opencontrail.sls: tests/pillar/single40.sls
-    excludes:
-      - ubuntu-trusty
   - name: analytics3
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/analytics3.sls
   - name: analytics40
     provisioner:
+      grains:
+        init: 'systemd'
       pillars-from-files:
         opencontrail.sls: tests/pillar/analytics40.sls
-    excludes:
-      - ubuntu-trusty
   - name: control3
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/control3.sls
   - name: control40
     provisioner:
+      grains:
+        init: 'systemd'
       pillars-from-files:
         opencontrail.sls: tests/pillar/control40.sls
-    excludes:
-      - ubuntu-trusty
   - name: cluster3
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/cluster3.sls
   - name: cluster40
     provisioner:
+      grains:
+        init: 'systemd'
       pillars-from-files:
         opencontrail.sls: tests/pillar/cluster40.sls
-    excludes:
-      - ubuntu-trusty
-  - name: tor3
-    provisioner:
-      pillars-from-files:
-        opencontrail.sls: tests/pillar/tor3.sls
-  - name: tor40
-    provisioner:
-      pillars-from-files:
-        opencontrail.sls: tests/pillar/tor40.sls
-    excludes:
-      - ubuntu-trusty
+  # - name: tor3
+  #   provisioner:
+  #     pillars-from-files:
+  #       opencontrail.sls: tests/pillar/tor3.sls
+  # - name: tor40
+  #   provisioner:
+  #     pillars-from-files:
+  #       opencontrail.sls: tests/pillar/tor40.sls
   - name: vrouter3
     provisioner:
       pillars-from-files:
         opencontrail.sls: tests/pillar/vrouter3.sls
-    excludes:
-      - ubuntu-trusty
   - name: vrouter40
     provisioner:
+      grains:
+        init: 'systemd'
       pillars-from-files:
         opencontrail.sls: tests/pillar/vrouter40.sls
-    excludes:
-      - ubuntu-trusty
 
 # vim: ft=yaml sw=2 ts=2 sts=2 tw=125

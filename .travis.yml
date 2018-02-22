@@ -18,36 +18,36 @@ install:
   - bundle install
 
 env:
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=single3
-  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=analytics3
-  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=control3
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=cluster3
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=tor3
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc311 SUITE=vrouter3
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=single3
-  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=analytics3
-  - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=control3
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=cluster3
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=tor3
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc323 SUITE=vrouter3
-  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=single3
-  #- PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=analytics3
-  #- PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=control3
-  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=cluster3
-  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=tor3
-  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc323 SUITE=vrouter3
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=single40
-  #- PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=analytics40
-  #- PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=control40
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=cluster40
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=tor40
-  # - PLATFORM=trevorj/salty-whales:trusty OC_REPO=oc40 SUITE=vrouter40
-  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc40 SUITE=single40
-  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc40 SUITE=analytics40
-  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc40 SUITE=control40
-  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc40 SUITE=cluster40
-  # - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc40 SUITE=tor40
-  - PLATFORM=trevorj/salty-whales:xenial OC_REPO=oc40 SUITE=vrouter40
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc311 SUITE=single3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc311 SUITE=analytics3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc311 SUITE=control3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc311 SUITE=cluster3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc311 SUITE=vrouter3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc323 SUITE=single3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc323 SUITE=analytics3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc323 SUITE=control3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc323 SUITE=cluster3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc323 SUITE=vrouter3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc40 SUITE=single40
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc40 SUITE=analytics40
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc40 SUITE=control40
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc40 SUITE=cluster40
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2016.3 OC_REPO=oc40 SUITE=vrouter40
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc311 SUITE=single3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc311 SUITE=analytics3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc311 SUITE=control3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc311 SUITE=cluster3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc311 SUITE=vrouter3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc323 SUITE=single3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc323 SUITE=analytics3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc323 SUITE=control3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc323 SUITE=cluster3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc323 SUITE=vrouter3
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc40 SUITE=single40
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc40 SUITE=analytics40
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc40 SUITE=control40
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc40 SUITE=cluster40
+  - PLATFORM=epcim/salt-formulas:saltstack-ubuntu-xenial-salt-2017.7 OC_REPO=oc40 SUITE=vrouter40
 
 before_script:
   - set -o pipefail

@@ -314,3 +314,8 @@ fi
 JVM_OPTS="$JVM_OPTS $MX4J_ADDRESS"
 JVM_OPTS="$JVM_OPTS $MX4J_PORT"
 JVM_OPTS="$JVM_OPTS $JVM_EXTRA_OPTS"
+
+# Add cassandra pid file, even if not used. It will stay in params and
+# contrail-nodemgr can detect cassandra PID from process list.
+
+JVM_OPTS="$JVM_OPTS -Dcassandra-pidfile=/var/run/cassandra/cassandra.pid"

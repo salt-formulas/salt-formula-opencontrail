@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
-  echo -e  "\nUsage: $0 {analytics|analyticsdb|controller|all} {<command_to_send>|console}\n"
+  echo -e  "\nUsage: $0 {analytics|analyticsdb|controller|kube-manager|all} {<command_to_send>|console}\n"
   echo "Examples: "
   echo "$0 controller contrail-status"
   echo "$0 controller service contrail-database restart"
@@ -11,7 +11,7 @@ if [ "$1" == "-h" ] || [ "$1" == "--help" ]; then
   exit 0
 fi
 
-NODES=("analytics" "analyticsdb" "controller")
+NODES=("analytics" "analyticsdb" "controller" "kube-manager")
 
 if [ "$1" == "all" ] ; then
   for el in ${NODES[*]}; do

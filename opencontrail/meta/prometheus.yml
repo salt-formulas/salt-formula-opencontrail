@@ -254,14 +254,14 @@ server:
         description: 'There are no BGP sessions on node {{ $labels.host }}'
     ContrailXMPPSessionsNoneUp:
       if: >-
-        max(contrail_xmpp_session_up_count) by (host) == 0
+        sum(contrail_xmpp_session_up_count) < count(contrail_vrouter_xmpp) * 2
       for: 2m
       labels:
         severity: warning
         service: contrail-control
       annotations:
-        summary: 'no active XMPP sessions'
-        description: 'There are no active XMPP sessions on node {{ $labels.host }}'
+        summary: 'Unavailable established XMPP sessions'
+        description: 'There is compute instance without established XMPP session'
     ContrailXMPPSessionsSomeDown:
       if: >-
         min(contrail_xmpp_session_down_count) by (host) > 0
@@ -274,14 +274,14 @@ server:
         description: 'There are inactive XMPP sessions on node {{ $labels.host }}'
     ContrailXMPPSessionsNone:
       if: >-
-        max(contrail_xmpp_session_count) by (host) == 0
+        sum(contrail_xmpp_session_count) < count(contrail_vrouter_xmpp) * 2
       for: 2m
       labels:
         severity: warning
         service: contrail-control
       annotations:
-        summary: 'No XMPP sessions'
-        description: 'There are no XMPP sessions on node {{ $labels.host }}'
+        summary: 'Unavailable XMPP sessions'
+        description: 'There is compute instance with missing XMPP session'
     ContrailXMPPSessionsTooMany:
       if: >-
 {%- endraw %}

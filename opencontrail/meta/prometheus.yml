@@ -427,6 +427,7 @@ server:
         summary: 'Too many vRouter discarded flows'
         description: 'There are too many discarded vRouter flows on node {{ $labels.host }} (current value={{ $value }}, threshold={%- endraw %}{{ vrouter_flows_discard_toohigh_threshold }})'
     ContrailFlowsDropTooMany:
+      enabled: false
       if: >-
     {%- set vrouter_flows_flow_action_drop_toohigh_threshold = monitoring.vrouter_flows_flow_action_drop_too_high_threshold %}
         rate(contrail_vrouter_flows_flow_action_drop[5m]) >= {{ vrouter_flows_flow_action_drop_toohigh_threshold }}

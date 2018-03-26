@@ -124,7 +124,7 @@ log_collector:
     contrail_api_stdout_log:
       engine: logstreamer
       log_directory: "/var/log"
-      file_match: 'contrail/contrail-(?P<Service>discovery-0-stdout)\.log\.?(?P<Seq>\d*)$'
+      file_match: 'contrail/contrail-(?P<Service>(api|discovery)-\d-stdout)\.log\.?(?P<Seq>\d*)$'
       differentiator: ['contrail', '.', 'Service']
       priority: ["^Seq"]
       decoder: "contrail_api_stdout_decoder"

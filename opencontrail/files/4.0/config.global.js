@@ -281,10 +281,10 @@ config.webui_addresses = ['0.0.0.0'];
 config.insecure_access = false;
 
 // HTTP port for NodeJS Server.
-config.http_port = '8080';
+config.http_port = '{{ web.get("http",{}).get("port","8080") }}';
 
 // HTTPS port for NodeJS Server.
-config.https_port = '8143';
+config.https_port = '{{ web.get("https",{}).get("port","8080") }}';
 
 // Activate/Deactivate Login.
 config.require_auth = false;

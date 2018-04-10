@@ -27,11 +27,20 @@ else
   if [ "$CORRECT" -gt 0 ] && [ "$1" != "all" ]; then
     if [ "$2" == "console" ]; then
       echo "Starting console:"
-      NODE=$(docker ps | grep _$1_ | awk '{print $1}')
-      docker exec -it $NODE bash
+      NODE=$(docker ps | grep "opencontrail.$1[-_]" | awk '{print $1}')
+      if [[ $NODE =~ ^[0-9a-fA-F]+$ ]]; then
+        docker exec -it $NODE bash
+      else
+        echo "Unknow container name, please use -h paramater for help."
+      fi
     else
-      NODE=$(docker ps | grep _$1_ | awk '{print $1}')
-      docker exec $NODE ${@:2}
+      NODE=$(docker ps | grep "opencontrail.$1[-_]" | awk '{print $1}')
+      if [[ $NODE =~ ^[0-9a-fA-F]+$ ]]; then
+        docker exec $NODE ${@:2}
+      else
+        echo "Unknow container name, please use -h paramater for help."
+      fi
+
     fi
   else
     echo "Unknow target, use -h or --help paramater for help"

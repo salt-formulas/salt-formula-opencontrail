@@ -42,9 +42,14 @@ net.ipv4.tcp_syncookies:
   sysctl.present:
     - value: 1
 
+{% if salt['pkg.version_cmp'](grains['kernelrelease'], '4.12') < 0 %}
+# This param is missing from kernel version 4.12
+# https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/commit/?id=4396e46187ca5070219b81773c4e65088dac50cc
+# TODO: Remove this for Ubuntu Bionic (4.15 is the default kernel)
 net.ipv4.tcp_tw_recycle:
   sysctl.present:
     - value: 1
+{% endif %}
 
 net.ipv4.tcp_tw_reuse:
   sysctl.present:

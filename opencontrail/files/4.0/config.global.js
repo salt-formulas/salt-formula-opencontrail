@@ -73,7 +73,10 @@ config.endpoints.opServiceType = 'OpServer';
  *
  ****************************************************************************/
 config.regions = {};
+
+{%- if web.identity.engine != "none" %}
 config.regions.RegionOne = 'http://{{ web.identity.host }}:5000/v{{ web.identity.version }}';
+{%- endif %}
 
 /****************************************************************************
  * This boolean flag indicates if serviceEndPointFromConfig is set as false,
@@ -284,7 +287,7 @@ config.insecure_access = false;
 config.http_port = '{{ web.get("http",{}).get("port","8080") }}';
 
 // HTTPS port for NodeJS Server.
-config.https_port = '{{ web.get("https",{}).get("port","8080") }}';
+config.https_port = '{{ web.get("https",{}).get("port","8143") }}';
 
 // Activate/Deactivate Login.
 config.require_auth = false;

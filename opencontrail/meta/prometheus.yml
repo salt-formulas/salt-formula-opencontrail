@@ -38,14 +38,19 @@
 
   {%- if control.get('enabled', False) %}
     {%- set control_apis = ( 'contrail.api', 'contrail.discovery' ) %}
+
     {%- set control_processes = (
-        'contrail-api', 'contrail-control', 'contrail-device-manager',
-        'contrail-discovery', 'contrail-dns', 'contrail-ifmap-server',
-        'contrail-irond', 'contrail-job-server', 'contrail-named',
-        'contrail-nodemgr-config', 'contrail-nodemgr-control',
-        'contrail-schema', 'contrail-supervisord-config',
-        'contrail-supervisord-control', 'contrail-svc-monitor',
-        ) %}
+    'contrail-api', 'contrail-control', 'contrail-device-manager',
+    'contrail-discovery', 'contrail-dns', 'contrail-job-server',
+    'contrail-named', 'contrail-nodemgr-config',
+    'contrail-nodemgr-control', 'contrail-schema',
+    'contrail-supervisord-config', 'contrail-supervisord-control',
+    'contrail-svc-monitor',
+    ) %}
+
+    {%- if config.get('ifmap', {}).get('engine', 'irond') == 'irond' %}
+    {%- set control_processes += ('contrail-ifmap-server', 'contrail-irond',) %}
+    {%- endif %}
 
     {%- for api in control_apis %}
       {% do all_contrail_apis.append(api) %}

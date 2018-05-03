@@ -184,10 +184,12 @@ local_plugin:
         match: 'python.*contrail-discovery'
       contrail-dns:
         match: 'contrail-dns'
+    {%- if config.get('ifmap', {}).get('engine', 'irond') == 'irond' %}
       contrail-ifmap-server:
         match: 'sh.*ifmap-server'
       contrail-irond:
         match: 'java.*irond'
+    {%- endif %}
       contrail-job-server:
         match: 'node.*jobServerStart'
       contrail-named:

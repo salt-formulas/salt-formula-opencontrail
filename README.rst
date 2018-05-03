@@ -1098,7 +1098,7 @@ Configuring OpenStack default quotasx
         vip: -1
 
 Enforcing physical routers
-h
+
 .. code-block:: yaml
 
   opencontrail:
@@ -1256,6 +1256,39 @@ To change forwarders for vDNS zones (handled by control nodes):
         - 8.8.8.8
         - 8.8.4.4
       ....
+
+Contrail IF-MAP server configuration
+------------------------------------
+
+Contrail 3.2 contains internal IF-MAP server implementation. This implementation can be enabled
+by setting ``config:ifmap:engine`` to internal. Currently supported engines are ``internal`` and
+``irond`` (default). The ``internal`` will configure contrail-api to run as a IF-MAP server in the
+same process as contrail-api and will generate security certificates in specified folder.
+
+.. code-block:: yaml
+
+    config:
+      ....
+      ifmap:
+        engine: internal
+        cert_dir: /etc/contrail/ssl/certs/    # default
+        basename_cert: ifmap.crt              # default
+        basename_key: ifmap.key               # default
+      ....
+
+To set static configuration of the IF-MAP server for contrail-control instead of using
+discovery service, you can use ``control:ifmap:bind:host`` and ``port``. The static configuration
+is triggered by existence of non-empty value of ``control:ifmap:bind`` key.
+
+.. code-block:: yaml
+    control:
+      ....
+      ifmap
+        bind:
+          host: 127.0.0.1
+          port: 8443
+      ....
+
 
 
 Usage

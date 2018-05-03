@@ -1,5 +1,6 @@
 {%- set vendor = salt['pillar.get']('opencontrail:common:vendor', 'opencontrail') %}
 {%- set version = salt['pillar.get']('opencontrail:common:version') %}
+{%- set ifmap = salt['pillar.get']('opencontrail:config:ifmap:engine', 'irond') %}
 
 {%- load_yaml as base_defaults %}
 {%- if vendor in ['opencontrail'] %}
@@ -69,10 +70,14 @@ compute:
 config:
   Debian:
     pkgs:
-        ['contrail-config-openstack', 'ifmap-server']
+    - 'contrail-config-openstack'
+    - 'ifmap-server'
     services:
     {%- if version < 4.0 %}
-        ['ifmap-server', 'supervisor-config']
+    {%- if ifmap == 'irond' %}
+    - 'ifmap-server'
+    {%- endif %}
+    - 'supervisor-config'
     {%- else %}
         ['contrail-api', 'contrail-schema', 'contrail-svc-monitor', 'contrail-device-manager', 'contrail-config-nodemgr']
     {%- endif %}

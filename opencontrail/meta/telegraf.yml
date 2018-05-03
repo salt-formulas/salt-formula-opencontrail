@@ -47,10 +47,12 @@ agent:
           pattern: 'python.*contrail-discovery'
         contrail-dns:
           pattern: 'contrail-dns'
+    {%- if config.get('ifmap', {}).get('engine', 'irond') == 'irond' %}
         contrail-ifmap-server:
           pattern: 'sh.*ifmap-server'
         contrail-irond:
           pattern: 'java.*irond'
+    {%- endif %}
         contrail-job-server:
           pattern: 'node.*jobServerStart'
         contrail-named:

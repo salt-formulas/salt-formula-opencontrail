@@ -61,6 +61,29 @@ publisher_init:
   - require:
     - pkg: opencontrail_config_packages
 
+{% set ifmap = config.get('ifmap', {}) %}
+{% if ifmap.get('engine', 'irond') != 'irond' %}
+irond_stop_and_disable:
+  service.dead:
+  - name: ifmap-server
+  - enable: False
+  - watch_in:
+    - service: opencontrail_config_services
+
+{% if ifmap.get('engine', 'irond') == 'internal' %}
+internal_ifmap_ssl_dir:
+  file.directory:
+    - name: {{ ifmap.get('cert_dir', '/etc/contrail/ssl/certs/') }}
+    - makedirs: True
+    - dir_mode: 750
+    - require:
+      - pkg: opencontrail_config_packages
+    - watch_in:
+      - service: opencontrail_config_services
+{% endif %}
+
+{% endif %}
+
 {%- if grains.get('init') != 'systemd' %}
 
 /etc/contrail/supervisord_config_files/contrail-discovery.ini:

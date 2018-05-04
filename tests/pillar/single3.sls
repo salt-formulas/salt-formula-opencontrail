@@ -80,6 +80,12 @@ opencontrail:
       members:
       - host: 127.0.0.1
         port: 9160
+    message_queue:
+      host: 127.0.0.1
+      members:
+      - host: 127.0.0.1
+      - host: 127.0.0.1
+      - host: 127.0.0.1
   database:
     version: 3.0
     cassandra:

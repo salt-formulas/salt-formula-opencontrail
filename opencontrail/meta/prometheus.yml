@@ -519,46 +519,56 @@ server:
     {%- endif %}
 
     {%- if database.get('enabled', False) %}
-    ZookeeperInfo:
+    ZookeeperServiceDown:
       if: >-
-        zookeeper_up != 1
+        zookeeper_up == 0
       for: 2m
       labels:
-        severity: info
+        severity: minor
         service: zookeeper
       annotations:
-        summary: 'Zookeeper service down'
-        description: 'Zookeeper service is down on node {% raw %}{{ $labels.host }}{% endraw %}.'
-    ZookeeperWarning:
+        summary: "Zookeeper service is down"
+        description: "The Zookeeper service on the {% raw %}{{ $labels.host }}{% endraw %} node is down for at least 2 minutes."
+    ZookeeperServiceError:
       if: >-
-        count(zookeeper_up == 0) >= count(zookeeper_up) * {{ monitoring.services_failed_warning_threshold_percent }}
+        zookeeper_service_health == 0
       for: 2m
       labels:
         severity: warning
         service: zookeeper
       annotations:
-        summary: "More than {{monitoring.services_failed_warning_threshold_percent*100}}% of Zookeeper services are down"
-        description: "More than {{monitoring.services_failed_warning_threshold_percent*100}}% of Zookeeper services are down"
-    ZookeeperCritical:
+        summary: "Zookeeper service error"
+        description: "The Zookeeper service on the {% raw %}{{ $labels.host }}{% endraw %} node is not responding for at least 2 minutes."
+    ZookeeperServicesDownMinor:
+      if: >-
+        count(zookeeper_up == 0) >= count(zookeeper_up) * {{ monitoring.services_failed_warning_threshold_percent }}
+      for: 2m
+      labels:
+        severity: minor
+        service: zookeeper
+      annotations:
+        summary: "{{ monitoring.services_failed_warning_threshold_percent*100 }}% of Zookeeper services are down"
+        description: "{% raw %}{{ $value }}{% endraw %} Zookeeper services are down (at least {{ monitoring.services_failed_warning_threshold_percent*100 }}%) for at least 2 minutes."
+    ZookeeperServicesDownMajor:
       if: >-
         count(zookeeper_up == 0) >= count(zookeeper_up) * {{ monitoring.services_failed_critical_threshold_percent }}
+      for: 2m
+      labels:
+        severity: major
+        service: zookeeper
+      annotations:
+        summary: "{{ monitoring.services_failed_critical_threshold_percent*100 }}% of Zookeeper services are down"
+        description: "{% raw %}{{ $value }}{% endraw %} Zookeeper services are down (at least {{ monitoring.services_failed_critical_threshold_percent*100 }}%) for at least 2 minutes."
+    ZookeeperServiceOutage:
+      if: >-
+        count(zookeeper_up == 0) == count(zookeeper_up)
       for: 2m
       labels:
         severity: critical
         service: zookeeper
       annotations:
-        summary: "More than {{monitoring.services_failed_critical_threshold_percent*100}}% of Zookeeper services are down"
-        description: "More than {{monitoring.services_failed_critical_threshold_percent*100}}% of Zookeeper services are down"
-    ZookeeperDown:
-      if: >-
-        count(zookeeper_up == 0) == count(zookeeper_up)
-      for: 2m
-      labels:
-        severity: down
-        service: zookeeper
-      annotations:
-        summary: 'All Zookeeper services are down'
-        description: 'All Zookeeper services are down'
+        summary: "Zookeeper service outage"
+        description: "All Zookeeper services are down for at least 2 minutes."
     {%- endif %}
 
     {%- if exporters is defined %}

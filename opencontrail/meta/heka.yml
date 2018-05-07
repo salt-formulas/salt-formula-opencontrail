@@ -22,7 +22,7 @@
         'contrail-svc-monitor',
         ) %}
     {%- if config.get('ifmap', {}).get('engine', 'irond') == 'irond' %}
-    {%- set control_processes += ('contrail-ifmap-server', 'contrail-irond',) %}
+      {%- set control_processes = control_processes + ('contrail-ifmap-server', 'contrail-irond',) %}
     {%- endif %}
   {%- endif %}
   {%- if database.get('enabled', False) %}

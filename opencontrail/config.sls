@@ -114,8 +114,11 @@ internal_ifmap_ssl_dir:
 
 /etc/contrail/supervisord_config_files/contrail-api.ini:
   file.managed:
-  - source: salt://opencontrail/files/{{ config.version }}/config/contrail-api.ini
+  - source: salt://opencontrail/files/{{ config.version }}/contrail-api.ini
+  - template: jinja
   - makedirs: true
+  - watch_in:
+    - service: opencontrail_config_services
 
 /etc/init.d/contrail-api:
   file.managed:

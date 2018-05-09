@@ -880,6 +880,17 @@ DPDK vRouter
           pci: 0000:81:00.1
       ...
 
+Increase number of contrail-api workers
+---------------------------------------
+
+.. code-block:: yaml
+
+    opencontrail:
+      ...
+      config:
+        api_workers: 3
+      ...
+
 Increase number of alarm-gen workers
 ------------------------------------
 

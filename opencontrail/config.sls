@@ -117,8 +117,10 @@ internal_ifmap_ssl_dir:
   - source: salt://opencontrail/files/{{ config.version }}/contrail-api.ini
   - template: jinja
   - makedirs: true
+{%- if config.get('config_only', False) %}
   - watch_in:
     - service: opencontrail_config_services
+{%- endif %}
 
 /etc/init.d/contrail-api:
   file.managed:

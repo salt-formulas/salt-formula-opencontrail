@@ -129,6 +129,11 @@ Config, control, analytics, database, web -- altogether on one node.
           members:
           - host: 127.0.0.1
             port: 9160
+        message_queue:
+          members:
+          - host: 127.0.0.1
+          - host: 127.0.0.1
+          - host: 127.0.0.1
       database:
         version: 2.2
         cassandra:
@@ -286,6 +291,11 @@ nodes.
             port: 9160
           - host: 127.0.0.1
             port: 9160
+        message_queue:
+          members:
+          - host: 127.0.0.1
+          - host: 127.0.0.1
+          - host: 127.0.0.1
       database:
         version: 2.2
         cassandra:
@@ -518,6 +528,11 @@ Analytics and database on an analytic node(s)
             port: 9160
           - host: 127.0.0.1
             port: 9160
+        message_queue:
+          members:
+          - host: 127.0.0.1
+          - host: 127.0.0.1
+          - host: 127.0.0.1
       database:
         version: 2.2
         cassandra:

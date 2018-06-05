@@ -129,3 +129,12 @@ vm.overcommit_memory:
 {%- endif %}
 
 {%- endif %}
+
+{%- if common.version == 4.0 and common.contrainer_folders is defined %}
+{%- for dir in common.contrainer_folders %}
+{{ dir }}:
+  file.directory:
+    - user: root
+    - group: root
+{%- endfor %}
+{%- endif %}

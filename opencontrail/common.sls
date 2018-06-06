@@ -136,5 +136,6 @@ vm.overcommit_memory:
   file.directory:
     - user: root
     - group: root
+    - makedirs: true
 {%- endfor %}
 {%- endif %}

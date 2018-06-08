@@ -1,6 +1,8 @@
 applications:
 - opencontrail
 parameters:
+  _param:
+    opencontrail_identity_port: 35357
   opencontrail:
     test:
       enabled: True
@@ -38,7 +40,7 @@ parameters:
         bind:
           address: 0.0.0.0
           private_address: ${_param:keystone_service_host}
-          private_port: 35357
+          private_port: ${_param:opencontrail_identity_port}
           public_address: ${_param:keystone_service_host}
           public_port: 5000
         region: RegionOne

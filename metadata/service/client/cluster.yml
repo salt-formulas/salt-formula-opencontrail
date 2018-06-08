@@ -3,6 +3,8 @@ applications:
 parameters:
   _param:
     opencontrail_version: 3.0
+    opencontrail_identity_port: 35357
+    opencontrail_identity_version: '2.0'
   opencontrail:
     client:
       enabled: True
@@ -10,7 +12,8 @@ parameters:
       identity:
         engine: keystone
         host: ${_param:openstack_control_address}
-        port: 35357
+        port: ${_param:opencontrail_identity_port}
+        version: ${_param:opencontrail_identity_version}
         tenant: admin
         user: admin
         password: ${_param:keystone_admin_password}

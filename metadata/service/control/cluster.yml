@@ -5,13 +5,15 @@ classes:
 parameters:
   _param:
     opencontrail_version: 2.2
+    opencontrail_identity_port: 35357
+    opencontrail_identity_version: '2.0'
   opencontrail:
     common:
       version: ${_param:opencontrail_version}
       identity:
         engine: keystone
         host: ${_param:cluster_vip_address}
-        port: 35357
+        port: ${_param:opencontrail_identity_port}
         token: '${_param:keystone_service_token}'
         password: '${_param:keystone_admin_password}'
       network:
@@ -48,10 +50,10 @@ parameters:
           port: 9160
       identity:
         engine: keystone
-        version: '2.0'
+        version: ${_param:opencontrail_identity_version}
         region: RegionOne
         host: ${_param:cluster_vip_address}
-        port: 35357
+        port: ${_param:opencontrail_identity_port}
         user: admin
         password: '${_param:keystone_admin_password}'
         token: '${_param:keystone_service_token}'
@@ -102,10 +104,10 @@ parameters:
           port: 9160
       identity:
         engine: keystone
-        version: '2.0'
+        version: ${_param:opencontrail_identity_version}
         region: RegionOne
         host: ${_param:cluster_vip_address}
-        port: 35357
+        port: ${_param:opencontrail_identity_port}
         user: admin
         password: '${_param:keystone_admin_password}'
         token: '${_param:keystone_service_token}'
@@ -162,9 +164,9 @@ parameters:
         port: 9160
       identity:
         engine: keystone
-        version: '2.0'
+        version: ${_param:opencontrail_identity_version}
         host: ${_param:cluster_vip_address}
-        port: 35357
+        port: ${_param:opencontrail_identity_port}
         user: admin
         password: '${_param:keystone_admin_password}'
         token: '${_param:keystone_service_token}'

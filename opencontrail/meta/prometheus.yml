@@ -125,9 +125,6 @@ server:
     {%- raw %}
         summary: "{{ $labels.name }} service outage"
         description: "All {{ $labels.process_name }} processes are down."
-    {%- endraw %}
-    {%- if control_processes is defined %}
-{%- raw %}
     ContrailBGPSessionsNoEstablished:
       if: >-
         max(contrail_bgp_session_count) by (host) == 0
@@ -188,8 +185,8 @@ server:
       annotations:
         summary: "XMPP sessions are down"
         description: "{{ $value }} XMPP sessions on the {{ $labels.host }} node are down for at least 2 minutes."
-{%- endraw %}
     ContrailXMPPSessionsTooHigh:
+{%- endraw %}
       if: >-
     {%- set xmpp_toohigh_threshold = monitoring.xmpp_sessions_too_high_threshold %}
         min(contrail_xmpp_session_count) by (host) >= {{ xmpp_toohigh_threshold }}
@@ -213,11 +210,6 @@ server:
       annotations:
         summary: "XMPP sessions changes reached the limit of {%- endraw %}{{ xmpp_variation_threshold }}{%- raw %}"
         description: "XMPP sessions on the {{ $labels.host }} node have changed {{ $value }} times."
-      {%- endraw %}
-    {%- endif %}
-
-    {%- if compute_processes is defined %}
-{%- raw %}
     ContrailVrouterXMPPSessionsZero:
       if: >-
         min(contrail_vrouter_xmpp) by (host) == 0
@@ -432,7 +424,6 @@ server:
         summary: "vRouter flows with full table reached the limit of {%- endraw %} {{ vrouter_flows_flow_table_full_toohigh_threshold }}{%- raw %}"
         description: "{{ $value }} vRouter flows on the {{ $labels.host }} node had a full table for at least 2 minutes."
 {%- endraw %}
-    {%- endif %}
     {%- if web.get('enabled', False) and web.get('cache', {}).get('engine', '') == 'redis' %}
     {%- raw %}
     RedisServiceDown:

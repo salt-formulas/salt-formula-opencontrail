@@ -34,7 +34,7 @@ exporters:
   {%- endif %}
 server:
   alert:
-    ContrailAPIDown:
+    ContrailApiDown:
       if: >-
         http_response_status{name=~"contrail.*"} == 0
       {%- raw %}
@@ -44,9 +44,9 @@ server:
         service: contrail
       annotations:
         summary: "{{ $labels.name }} API endpoint is not accessible"
-        description: "The {{ $labels.name }} API endpoint on the {{ $labels.host }} node is not accessible for at least 2 minutes."
+        description: "The {{ $labels.name }} API endpoint on the {{ $labels.host }} node is not accessible for 2 minutes."
       {%- endraw %}
-    ContrailAPIDownMinor:
+    ContrailApiDownMinor:
       if: >-
         count(http_response_status{name=~"contrail.*"} == 0) by (name) >= count(http_response_status{name=~"contrail.*"}) by (name) *{{ monitoring.services_failed_warning_threshold_percent }}
       {%- raw %}
@@ -56,9 +56,9 @@ server:
         service: contrail
       annotations:
         summary: "{%- endraw %}{{monitoring.services_failed_warning_threshold_percent*100}}%{%- raw %} of {{ $labels.name }} API endpoints are not accessible"
-        description: "{{ $value }} {{ $labels.name }} API endpoints are not accessible (at least {%- endraw %} {{monitoring.services_failed_warning_threshold_percent*100}}%{%- raw %})."
+        description: "{{ $value }} {{ $labels.name }} API endpoints (>= {%- endraw %} {{monitoring.services_failed_warning_threshold_percent*100}}%{%- raw %}) are not accessible for 2 minutes."
       {%- endraw %}
-    ContrailAPIDownMajor:
+    ContrailApiDownMajor:
       if: >-
         count(http_response_status{name=~"contrail.*"} == 0) by (name) >= count(http_response_status{name=~"contrail.*"}) by (name) *{{ monitoring.services_failed_critical_threshold_percent }}
       {%- raw %}
@@ -68,9 +68,9 @@ server:
         service: contrail
       annotations:
         summary: "{%- endraw %} {{monitoring.services_failed_critical_threshold_percent*100}}%{%- raw %} of {{ $labels.name }} API endpoints are not accessible"
-        description: "{{ $value }} {{ $labels.name }} API endpoints are not accessible (at least {%- endraw %} {{monitoring.services_failed_critical_threshold_percent*100}}%{%- raw %})."
+        description: "{{ $value }} {{ $labels.name }} API endpoints (>= {%- endraw %} {{monitoring.services_failed_critical_threshold_percent*100}}%{%- raw %}) are not accessible for 2 minutes."
       {%- endraw %}
-    ContrailAPIOutage:
+    ContrailApiOutage:
       if: >-
         count(http_response_status{name=~"contrail.*"} == 0) by (name) == count(http_response_status{name=~"contrail.*"}) by (name)
       {%- raw %}
@@ -80,7 +80,7 @@ server:
         service: contrail
       annotations:
         summary: "{{ $labels.name }} API outage"
-        description: "The {{ $labels.name }} API is not accessible for all available endpoints."
+        description: "The {{ $labels.name }} API is not accessible for all available endpoints for 2 minutes."
       {%- endraw %}
     ContrailProcessDown:
       if: >-
@@ -102,7 +102,7 @@ server:
       annotations:
     {%- raw %}
         summary: "{%- endraw %}{{monitoring.services_failed_warning_threshold_percent*100}}%{%- raw %} of {{ $labels.process_name }} processes are down"
-        description: "{{ $value }} {{ $labels.process_name }} processes are down (at least {%- endraw %} {{monitoring.services_failed_warning_threshold_percent*100}}%{%- raw %})."
+        description: "{{ $value }} {{ $labels.process_name }} processes (>= {%- endraw %} {{monitoring.services_failed_warning_threshold_percent*100}}%{%- raw %}) are down."
     {%- endraw %}
     ContrailProcessDownMajor:
       if: >-
@@ -113,7 +113,7 @@ server:
       annotations:
     {%- raw %}
         summary: "{%- endraw %}{{monitoring.services_failed_critical_threshold_percent*100}}%{%- raw %} of {{ $labels.process_name }} processes are down"
-        description: "{{ $value }} {{ $labels.process_name }} processes are down (at least {%- endraw %} {{monitoring.services_failed_critical_threshold_percent*100}}%{%- raw %})."
+        description: "{{ $value }} {{ $labels.process_name }} processes (>= {%- endraw %} {{monitoring.services_failed_critical_threshold_percent*100}}%{%- raw %}) are down."
     {%- endraw %}
     ContrailProcessOutage:
       if: >-
@@ -133,8 +133,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "No established BGP sessions"
-        description: "There are no established BGP sessions on the {{ $labels.host }} node for at least 2 minutes."
+        summary: "No established OpenContrail BGP sessions"
+        description: "There are no established OpenContrail BGP sessions on the {{ $labels.host }} node for 2 minutes."
     ContrailBGPSessionsNoActive:
       if: >-
         max(contrail_bgp_session_up_count) by (host) == 0
@@ -143,8 +143,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "No active BGP sessions"
-        description: "There are no active BGP sessions on the {{ $labels.host }} node for at least 2 minutes."
+        summary: "No active OpenContrail BGP sessions"
+        description: "There are no active OpenContrail BGP sessions on the {{ $labels.host }} node for 2 minutes."
     ContrailBGPSessionsDown:
       if: >-
         min(contrail_bgp_session_down_count) by (host) > 0
@@ -153,8 +153,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "BGP sessions are down"
-        description: "{{ $value }} BGP sessions on the {{ $labels.host }} node are down for at least 2 minutes."
+        summary: "OpenContrail BGP sessions are down"
+        description: "{{ $value }} OpenContrail BGP sessions on the {{ $labels.host }} node are down for 2 minutes."
     ContrailXMPPSessionsMissingEstablished:
       if: >-
         count(contrail_vrouter_xmpp) * 2 - sum(contrail_xmpp_session_up_count) > 0
@@ -163,8 +163,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "Missing established XMPP sessions"
-        description: "{{ $value }} established XMPP sessions are missing on the compute cluster for at least 2 minutes."
+        summary: "Missing established OpenContrail XMPP sessions"
+        description: "{{ $value }} established OpenContrail XMPP sessions are missing on the compute cluster for 2 minutes."
     ContrailXMPPSessionsMissing:
       if: >-
         count(contrail_vrouter_xmpp) * 2 - sum(contrail_xmpp_session_count) > 0
@@ -173,8 +173,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "Missing XMPP sessions"
-        description: "{{ $value }} XMPP sessions are missing on the compute cluster for at least 2 minutes."
+        summary: "Missing OpenContrail XMPP sessions"
+        description: "{{ $value }} OpenContrail XMPP sessions are missing on the compute cluster for 2 minutes."
     ContrailXMPPSessionsDown:
       if: >-
         min(contrail_xmpp_session_down_count) by (host) > 0
@@ -183,8 +183,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "XMPP sessions are down"
-        description: "{{ $value }} XMPP sessions on the {{ $labels.host }} node are down for at least 2 minutes."
+        summary: "OpenContrail XMPP sessions are down"
+        description: "{{ $value }} OpenContrail XMPP sessions on the {{ $labels.host }} node are down for 2 minutes."
     ContrailXMPPSessionsTooHigh:
 {%- endraw %}
       if: >-
@@ -196,8 +196,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "XMPP sessions reached the limit of {%- endraw %} {{ xmpp_toohigh_threshold }}{%- raw %}"
-        description: "{{ $value }} XMPP sessions on the {{ $labels.host }} node are open for at least 2 minutes."
+        summary: "OpenContrail XMPP sessions reached the limit of {%- endraw %} {{ xmpp_toohigh_threshold }}{%- raw %}"
+        description: "{{ $value }} OpenContrail XMPP sessions on the {{ $labels.host }} node are open for 2 minutes."
 {%- endraw %}
     ContrailXMPPSessionsChangesTooHigh:
       if: >-
@@ -208,8 +208,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "XMPP sessions changes reached the limit of {%- endraw %}{{ xmpp_variation_threshold }}{%- raw %}"
-        description: "XMPP sessions on the {{ $labels.host }} node have changed {{ $value }} times."
+        summary: "OpenContrail XMPP sessions changes reached the limit of {%- endraw %}{{ xmpp_variation_threshold }}{%- raw %}"
+        description: "The OpenContrail XMPP sessions on the {{ $labels.host }} node have changed {{ $value }} times."
     ContrailVrouterXMPPSessionsZero:
       if: >-
         min(contrail_vrouter_xmpp) by (host) == 0
@@ -218,8 +218,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "No vRouter XMPP sessions"
-        description: "There are no vRouter XMPP sessions on the {{ $labels.host }} node for at least 2 minutes."
+        summary: "No OpenContrail vRouter XMPP sessions"
+        description: "There are no OpenContrail vRouter XMPP sessions on the {{ $labels.host }} node for 2 minutes."
 {%- endraw %}
     ContrailVrouterXMPPSessionsTooHigh:
       if: >-
@@ -231,8 +231,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter XMPP sessions reached the limit of {%- endraw %} {{ vrouter_xmpp_toohigh_threshold }}{%- raw %}"
-        description: "{{ $value }} vRouter XMPP sessions are open on the {{ $labels.host }} node for at least 2 minutes."
+        summary: "OpenContrail vRouter XMPP sessions reached the limit of {%- endraw %} {{ vrouter_xmpp_toohigh_threshold }}{%- raw %}"
+        description: "{{ $value }} OpenContrail vRouter XMPP sessions are open on the {{ $labels.host }} node for 2 minutes."
 {%- endraw %}
     ContrailVrouterXMPPSessionsChangesTooHigh:
       if: >-
@@ -243,8 +243,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter XMPP sessions changes reached the limit of {%- endraw %}{{ vrouter_xmpp_variation_threshold }}{%- raw %}"
-        description: "vRouter XMPP sessions on the {{ $labels.host }} node have changed {{ $value }} times."
+        summary: "OpenContrail vRouter XMPP sessions changes reached the limit of {%- endraw %}{{ vrouter_xmpp_variation_threshold }}{%- raw %}"
+        description: "The OpenContrail vRouter XMPP sessions on the {{ $labels.host }} node have changed {{ $value }} times."
     ContrailVrouterDNSXMPPSessionsZero:
       if: >-
         min(contrail_vrouter_dns_xmpp) by (host) == 0
@@ -253,8 +253,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "No vRouter DNS-XMPP sessions"
-        description: "There are no vRouter DNS-XMPP sessions on the {{ $labels.host }} node for at least 2 minutes."
+        summary: "No OpenContrail vRouter DNS-XMPP sessions"
+        description: "There are no OpenContrail vRouter DNS-XMPP sessions on the {{ $labels.host }} node for 2 minutes."
 {%- endraw %}
     ContrailVrouterDNSXMPPSessionsTooHigh:
       if: >-
@@ -266,8 +266,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter DNS-XMPP sessions reached the limit of {%- endraw %} {{ vrouter_dns_xmpp_toohigh_threshold }}{%- raw %}"
-        description: "{{ $value }} vRouter DNS-XMPP sessions are open on the {{ $labels.host }} node for at least 2 minutes."
+        summary: "OpenContrail vRouter DNS-XMPP sessions reached the limit of {%- endraw %} {{ vrouter_dns_xmpp_toohigh_threshold }}{%- raw %}"
+        description: "{{ $value }} OpenContrail vRouter DNS-XMPP sessions are open on the {{ $labels.host }} node for 2 minutes."
 {%- endraw %}
     ContrailVrouterDNSXMPPSessionsChangesTooHigh:
       if: >-
@@ -278,8 +278,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter DNS-XMPP sessions changes reached the limit of {%- endraw %}{{ vrouter_dns_xmpp_variation_threshold }}{%- raw %}"
-        description: "vRouter DNS-XMPP sessions on the {{ $labels.host }} node have changed {{ $value }} times."
+        summary: "OpenContrail vRouter DNS-XMPP sessions changes reached the limit of {%- endraw %}{{ vrouter_dns_xmpp_variation_threshold }}{%- raw %}"
+        description: "The OpenContrail vRouter DNS-XMPP sessions on the {{ $labels.host }} node have changed {{ $value }} times."
 {%- endraw %}
     ContrailVrouterLLSSessionsTooHigh:
       if: >-
@@ -291,8 +291,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter LLS sessions reached the limit of {%- endraw %} {{ vrouter_lls_toohigh_threshold }}{%- raw %}"
-        description: "{{ $value }} vRouter LLS sessions are open on the {{ $labels.host }} node for at least 2 minutes."
+        summary: "OpenContrail vRouter LLS sessions reached the limit of {%- endraw %} {{ vrouter_lls_toohigh_threshold }}{%- raw %}"
+        description: "{{ $value }} OpenContrail vRouter LLS sessions are open on the {{ $labels.host }} node for 2 minutes."
 {%- endraw %}
     ContrailVrouterLLSSessionsChangesTooHigh:
       if: >-
@@ -303,8 +303,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter LLS sessions changes reached the limit of {%- endraw %} {{ vrouter_lls_variation_threshold }}{%- raw %}"
-        description: "vRouter LLS sessions on the {{ $labels.host }} node have changed {{ $value }} times."
+        summary: "OpenContrail vRouter LLS sessions changes reached the limit of {%- endraw %} {{ vrouter_lls_variation_threshold }}{%- raw %}"
+        description: "The OpenContrail vRouter LLS sessions on the {{ $labels.host }} node have changed {{ $value }} times."
 {%- endraw %}
     ContrailFlowsActiveTooHigh:
       if: >-
@@ -316,8 +316,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter active flows reached the limit of {%- endraw %} {{ vrouter_flows_active_toohigh_threshold }}{%- raw %}"
-        description: "{{ $value }} vRouter flows per second on the {{ $labels.host }} node are active for at least 2 minutes."
+        summary: "OpenContrail vRouter active flows reached the limit of {%- endraw %} {{ vrouter_flows_active_toohigh_threshold }}{%- raw %}"
+        description: "{{ $value }} OpenContrail vRouter flows per second on the {{ $labels.host }} node are active for 2 minutes."
 {%- endraw %}
     ContrailFlowsDiscardedTooHigh:
       if: >-
@@ -329,8 +329,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter discarded flows reached the limit of {%- endraw %} {{ vrouter_flows_discard_toohigh_threshold }}{%- raw %}/s"
-        description: "An average per-second rate of discarded vRouter flows on the {{ $labels.host }} node is {{ $value }} for at least 2 minutes."
+        summary: "OpenContrail vRouter discarded flows reached the limit of {%- endraw %} {{ vrouter_flows_discard_toohigh_threshold }}{%- raw %}/s"
+        description: "An average per-second rate of discarded OpenContrail vRouter flows on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
 {%- endraw %}
     ContrailFlowsDroppedTooHigh:
       enabled: false
@@ -343,8 +343,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter dropped flows reached the limit of {%- endraw %} {{ vrouter_flows_flow_action_drop_toohigh_threshold }}{%- raw %}/s"
-        description: "An average per-second rate of dropped vRouter flows on the {{ $labels.host }} node is {{ $value }} for at least 2 minutes."
+        summary: "OpenContrail vRouter dropped flows reached the limit of {%- endraw %} {{ vrouter_flows_flow_action_drop_toohigh_threshold }}{%- raw %}/s"
+        description: "An average per-second rate of dropped OpenContrail vRouter flows on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
 {%- endraw %}
     ContrailFlowsFragErrTooHigh:
       if: >-
@@ -356,8 +356,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter flows with fragment errors reached the limit of {%- endraw %} {{ vrouter_flows_flow_action_drop_toohigh_threshold }}{%- raw %}"
-        description: "{{ $value }} vRouter flows on the {{ $labels.host }} node had fragment errors for at least 2 minutes."
+        summary: "OpenContrail vRouter flows with fragment errors reached the limit of {%- endraw %} {{ vrouter_flows_flow_action_drop_toohigh_threshold }}{%- raw %}"
+        description: "{{ $value }} OpenContrail vRouter flows on the {{ $labels.host }} node had fragment errors for 2 minutes."
 {%- endraw %}
     ContrailFlowsNextHopInvalidTooHigh:
       if: >-
@@ -369,8 +369,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter flows with an invalid next hop reached the limit of {%- endraw %} {{ vrouter_flows_invalid_nh_toohigh_threshold }}{%- raw %}/s"
-        description: "An average per-second rate of vRouter flows with an invalid next hop on the {{ $labels.host }} node is {{ $value }} for at least 2 minutes."
+        summary: "OpenContrail vRouter flows with an invalid next hop reached the limit of {%- endraw %} {{ vrouter_flows_invalid_nh_toohigh_threshold }}{%- raw %}/s"
+        description: "An average per-second rate of OpenContrail vRouter flows with an invalid next hop on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
 {%- endraw %}
     ContrailFlowsInterfaceInvalidTooHigh:
       if: >-
@@ -382,8 +382,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter flows with an invalid composite interface reached the limit of {%- endraw %} {{ vrouter_flows_composite_invalid_interface_toohigh_threshold }}{%- raw %}/s"
-        description: "An average per-second rate of vRouter flows with an invalid composite interface on the {{ $labels.host }} node is {{ $value }} for at least 2 minutes."
+        summary: "OpenContrail vRouter flows with an invalid composite interface reached the limit of {%- endraw %} {{ vrouter_flows_composite_invalid_interface_toohigh_threshold }}{%- raw %}/s"
+        description: "An average per-second rate of OpenContrail vRouter flows with an invalid composite interface on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
 {%- endraw %}
     ContrailFlowsLabelInvalidTooHigh:
       if: >-
@@ -395,8 +395,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter flows with an invalid label reached the limit of {%- endraw %} {{ vrouter_flows_invalid_label_toohigh_threshold }}{%- raw %}"
-        description: "{{ $value }} vRouter flows on the {{ $labels.host }} node had an invalid composite interface for at least 2 minutes."
+        summary: "OpenContrail vRouter flows with an invalid label reached the limit of {%- endraw %} {{ vrouter_flows_invalid_label_toohigh_threshold }}{%- raw %}"
+        description: "{{ $value }} OpenContrail vRouter flows on the {{ $labels.host }} node had an invalid composite interface for 2 minutes."
 {%- endraw %}
     ContrailFlowsQueueSizeExceededTooHigh:
       if: >-
@@ -408,8 +408,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter flows exceeding the queue size reached the limit of {%- endraw %} {{ vrouter_flows_flow_queue_limit_exceeded_toohigh_threshold }}{%- raw %}/s"
-        description: "An average per-second rate of vRouter flows exceeding the queue size on the {{ $labels.host }} node is {{ $value }} for at least 2 minutes."
+        summary: "OpenContrail vRouter flows exceeding the queue size reached the limit of {%- endraw %} {{ vrouter_flows_flow_queue_limit_exceeded_toohigh_threshold }}{%- raw %}/s"
+        description: "An average per-second rate of OpenContrail vRouter flows exceeding the queue size on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
 {%- endraw %}
     ContrailFlowsTableFullTooHigh:
       if: >-
@@ -421,8 +421,8 @@ server:
         severity: warning
         service: contrail
       annotations:
-        summary: "vRouter flows with full table reached the limit of {%- endraw %} {{ vrouter_flows_flow_table_full_toohigh_threshold }}{%- raw %}"
-        description: "{{ $value }} vRouter flows on the {{ $labels.host }} node had a full table for at least 2 minutes."
+        summary: "OpenContrail vRouter flows with full table reached the limit of {%- endraw %} {{ vrouter_flows_flow_table_full_toohigh_threshold }}{%- raw %}"
+        description: "{{ $value }} OpenContrail vRouter flows on the {{ $labels.host }} node had a full table for 2 minutes."
 {%- endraw %}
     {%- if web.get('enabled', False) and web.get('cache', {}).get('engine', '') == 'redis' %}
     {%- raw %}
@@ -557,7 +557,7 @@ server:
         service: zookeeper
       annotations:
         summary: "Zookeeper service is down"
-        description: "The Zookeeper service on the {% raw %}{{ $labels.host }}{% endraw %} node is down for at least 2 minutes."
+        description: "The Zookeeper service on the {% raw %}{{ $labels.host }}{% endraw %} node is down for 2 minutes."
     ZookeeperServiceErrorWarning:
       if: >-
         zookeeper_service_health == 0
@@ -567,7 +567,7 @@ server:
         service: zookeeper
       annotations:
         summary: "Zookeeper service error"
-        description: "The Zookeeper service on the {% raw %}{{ $labels.host }}{% endraw %} node is not responding for at least 2 minutes."
+        description: "The Zookeeper service on the {% raw %}{{ $labels.host }}{% endraw %} node is not responding for 2 minutes."
     ZookeeperServicesDownMinor:
       if: >-
         count(zookeeper_up == 0) >= count(zookeeper_up) * {{ monitoring.services_failed_warning_threshold_percent }}
@@ -577,7 +577,7 @@ server:
         service: zookeeper
       annotations:
         summary: "{{ monitoring.services_failed_warning_threshold_percent*100 }}% of Zookeeper services are down"
-        description: "{% raw %}{{ $value }}{% endraw %} Zookeeper services are down (at least {{ monitoring.services_failed_warning_threshold_percent*100 }}%) for at least 2 minutes."
+        description: "{% raw %}{{ $value }} Zookeeper services (>= {% endraw %} {{ monitoring.services_failed_warning_threshold_percent*100 }}%) are down for 2 minutes."
     ZookeeperServicesDownMajor:
       if: >-
         count(zookeeper_up == 0) >= count(zookeeper_up) * {{ monitoring.services_failed_critical_threshold_percent }}
@@ -587,7 +587,7 @@ server:
         service: zookeeper
       annotations:
         summary: "{{ monitoring.services_failed_critical_threshold_percent*100 }}% of Zookeeper services are down"
-        description: "{% raw %}{{ $value }}{% endraw %} Zookeeper services are down (at least {{ monitoring.services_failed_critical_threshold_percent*100 }}%) for at least 2 minutes."
+        description: "{% raw %}{{ $value }} Zookeeper services (>= {% endraw %} {{ monitoring.services_failed_critical_threshold_percent*100 }}%) are down for 2 minutes."
     ZookeeperServiceOutage:
       if: >-
         count(zookeeper_up == 0) == count(zookeeper_up)
@@ -597,7 +597,7 @@ server:
         service: zookeeper
       annotations:
         summary: "Zookeeper service outage"
-        description: "All Zookeeper services are down for at least 2 minutes."
+        description: "All Zookeeper services are down for 2 minutes."
     {%- endif %}
 
     {%- if exporters is defined %}

@@ -330,7 +330,7 @@ server:
         service: contrail
       annotations:
         summary: "OpenContrail vRouter discarded flows reached the limit of {%- endraw %} {{ vrouter_flows_discard_toohigh_threshold }}{%- raw %}/s"
-        description: "An average per-second rate of discarded OpenContrail vRouter flows on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
+        description: "The average per-second rate of discarded OpenContrail vRouter flows on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
 {%- endraw %}
     ContrailFlowsDroppedTooHigh:
       enabled: false
@@ -344,7 +344,7 @@ server:
         service: contrail
       annotations:
         summary: "OpenContrail vRouter dropped flows reached the limit of {%- endraw %} {{ vrouter_flows_flow_action_drop_toohigh_threshold }}{%- raw %}/s"
-        description: "An average per-second rate of dropped OpenContrail vRouter flows on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
+        description: "The average per-second rate of dropped OpenContrail vRouter flows on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
 {%- endraw %}
     ContrailFlowsFragErrTooHigh:
       if: >-
@@ -370,7 +370,7 @@ server:
         service: contrail
       annotations:
         summary: "OpenContrail vRouter flows with an invalid next hop reached the limit of {%- endraw %} {{ vrouter_flows_invalid_nh_toohigh_threshold }}{%- raw %}/s"
-        description: "An average per-second rate of OpenContrail vRouter flows with an invalid next hop on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
+        description: "The average per-second rate of OpenContrail vRouter flows with an invalid next hop on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
 {%- endraw %}
     ContrailFlowsInterfaceInvalidTooHigh:
       if: >-
@@ -383,7 +383,7 @@ server:
         service: contrail
       annotations:
         summary: "OpenContrail vRouter flows with an invalid composite interface reached the limit of {%- endraw %} {{ vrouter_flows_composite_invalid_interface_toohigh_threshold }}{%- raw %}/s"
-        description: "An average per-second rate of OpenContrail vRouter flows with an invalid composite interface on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
+        description: "The average per-second rate of OpenContrail vRouter flows with an invalid composite interface on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
 {%- endraw %}
     ContrailFlowsLabelInvalidTooHigh:
       if: >-
@@ -409,7 +409,7 @@ server:
         service: contrail
       annotations:
         summary: "OpenContrail vRouter flows exceeding the queue size reached the limit of {%- endraw %} {{ vrouter_flows_flow_queue_limit_exceeded_toohigh_threshold }}{%- raw %}/s"
-        description: "An average per-second rate of OpenContrail vRouter flows exceeding the queue size on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
+        description: "The average per-second rate of OpenContrail vRouter flows exceeding the queue size on the {{ $labels.host }} node is {{ $value }} for 2 minutes."
 {%- endraw %}
     ContrailFlowsTableFullTooHigh:
       if: >-

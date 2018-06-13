@@ -148,13 +148,10 @@ internal_ifmap_ssl_dir:
   - source: salt://opencontrail/files/{{ config.version }}/contrail-config-nodemgr.conf
   - template: jinja
 
-
-{%- if config.identity.engine == "keystone" %}
 /etc/contrail/contrail-keystone-auth.conf:
   file.managed:
   - source: salt://opencontrail/files/{{ config.version }}/contrail-keystone-auth.conf
   - template: jinja
-{%- endif %}
 
 /etc/contrail/contrail-schema.conf:
   file.managed:

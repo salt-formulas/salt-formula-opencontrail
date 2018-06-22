@@ -1,7 +1,7 @@
 {%- if pillar.opencontrail is defined %}
   {%- from "opencontrail/map.jinja" import control, collector, compute, config, database, web, monitoring with context %}
 
-  {%- if database_processes is defined and
+  {%- if database.get('enabled', False) and
          database.get('cassandra', False) and
          exporters is defined %}
 {%- set packages = exporters.get('jmx', {}).get('packages', ('jmx-exporter', )) %}

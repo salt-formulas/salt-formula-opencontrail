@@ -169,10 +169,20 @@ opencontrail_vrouter_package:
 
 /etc/modprobe.d/vrouter.conf:
   file.managed:
-  - contents: "options vrouter vr_flow_entries=2097152"
+  - source: salt://opencontrail/files/vrouter.conf
+  - template: jinja
 
 {%- if network.interface.get('vhost0', {}).get('enabled', False) %}
 {%- if grains.get('virtual_subtype', None) not in ['Docker', 'LXC'] %}
+{%- if compute.flow_hold_limit is defined %}
+
+contrail_vrouter_flow_hold_limit:
+  cmd.run:
+    - name: "vrouter --flow_hold_limit {{ compute.flow_hold_limit }}"
+    - onchanges:
+      - file: /etc/modprobe.d/vrouter.conf
+
+{%- endif %}
 
 contrail_load_vrouter_kernel_module:
   cmd.run:

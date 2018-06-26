@@ -583,6 +583,7 @@ Vrouter configuration on a compute node(s)
         version: 2.2
         enabled: True
         hostname: node-12.domain.tld
+        flow_hold_limit: 0
         discovery:
           host: 127.0.0.1
         interface:

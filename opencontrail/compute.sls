@@ -181,6 +181,7 @@ contrail_vrouter_flow_hold_limit:
     - name: "vrouter --flow_hold_limit {{ compute.flow_hold_limit }}"
     - onchanges:
       - file: /etc/modprobe.d/vrouter.conf
+    - unless: "lsmod | ( ! grep -q vrouter )"
 
 {%- endif %}
 

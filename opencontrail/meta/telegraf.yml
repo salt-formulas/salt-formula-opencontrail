@@ -1,5 +1,5 @@
 {%- if pillar.opencontrail is defined %}
-  {%- from "opencontrail/map.jinja" import control, collector, compute, config, database, web with context %}
+  {%- from "opencontrail/map.jinja" import control, collector, compute, config, database, version, web with context %}
 agent:
   input:
   {%- if collector.get('enabled', False) or database.get('enabled', False) or control.get('enabled', False)
@@ -13,14 +13,21 @@ agent:
           pattern: 'python.*contrail-analytics-api'
         contrail-collector:
           pattern: 'contrail-collector'
+        {%- if version < 4.0 %}
         contrail-nodemgr:
           pattern: 'python.*contrail-nodemgr$'
+        {% else %}
+        contrail-nodemgr-analytics:
+          pattern: 'python.*contrail-nodemgr.*-analytics'
+        {% endif %}
         contrail-query-engine:
           pattern: 'contrail-query-engine'
         contrail-snmp-collector:
           pattern: 'python.*contrail-snmp-collector'
+        {%- if version < 4.0 %}
         contrail-supervisord-analytics:
           pattern: 'python.*supervisord.*_analytics'
+        {% endif %}
         contrail-topology:
           pattern: 'python.*contrail-topology'
     {%- endif %}
@@ -33,8 +40,10 @@ agent:
           pattern: 'java.*service.CassandraDaemon'
         contrail-nodemgr-database:
           pattern: 'python.*contrail-nodemgr.*-database'
+        {%- if version < 4.0 %}
         contrail-supervisord-database:
           pattern: 'python.*supervisord.*_database'
+        {%- endif %}
     {%- endif %}
     {%- if control.get('enabled', False) %}
         contrail-api:
@@ -43,15 +52,19 @@ agent:
           pattern: '[^=]contrail-control$'
         contrail-device-manager:
           pattern: 'python.*contrail-device-manager'
+        {%- if version < 4.0 %}
         contrail-discovery:
           pattern: 'python.*contrail-discovery'
+        {%- endif %}
         contrail-dns:
           pattern: 'contrail-dns'
     {%- if config.get('ifmap', {}).get('engine', 'irond') == 'irond' %}
+        {%- if version < 4.0 %}
         contrail-ifmap-server:
           pattern: 'sh.*ifmap-server'
         contrail-irond:
           pattern: 'java.*irond'
+        {%- endif %}
     {%- endif %}
         contrail-job-server:
           pattern: 'node.*jobServerStart'
@@ -63,10 +76,12 @@ agent:
           pattern: 'python.*contrail-nodemgr.*-control'
         contrail-schema:
           pattern: 'python.*contrail-schema'
+        {%- if version < 4.0 %}
         contrail-supervisord-config:
           pattern: 'python.*supervisord.*_config'
         contrail-supervisord-control:
           pattern: 'python.*supervisord.*_control'
+        {%- endif %}
         contrail-svc-monitor:
           pattern: 'python.*contrail-svc-monitor'
     {%- endif %}
@@ -81,8 +96,10 @@ agent:
     {%- if compute.get('enabled', False) %}
         contrail-nodemgr-vrouter:
           pattern: 'python.*contrail-nodemgr.*-vrouter'
+        {%- if version < 4.0 %}
         contrail-supervisord-vrouter:
           pattern: 'python.*supervisord.*_vrouter'
+        {%- endif %}
         contrail-vrouter-agent:
           pattern: 'contrail-vrouter-agent'
     {%- endif %}
@@ -93,8 +110,10 @@ agent:
       {%- set bind_addr=config.bind.address|replace('0.0.0.0', '127.0.0.1') %}
       contrail-api:
         address: "http://{{ bind_addr }}:{{ config.bind.api_port|default(9100) }}/"
+      {%- if version < 4.0 %}
       contrail-discovery:
         address: "http://{{ bind_addr }}:{{ config.bind.discovery_port|default(9110) }}/"
+      {%- endif %}
     {%- endif %}
     {%- if collector.get('enabled', False) %}
       contrail-collector:

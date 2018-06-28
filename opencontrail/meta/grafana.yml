@@ -1,3 +1,4 @@
+{%- from "opencontrail/map.jinja" import version with context %}
 dashboard:
   cassandra_influxdb:
     datasource: influxdb
@@ -11,10 +12,18 @@ dashboard:
     datasource: influxdb
     format: json
     template: opencontrail/files/grafana_dashboards/contrail_influxdb.json
-  contrail_prometheus:
+  contrail_controller_prometheus:
     datasource: prometheus
     format: json
-    template: opencontrail/files/grafana_dashboards/contrail_prometheus.json
+{%- if version < 4.0 %}
+    template: opencontrail/files/grafana_dashboards/contrail_controller_prometheus.json
+{%- else %}
+    template: opencontrail/files/grafana_dashboards/contrail_4_controller_prometheus.json
+{%- endif %}
+  contrail_vrouter_prometheus:
+    datasource: prometheus
+    format: json
+    template: opencontrail/files/grafana_dashboards/contrail_vrouter_prometheus.json
   zookeeper_influxdb:
     datasource: influxdb
     format: json

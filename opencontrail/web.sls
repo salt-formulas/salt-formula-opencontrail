@@ -59,7 +59,12 @@ opencontrail_web_entrypoint:
   - template: jinja
 
 {%- if web.container_name is defined %}
-{%- if salt['dockerng.exists'](web.container_name) %}
+{%- if grains['saltversioninfo'] < [2017, 7] %}
+  {% set docker_module = 'dockerng' %}
+{%- else %}
+  {% set docker_module = 'docker' %}
+{%- endif %}
+{%- if salt['{{ docker_module }}.exists'](web.container_name) %}
 opencontrail_web_dockerng_services:
   dockerng_service.running:
     - services:
@@ -69,8 +74,8 @@ opencontrail_web_dockerng_services:
     - watch:
       - file: /etc/contrail/config.global.js
       - file: /etc/contrail/contrail-webui-userauth.js
-{%- endif%}
-{%- endif%}
+{%- endif %}
+{%- endif %}
 
 {%- endif %}
 

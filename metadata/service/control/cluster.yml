@@ -7,6 +7,8 @@ parameters:
     opencontrail_version: 2.2
     opencontrail_identity_port: 35357
     opencontrail_identity_version: '2.0'
+    keystone_admin_password: 'none'
+    keystone_service_token: 'none'
   opencontrail:
     common:
       version: ${_param:opencontrail_version}

@@ -95,7 +95,7 @@
       "tableColumn": "",
       "targets": [
         {
-          "expr": "sum(http_response_status{service=\"contrail-vrouter\"} == 1) / count(libvirt_up)",
+          "expr": "sum(http_response_status{service=\"contrail-vrouter\"} == 1) / count(http_response_status{service=\"contrail-vrouter\"})",
           "format": "time_series",
           "intervalFactor": 1,
           "refId": "A"

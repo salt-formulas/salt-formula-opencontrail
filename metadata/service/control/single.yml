@@ -7,6 +7,9 @@ parameters:
     opencontrail_version: 2.2
     opencontrail_identity_port: 35357
     opencontrail_identity_version: '2.0'
+    keystone_admin_password: 'none'
+    keystone_service_token: 'none'
+    openstack_region: RegionOne
   opencontrail:
     common:
       version: ${_param:opencontrail_version}
@@ -51,7 +54,7 @@ parameters:
       identity:
         engine: keystone
         version: ${_param:opencontrail_identity_version}
-        region: RegionOne
+        region: ${_param:openstack_region}
         host: ${_param:single_address}
         port: ${_param:opencontrail_identity_port}
         user: admin

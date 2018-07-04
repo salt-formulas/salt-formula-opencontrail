@@ -69,6 +69,14 @@ opencontrail_control_doctrail:
   file.managed:
   - source: salt://opencontrail/files/{{ control.version }}/contrail-issu.conf
   - template: jinja
+
+docker-compose-contrail-control-env:
+  file.managed:
+  - name: /etc/docker/compose/opencontrail/contrail.env
+  - contents:
+    - "CONTRAIL_UID={{ salt['user.info']('contrail').get('uid', 0) }}"
+    - "CONTRAIL_GID={{ salt['user.info']('contrail').get('uid', 0) }}"
+  - makedirs: true
 {%- endif %}
 
 {%- if control.version == 3.0 and control.get('dns', {}).get('forwarders', False) %}

@@ -61,6 +61,13 @@ include:
   - template: jinja
   - makedirs: true
 
+docker-compose-contrail-database-env:
+  file.managed:
+  - name: /etc/docker/compose/opencontrail/contrail.env
+  - contents:
+    - "CONTRAIL_UID={{ salt['user.info']('contrail').get('uid', 0) }}"
+    - "CONTRAIL_GID={{ salt['user.info']('contrail').get('uid', 0) }}"
+  - makedirs: true
 {% endif %}
 
 {{ database.cassandra_config }}logback.xml:

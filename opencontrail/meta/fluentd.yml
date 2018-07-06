@@ -1,5 +1,5 @@
 {%- if pillar.get('fluentd', {}).get('agent', {}).get('enabled', False) %}
-{%- from "opencontrail/map.jinja" import control, collector, compute, config, database, web with context %}
+{%- from "opencontrail/map.jinja" import control, collector, compute, config, database, version, web with context %}
 {%- set positiondb = pillar.fluentd.agent.dir.positiondb %}
 agent:
   config:
@@ -11,7 +11,11 @@ agent:
           contrail_collector:
             type: tail
             tag: temp.opencontrail.collector.*
+            {%- if version < 4.0 %}
             path: /var/log/contrail/contrail-collector.log, /var/log/contrail/contrail-control.log, /var/log/contrail/contrail-dns.log, /var/log/contrail/contrail-query-engine.log
+            {%- else %}
+            path: /var/log/contrail/contrail-control.log, /var/log/contrail/contrail-dns.log
+            {%- endif %}
             path_key: log_location
             pos_file: {{ positiondb }}/contrail.collector.pos
             parser:
@@ -21,6 +25,7 @@ agent:
               keep_time_key: false
               format: '/^(?<Timestamp>[^ ]+ [^ ]+ [^ ]+ [^ ]+)\s+?(?<Hostname>[^ ]+) \[Thread \d+?, Pid (?<Pid>[^ ]+)\]: (?<Payload>.*)$/'
           {%- endif %}
+          {%- if version < 4.0 %}
           contrail_supervisord:
             type: tail
             tag: temp.opencontrail.supervisord.*
@@ -33,10 +38,15 @@ agent:
               time_key: Timestamp
               keep_time_key: false
               format: '/^(?<Timestamp>[^ ]+ [^ ]+) (?<orig_severity_label>[^ ]+) (?<Payload>.*)$/'
+          {%- endif %}
           contrail_main:
             type: tail
             tag: temp.opencontrail.main.*
-            path: /var/log/contrail/contrail-api.log, /var/log/contrail/contrail-analytics-api.log, /var/log/contrail/contrail-alarm-gen*.log, /var/log/contrail/contrail-*-stderr.log, /var/log/contrail/contrail-*svc-monitor*.log, /var/log/contrail/contrail-snmp*.log, /var/log/contrail/contrail-discovery.log, /var/log/contrail/contrail-schema.log, /var/log/contrail/contrail-topology.log, /var/log/contrail/device-manager-zk.log, /var/log/contrail/discovery.log
+            {%- if version < 4.0 %}
+            path: /var/log/contrail/contrail-api.log, /var/log/contrail/contrail-api-*.log, /var/log/contrail/contrail-analytics-api.log, /var/log/contrail/contrail-alarm-gen*.log, /var/log/contrail/contrail-*-stderr.log, /var/log/contrail/contrail-*svc-monitor*.log, /var/log/contrail/contrail-snmp*.log, /var/log/contrail/contrail-discovery.log, /var/log/contrail/contrail-schema.log, /var/log/contrail/contrail-topology.log, /var/log/contrail/device-manager-zk.log, /var/log/contrail/discovery.log
+            {%- else %}
+            path: /var/log/contrail/contrail-api.log, /var/log/contrail/contrail-api-*.log, /var/log/contrail/contrail-svc-monitor.log, /var/log/contrail/contrail-schema.log, /var/log/contrail/device-manager-zk.log, /var/log/contrail/schema-zk.log, /var/log/contrail/svc-monitor-zk.log, /var/log/contrail/api-0-zk.log
+            {%- endif %}
             path_key: log_location
             pos_file: {{ positiondb }}/contrail.main.pos
             parser:
@@ -69,6 +79,7 @@ agent:
               - name: programname
                 value: '${ tag_parts[5] }'
           {%- endif %}
+          {%- if version < 4.0 %}
           enrich_supervisord:
             tag: temp.opencontrail.supervisord.**
             type: record_transformer
@@ -81,6 +92,7 @@ agent:
                 value: ${ {'BLAT'=>7,'TRAC'=>7,'DEBG'=>7,'INFO'=>6,'WARN'=>4,'ERRO'=>3,'CRIT'=>2}[record['orig_severity_label']].to_i }
               - name: programname
                 value: 'contrail-${ tag_parts[5] }'
+          {%- endif %}
         match:
           cast_service_tag:
             tag: 'temp.opencontrail.**'
@@ -98,7 +110,11 @@ agent:
         input:
           tail_cassandra_log_files:
             type: tail
+            {%- if version < 4.0 %}
             path: /var/log/cassandra/*.log
+            {% else %}
+            path: /var/log/contrail/cassandra-status.log
+            {% endif %}
             tag: temp.cassandra
             pos_file: {{ positiondb }}/cassandra.pos
             path_key: log_location
@@ -159,6 +175,7 @@ agent:
             type: relabel
             label: default_output
   {%- endif %}
+  {%- if version < 4.0 %}
   {%- if control.get('enabled', False) %}
       ifmap:
         input:
@@ -197,6 +214,7 @@ agent:
             tag: opencontrail.ifmap
             type: relabel
             label: default_output
+  {%- endif %}
   {%- endif %}
   {%- if web.get('enabled', False) and web.get('cache', {}).get('engine', '') == 'redis' %}
       redis:

@@ -77,6 +77,8 @@ docker-compose-contrail-control-env:
     - "CONTRAIL_UID={{ salt['user.info']('contrail').get('uid', 0) }}"
     - "CONTRAIL_GID={{ salt['user.info']('contrail').get('uid', 0) }}"
   - makedirs: true
+  - require:
+    - user: user_contrail
 {%- endif %}
 
 {%- if control.version == 3.0 and control.get('dns', {}).get('forwarders', False) %}

@@ -135,7 +135,12 @@ opencontrail_control_entrypoint:
 
 {%- else %}
 {%- if control.container_name is defined %}
-{%- if salt['dockerng.exists'](control.container_name) %}
+{%- if grains['saltversioninfo'] < [2017, 7] %}
+  {% set docker_module = 'dockerng' %}
+{%- else %}
+  {% set docker_module = 'docker' %}
+{%- endif %}
+{%- if salt['{{ docker_module }}.exists'](control.container_name) %}
 opencontrail_control_dockerng_services:
   dockerng_service.running:
     - services: {{ control.services }}

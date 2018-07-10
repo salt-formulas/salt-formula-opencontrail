@@ -139,7 +139,12 @@ opencontrail_collector_entrypoint:
 
 {%- else %}
 {%- if collector.container_name is defined %}
-{%- if salt['dockerng.exists'](collector.container_name) %}
+{%- if grains['saltversioninfo'] < [2017, 7] %}
+  {% set docker_module = 'dockerng' %}
+{%- else %}
+  {% set docker_module = 'docker' %}
+{%- endif %}
+{%- if salt['{{ docker_module }}.exists'](collector.container_name) %}
 opencontrail_collector_dockerng_services:
   dockerng_service.running:
   - services: {{ collector.services }}
@@ -153,8 +158,8 @@ opencontrail_collector_dockerng_services:
     - file: /etc/contrail/contrail-snmp-collector.conf
     - file: /etc/contrail/contrail-analytics-nodemgr.conf
     - file: /etc/contrail/contrail-alarm-gen.conf
-{%- endif%}
-{%- endif%}
+{%- endif %}
+{%- endif %}
 {%- endif %}
 
 {%- endif %}

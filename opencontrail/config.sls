@@ -258,7 +258,7 @@ opencontrail_config_entrypoint:
 {%- else %}
   {% set docker_module = 'docker' %}
 {%- endif %}
-{%- if salt['{{ docker_module }}.exists'](config.container_name) %}
+{%- if salt[docker_module + '.exists'](config.container_name) %}
 opencontrail_config_dockerng_services:
   dockerng_service.running:
     - services: {{ config.services }}

@@ -144,7 +144,7 @@ opencontrail_collector_entrypoint:
 {%- else %}
   {% set docker_module = 'docker' %}
 {%- endif %}
-{%- if salt['{{ docker_module }}.exists'](collector.container_name) %}
+{%- if salt[docker_module + '.exists'](collector.container_name) %}
 opencontrail_collector_dockerng_services:
   dockerng_service.running:
   - services: {{ collector.services }}

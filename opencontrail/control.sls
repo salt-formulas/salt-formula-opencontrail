@@ -75,7 +75,7 @@ docker-compose-contrail-control-env:
   - name: /etc/docker/compose/opencontrail/contrail.env
   - contents:
     - "CONTRAIL_UID={{ salt['user.info']('contrail').get('uid', 0) }}"
-    - "CONTRAIL_GID={{ salt['user.info']('contrail').get('uid', 0) }}"
+    - "CONTRAIL_GID={{ salt['user.info']('contrail').get('gid', 0) }}"
   - makedirs: true
   - require:
     - user: user_contrail

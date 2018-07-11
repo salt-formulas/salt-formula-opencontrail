@@ -74,13 +74,20 @@ opencontrail_collector_packages:
 {%- endif %}
 
 {%- if collector.version >= 4.0 %}
+user_contrail_collector:
+  user.present:
+    - name: contrail
+    - system: True
+
 docker-compose-contrail-collector-env:
   file.managed:
   - name: /etc/docker/compose/opencontrail/contrail.env
   - contents:
     - "CONTRAIL_UID={{ salt['user.info']('contrail').get('uid', 0) }}"
-    - "CONTRAIL_GID={{ salt['user.info']('contrail').get('uid', 0) }}"
+    - "CONTRAIL_GID={{ salt['user.info']('contrail').get('gid', 0) }}"
   - makedirs: true
+  - require:
+    - user: user_contrail_collector
 {%- endif %}
 
 {%- if collector.version == 3.0 %}

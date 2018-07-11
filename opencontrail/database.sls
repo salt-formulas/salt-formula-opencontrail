@@ -297,7 +297,7 @@ opencontrail_database_entrypoint:
 {%- else %}
   {% set docker_module = 'docker' %}
 {%- endif %}
-{%- if salt['{{ docker_module }}.exists'](database.container_name) %}
+{%- if salt[docker_module + '.exists'](database.container_name) %}
 opencontrail_database_dockerng_services:
   dockerng_service.running:
     - services:

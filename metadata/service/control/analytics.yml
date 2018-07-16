@@ -60,6 +60,7 @@ parameters:
       version: ${_param:opencontrail_version}
       cassandra:
         version: 2
+      type: analytics
       enabled: true
       name: 'Contrail'
       minimum_disk: 10

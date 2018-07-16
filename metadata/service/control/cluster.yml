@@ -122,6 +122,7 @@ parameters:
       version: ${_param:opencontrail_version}
       cassandra:
         version: 2
+      type: cluster
       enabled: true
       name: 'Contrail'
       minimum_disk: 10

@@ -826,8 +826,10 @@ automatically. The period of sync is 60s.
           sync_on_demand: false
       ...
 
-Cassandra listen interface
---------------------------
+Cassandra listen configuration
+------------------------------
+
+Interface example:
 
 .. code-block:: yaml
 
@@ -838,6 +840,21 @@ Cassandra listen interface
         port: 9042
         rpc_port: 9160
       ....
+
+For running config and analytics db clusters on same hosts, you will need to
+change ports not to collide. The host is required.
+
+    database:
+      ....
+      bind:
+        host: 127.0.0.1
+        port: 9042
+        rpc_port: 9160
+        # for containers we need to move configdb to neighbouring ports
+        port_configdb: 9041
+        rpc_port_configdb: 9161
+      ....
+
 
 OpenContrail WebUI version >= 3.1.1
 -----------------------------------

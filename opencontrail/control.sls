@@ -155,4 +155,30 @@ opencontrail_control_dockerng_services:
 {%- endif %}
 {%- endif %}
 
+{%- if control.get('disable_dns', False) %}
+{%- if control.version < 4.0 %}
+disable_contrail_dns_service:
+  file.replace:
+    - name: /etc/contrail/supervisord_control_files/contrail-dns.ini
+    - pattern: "autostart=true"
+    - repl: "autostart=false"
+
+disable_contrail_named_service:
+  file.replace:
+    - name: /etc/contrail/supervisord_control_files/contrail-named.ini
+    - pattern: "autostart=true"
+    - repl: "autostart=false"
+
+{# cmd run is used, beacause service.dead or supervisord.dead states are not working #}
+stop_contrail_dns_service:
+  cmd.run:
+  - name: "service contrail-dns stop"
+
+stop_contrail_named_service:
+  cmd.run:
+  - name: "service contrail-named stop"
+
+{%- endif %}
+{%- endif %}
+
 {%- endif %}

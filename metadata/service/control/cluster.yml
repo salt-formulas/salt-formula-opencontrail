@@ -136,6 +136,10 @@ parameters:
         host: ${_param:cluster_local_address}
         port: 9042
         rpc_port: 9160
+        # for containers we need to move configdb to neighbouring ports
+        port_configdb: 9041
+        rpc_port_configdb: 9161
+
       members:
       - host: ${_param:cluster_node01_address}
         id: 1

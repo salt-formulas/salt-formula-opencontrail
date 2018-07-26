@@ -16,10 +16,10 @@ agent:
         {%- if version < 4.0 %}
         contrail-nodemgr:
           pattern: 'python.*contrail-nodemgr$'
-        {% else %}
+        {%- else %}
         contrail-nodemgr-analytics:
           pattern: 'python.*contrail-nodemgr.*-analytics'
-        {% endif %}
+        {%- endif %}
         contrail-query-engine:
           pattern: 'contrail-query-engine'
         contrail-snmp-collector:
@@ -34,15 +34,22 @@ agent:
     {%- if database.get('enabled', False) %}
         zookeeper-server:
           pattern: 'java.*zookeeper.server'
-        kafka-server:
-          pattern: 'java.*kafka.Kafka'
         cassandra-server:
           pattern: 'java.*service.CassandraDaemon'
+        {%- if version < 4.0 %}
         contrail-nodemgr-database:
           pattern: 'python.*contrail-nodemgr.*-database'
-        {%- if version < 4.0 %}
+        kafka-server:
+          pattern: 'java.*kafka.Kafka'
         contrail-supervisord-database:
           pattern: 'python.*supervisord.*_database'
+        {%- else %}
+        {%- if database.get('type') == 'analytics' or database.get('type') == 'cluster' %}
+        contrail-nodemgr-database:
+          pattern: 'python.*contrail-nodemgr.*-database'
+        kafka-server:
+          pattern: 'java.*kafka.Kafka'
+        {%- endif %}
         {%- endif %}
     {%- endif %}
     {%- if control.get('enabled', False) %}

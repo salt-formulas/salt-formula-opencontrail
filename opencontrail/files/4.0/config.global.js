@@ -75,7 +75,7 @@ config.endpoints.opServiceType = 'OpServer';
 config.regions = {};
 
 {%- if web.identity.engine != "none" %}
-config.regions.['{{ web.identity.get("region", "RegionOne") }}'] = 'http://{{ web.identity.host }}:5000/v{{ web.identity.version }}';
+config.regions['{{ web.identity.get("region", "RegionOne") }}'] = 'http://{{ web.identity.host }}:5000/v{{ web.identity.version }}';
 {%- endif %}
 
 /****************************************************************************

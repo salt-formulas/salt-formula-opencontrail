@@ -47,7 +47,13 @@ collector:
 compute:
   Debian:
     pkgs:
-        ['contrail-utils', 'iproute2', 'haproxy', '{{ ['linux-headers-', grains.get('kernelrelease')]|join('') }}']
+    - contrail-utils
+    - iproute2
+    - haproxy
+    - {{ ['linux-headers-', grains.get('kernelrelease')]|join('') }}
+{%- if pillar.nova is defined and pillar.nova.compute is defined and pillar.nova.compute.get('networking', 'default') == "contrail" and pillar.nova.compute.get('version', 'ocata') not in ["juno", "kilo", "liberty", "mitaka", "newton"] %}
+    - contrail-nova-driver
+{%- endif %}
     services:
     {%- if version < 4.0 %}
         ['supervisor-vrouter']

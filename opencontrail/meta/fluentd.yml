@@ -43,7 +43,7 @@ agent:
             type: tail
             tag: temp.opencontrail.main.*
             {%- if version < 4.0 %}
-            path: /var/log/contrail/contrail-api.log, /var/log/contrail/contrail-api-*.log, /var/log/contrail/contrail-analytics-api.log, /var/log/contrail/contrail-alarm-gen*.log, /var/log/contrail/contrail-*-stderr.log, /var/log/contrail/contrail-*svc-monitor*.log, /var/log/contrail/contrail-snmp*.log, /var/log/contrail/contrail-discovery.log, /var/log/contrail/contrail-schema.log, /var/log/contrail/contrail-topology.log, /var/log/contrail/device-manager-zk.log, /var/log/contrail/discovery.log
+            path: /var/log/contrail/contrail-api.log, /var/log/contrail/contrail-api-*.log, /var/log/contrail/contrail-analytics-api.log, /var/log/contrail/contrail-alarm-gen*.log, /var/log/contrail/contrail-*svc-monitor*.log, /var/log/contrail/contrail-snmp*.log, /var/log/contrail/contrail-discovery.log, /var/log/contrail/contrail-schema.log, /var/log/contrail/contrail-topology.log, /var/log/contrail/device-manager-zk.log, /var/log/contrail/discovery.log
             {%- else %}
             path: /var/log/contrail/contrail-api.log, /var/log/contrail/contrail-api-*.log, /var/log/contrail/contrail-svc-monitor.log, /var/log/contrail/contrail-schema.log, /var/log/contrail/device-manager-zk.log, /var/log/contrail/schema-zk.log, /var/log/contrail/svc-monitor-zk.log, /var/log/contrail/api-0-zk.log
             {%- endif %}
@@ -56,6 +56,21 @@ agent:
               keep_time_key: false
               format_firstline: '/^[^ ]+ [^ ]+ [^ ]+/'
               format: '/^(?<Timestamp>[^ ]+ [^ ]+ [^ ]+) \[(?<programname>[^ ]+)\]: (?<Payload>.*)/'
+          {%- if version < 4.0 %}
+          contrail_stderr:
+            type: tail
+            tag: temp.opencontrail.stderr.*
+            path: /var/log/contrail/contrail-*-stderr.log
+            path_key: log_location
+            pos_file: {{ positiondb }}/contrail.stderr.pos
+            parser:
+              type: multiline
+              time_format: '%Y-%m-%d %H:%M:%S'
+              time_key: Timestamp
+              keep_time_key: false
+              format_firstline: '/^wokeup and found a line/'
+              format: '/^(?<http_client_ip_address>[\d\.]+)\s\-\s\-\s\[(?<Timestamp>.*)\]\s(?<Payload>\"(?<http_method>[A-Z]+)\s(?<http_url>\S+)\s(?<http_version>[.\/\dHTFSP]+)\"\s(?<http_status>\d{3})\s(?<http_response_size>\d+)\s(?<http_response_time>\d.+))/'
+          {%- endif %}
         filter:
           enrich_main:
             tag: temp.opencontrail.main.**
@@ -66,6 +81,17 @@ agent:
                 value: INFO
               - name: Severity
                 value: 6
+          {%- if version < 4.0 %}
+          enrich_stderr:
+            tag: temp.opencontrail.stderr.**
+            type: record_transformer
+            enable_ruby: true
+            record:
+              - name: severity_label
+                value: ERROR
+              - name: Severity
+                value: 3
+          {%- endif %}
           {%- if control.get('enabled', False) %}
           enrich_collector:
             tag: temp.opencontrail.collector.**

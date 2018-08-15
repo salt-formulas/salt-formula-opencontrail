@@ -159,10 +159,17 @@ modules_dpdk:
 
 {%- else %}
 
-opencontrail_vrouter_package:
+opencontrail_vrouter_package_vrouter_dkms:
   pkg.installed:
   - names:
     - contrail-vrouter-dkms
+  - require_in:
+    - pkg: opencontrail_compute_packages
+    - pkg: opencontrail_vrouter_package_vrouter_agent
+
+opencontrail_vrouter_package_vrouter_agent:
+  pkg.installed:
+  - names:
     - contrail-vrouter-agent
   - require_in:
     - pkg: opencontrail_compute_packages

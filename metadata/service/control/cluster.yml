@@ -9,6 +9,7 @@ parameters:
     opencontrail_identity_version: '2.0'
     keystone_admin_password: 'none'
     keystone_service_token: 'none'
+    redis_password: 'none'
     openstack_region: RegionOne
   opencontrail:
     common:
@@ -160,6 +161,7 @@ parameters:
         engine: redis
         host: ${_param:cluster_local_address}
         port: 6379
+        password: ${_param:redis_password}
       members:
       - host: ${_param:cluster_node01_address}
         id: 1

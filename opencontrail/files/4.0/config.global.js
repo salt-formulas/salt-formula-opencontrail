@@ -261,7 +261,7 @@ config.redis_dump_file = '/var/lib/redis/dump.rdb';
 {%- else %}
 config.redis_dump_file = '/var/lib/redis/dump-webui.rdb';
 {%- endif %}
-config.redis_password = '';
+config.redis_password = '{{ web.cache.get('password', 'guest') }}';
 
 /* Cassandra Server */
 config.cassandra = {};

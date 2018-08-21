@@ -10,6 +10,7 @@ parameters:
     keystone_admin_password: 'none'
     keystone_service_token: 'none'
     openstack_region: RegionOne
+    redis_password: 'none'
   opencontrail:
     common:
       version: ${_param:opencontrail_version}
@@ -141,6 +142,7 @@ parameters:
         engine: redis
         host: ${_param:single_address}
         port: 6379
+        password: ${_param:redis_password}
       members:
       - host: ${_param:single_address}
         id: 1

@@ -10,6 +10,7 @@ parameters:
     keystone_admin_password: 'none'
     keystone_service_token: 'none'
     openstack_region: RegionOne
+    redis_password: 'none'
   opencontrail:
     common:
       version: ${_param:opencontrail_version}
@@ -116,6 +117,7 @@ parameters:
     web:
       version: ${_param:opencontrail_version}
       enabled: True
+      password: ${_param:redis_password}
       bind:
         address: ${_param:cluster_local_address}
       analytics:

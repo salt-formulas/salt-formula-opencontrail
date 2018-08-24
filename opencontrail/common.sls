@@ -99,12 +99,6 @@ vm.overcommit_memory:
   file.directory
 
 {%- if common.identity.engine == "keystone" %}
-/etc/contrail/service.token:
-  file.managed:
-  - contents: "{{ common.identity.token }}"
-  - require:
-    - file: /etc/contrail
-
 /etc/contrail/ctrl-details:
   file.managed:
   - source: salt://opencontrail/files/{{ common.version }}/ctrl-details

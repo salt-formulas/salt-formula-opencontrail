@@ -168,7 +168,6 @@ Config, control, analytics, database, web -- altogether on one node.
         cache:
           engine: redis
           host: 127.0.0.1
-          password: guest
           port: 6379
         members:
         - host: 127.0.0.1
@@ -333,7 +332,6 @@ nodes.
         cache:
           engine: redis
           host: 127.0.0.1
-          password: guest
           port: 6379
         members:
         - host: 127.0.0.1
@@ -475,7 +473,6 @@ Config, control, database, web.
         cache:
           engine: redis
           host: 127.0.0.1
-          password: guest
           port: 6379
         members:
         - host: 127.0.0.1

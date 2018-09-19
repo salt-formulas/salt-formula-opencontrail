@@ -921,7 +921,8 @@ Increase number of contrail-api workers
     opencontrail:
       ...
       config:
-        api_workers: 3
+        api:
+          workers_count: 3
       ...
 
 Increase number of alarm-gen workers

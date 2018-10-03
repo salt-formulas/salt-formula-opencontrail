@@ -48,7 +48,7 @@ net.ipv4.tcp_syncookies:
 # TODO: Remove this for Ubuntu Bionic (4.15 is the default kernel)
 net.ipv4.tcp_tw_recycle:
   sysctl.present:
-    - value: 1
+    - value: {{ common.get('tcp_tw_recycle', 1) }}
 {% endif %}
 
 net.ipv4.tcp_tw_reuse:

@@ -1334,7 +1334,20 @@ is triggered by existence of non-empty value of ``control:ifmap:bind`` key.
           port: 8443
       ....
 
+Configure TCP_TW_RECYCLE in kernel
+------------------------------------
 
+Enable fast recycling of TIME-WAIT sockets. To enable set parameter to 1, which is
+default value in formula. To turn off this option set parameter to 0:
+
+.. code-block:: yaml
+
+    opencontrail:
+      ....
+      common
+        ....
+        tcp_tw_recycle: 0
+        ....
 
 Usage
 =====

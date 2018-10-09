@@ -1349,6 +1349,29 @@ default value in formula. To turn off this option set parameter to 0:
         tcp_tw_recycle: 0
         ....
 
+Define extra states for contrail services health check
+------------------------------------------------------
+
+Service health check procedure verifies that all available contrail services are in ``active``
+state.
+Additional states could be defined for every service as expected states for validation procedure.
+
+.. code-block:: yaml
+
+    config:
+      ....
+      services_extra_states:
+        contrail-schema:
+          - backup
+        contrail-device-manager
+          - backup
+        contrail-svc-monitor:
+          - backup
+      ....
+
+``contrail-schema``, ``contrail-device-manager`` and ``contrail-svc-monitor`` config services already
+have additional ``backup`` state by default.
+
 Usage
 =====
 

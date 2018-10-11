@@ -49,7 +49,7 @@ def services_health(name, healthy_states=None, extra_states_map=None):
             result = True
 
     else:
-        comment = ("Contrail services were not found.\n"
+        comment = ("Contrail services states could not be verified.\n"
                    "If contrail services are working inside container(s) "
                    "(starting from version 4.0), please check "
                    "that related container(s) is (are) started.")

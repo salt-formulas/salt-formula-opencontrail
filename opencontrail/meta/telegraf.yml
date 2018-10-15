@@ -243,4 +243,9 @@ agent:
           state: "Established"
     {%- endif %}
   {%- endif %}
+  {%- if pillar.haproxy.proxy is defined %}
+    haproxy:
+      tagdrop:
+        proxy: ["contrail_collector_stats", "contrail_config_stats", "contrail_openstack_stats"]
+  {%- endif %}
 {%- endif %}

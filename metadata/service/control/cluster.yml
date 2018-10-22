@@ -68,6 +68,13 @@ parameters:
         id: 2
       - host: ${_param:cluster_node03_address}
         id: 3
+      services_extra_states:
+        contrail-schema:
+        - backup
+        contrail-svc-monitor:
+        - backup
+        contrail-device-manager:
+        - backup
     control:
       version: ${_param:opencontrail_version}
       enabled: true

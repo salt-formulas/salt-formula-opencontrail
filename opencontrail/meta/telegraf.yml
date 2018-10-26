@@ -230,10 +230,12 @@ agent:
           url: "http://{{ bind_addr }}:8085/Snh_KDropStatsReq"
           xml_element: "KDropStatsResp"
           result_type: "ds_invalid_nh"
+      {%- if version < 4.0 %}
         vrouter_dns_xmpp:
           url: "http://{{ bind_addr }}:8085/Snh_AgentDnsXmppConnectionStatusReq"
           xml_element: "AgentXmppDnsData"
           state: "Established"
+      {%- endif %}
         vrouter_lls:
           url: "http://{{ bind_addr }}:8085/Snh_LinkLocalServiceInfo"
           xml_element: "LinkLocalServiceData"

@@ -23,7 +23,11 @@ dashboard:
   contrail_vrouter_prometheus:
     datasource: prometheus
     format: json
+{%- if version < 4.0 %}
     template: opencontrail/files/grafana_dashboards/contrail_vrouter_prometheus.json
+{%- else %}
+    template: opencontrail/files/grafana_dashboards/contrail_4_vrouter_prometheus.json
+{%- endif %}
   zookeeper_influxdb:
     datasource: influxdb
     format: json

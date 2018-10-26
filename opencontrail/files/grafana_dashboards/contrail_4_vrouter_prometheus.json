@@ -18,7 +18,7 @@
   "gnetId": null,
   "graphTooltip": 1,
   "id": null,
-  "iteration": 1529922436813,
+  "iteration": 1540544225082,
   "links": [],
   "panels": [
     {
@@ -266,8 +266,8 @@
       "scopedVars": {
         "host": {
           "selected": true,
-          "text": "cmp002",
-          "value": "cmp002"
+          "text": "cmp1",
+          "value": "cmp1"
         }
       },
       "sparkline": {
@@ -316,12 +316,12 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 11
+        "y": 14
       },
       "id": 23,
       "panels": [],
       "repeat": null,
-      "title": "DNS-XMPP & LLS",
+      "title": "LLS",
       "type": "row"
     },
     {
@@ -334,97 +334,9 @@
       "fill": 1,
       "gridPos": {
         "h": 7,
-        "w": 12,
+        "w": 24,
         "x": 0,
-        "y": 12
-      },
-      "id": 8,
-      "legend": {
-        "alignAsTable": true,
-        "avg": false,
-        "current": false,
-        "max": false,
-        "min": false,
-        "rightSide": true,
-        "show": true,
-        "total": false,
-        "values": false
-      },
-      "lines": true,
-      "linewidth": 1,
-      "links": [],
-      "nullPointMode": "null as zero",
-      "percentage": false,
-      "pointradius": 5,
-      "points": false,
-      "renderer": "flot",
-      "seriesOverrides": [],
-      "spaceLength": 10,
-      "stack": false,
-      "steppedLine": false,
-      "targets": [
-        {
-          "expr": "min(contrail_vrouter_dns_xmpp{host=~\"$host\"}) by (host)",
-          "format": "time_series",
-          "intervalFactor": 2,
-          "legendFormat": "{{ host }}",
-          "refId": "A",
-          "step": 2
-        }
-      ],
-      "thresholds": [],
-      "timeFrom": null,
-      "timeShift": null,
-      "title": "vRouters DNS XMPP Sessions",
-      "tooltip": {
-        "shared": true,
-        "sort": 0,
-        "value_type": "individual"
-      },
-      "type": "graph",
-      "xaxis": {
-        "buckets": null,
-        "mode": "time",
-        "name": null,
-        "show": true,
-        "values": []
-      },
-      "yaxes": [
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": "0",
-          "show": true
-        },
-        {
-          "format": "short",
-          "label": null,
-          "logBase": 1,
-          "max": null,
-          "min": null,
-          "show": true
-        }
-      ],
-      "yaxis": {
-        "align": false,
-        "alignLevel": null
-      }
-    },
-    {
-      "aliasColors": {},
-      "bars": false,
-      "dashLength": 10,
-      "dashes": false,
-      "datasource": null,
-      "decimals": 0,
-      "fill": 1,
-      "gridPos": {
-        "h": 7,
-        "w": 12,
-        "x": 12,
-        "y": 12
+        "y": 15
       },
       "id": 9,
       "legend": {
@@ -506,7 +418,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 19
+        "y": 22
       },
       "id": 24,
       "panels": [],
@@ -526,7 +438,7 @@
         "h": 7,
         "w": 12,
         "x": 0,
-        "y": 20
+        "y": 23
       },
       "id": 10,
       "legend": {
@@ -614,7 +526,7 @@
         "h": 7,
         "w": 12,
         "x": 12,
-        "y": 20
+        "y": 23
       },
       "id": 11,
       "legend": {
@@ -696,7 +608,7 @@
         "h": 1,
         "w": 24,
         "x": 0,
-        "y": 27
+        "y": 30
       },
       "id": 25,
       "panels": [],
@@ -716,7 +628,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 28
+        "y": 31
       },
       "id": 12,
       "legend": {
@@ -804,7 +716,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 28
+        "y": 31
       },
       "id": 13,
       "legend": {
@@ -892,7 +804,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 28
+        "y": 31
       },
       "id": 14,
       "legend": {
@@ -980,7 +892,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 35
+        "y": 38
       },
       "id": 15,
       "legend": {
@@ -1068,7 +980,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 35
+        "y": 38
       },
       "id": 16,
       "legend": {
@@ -1156,7 +1068,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 35
+        "y": 38
       },
       "id": 17,
       "legend": {
@@ -1244,7 +1156,7 @@
         "h": 7,
         "w": 8,
         "x": 0,
-        "y": 42
+        "y": 45
       },
       "id": 18,
       "legend": {
@@ -1332,7 +1244,7 @@
         "h": 7,
         "w": 8,
         "x": 8,
-        "y": 42
+        "y": 45
       },
       "id": 19,
       "legend": {
@@ -1420,7 +1332,7 @@
         "h": 7,
         "w": 8,
         "x": 16,
-        "y": 42
+        "y": 45
       },
       "id": 20,
       "legend": {
@@ -1508,10 +1420,9 @@
       {
         "allValue": null,
         "current": {
-          "text": "cmp002",
-          "value": [
-            "cmp002"
-          ]
+          "selected": false,
+          "text": "cmp1",
+          "value": "cmp1"
         },
         "datasource": "prometheus",
         "hide": 0,
@@ -1565,6 +1476,6 @@
   "timezone": "browser",
   "title": "OpenContrail vRouter",
   "uid": null,
-  "version": 38
+  "version": 1
 }
 {% endraw %}

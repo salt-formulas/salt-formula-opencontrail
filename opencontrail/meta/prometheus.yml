@@ -253,10 +253,13 @@ server:
       annotations:
         summary: "OpenContrail vRouter XMPP sessions changes reached the limit of {%- endraw %}{{ vrouter_xmpp_variation_threshold }}{%- raw %}"
         description: "The OpenContrail vRouter XMPP sessions on the {{ $labels.host }} node have changed {{ $value }} times."
+{%- endraw %}
+  {%- if version < 4.0 %}
     ContrailVrouterDNSXMPPSessionsZero:
       if: >-
         min(contrail_vrouter_dns_xmpp) by (host) == 0
       for: 2m
+{%- raw %}
       labels:
         severity: warning
         service: contrail
@@ -289,6 +292,7 @@ server:
         summary: "OpenContrail vRouter DNS-XMPP sessions changes reached the limit of {%- endraw %}{{ vrouter_dns_xmpp_variation_threshold }}{%- raw %}"
         description: "The OpenContrail vRouter DNS-XMPP sessions on the {{ $labels.host }} node have changed {{ $value }} times."
 {%- endraw %}
+  {%- endif %}
     ContrailVrouterLLSSessionsTooHigh:
       if: >-
     {%- set vrouter_lls_toohigh_threshold = monitoring.vrouter_lls_too_high_threshold %}

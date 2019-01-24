@@ -11,6 +11,7 @@ include:
 {% endif %}
 {% if pillar.opencontrail.control is defined %}
 - opencontrail.control
+- opencontrail.cassandra_backup
 {% endif %}
 {% if pillar.opencontrail.database is defined %}
 - opencontrail.database

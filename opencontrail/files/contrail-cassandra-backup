@@ -1,0 +1,58 @@
+{% from "opencontrail/map.jinja" import database with context %}
+{% set node_fqdn = salt['grains.get']('fqdn') %}
+
+#!/bin/bash
+
+set -uef -o pipefail
+
+# Define vars
+BACKUP_DIR=/var/backups/cassandra
+DATA_DIR=/var/lib/cassandra/data
+NODETOOL=$(which nodetool)
+
+TODAY_DATE=$(date +%F)
+NODENAME="{{ node_fqdn }}"
+CONTROL_NODES_DB_TAG="OPENCONTRAIL_CONTROL_DB"
+BACKUP_SNAPSHOT_DIR="${BACKUP_DIR}/${CONTROL_NODES_DB_TAG}/${NODENAME}/${TODAY_DATE}/SNAPSHOTS"
+BACKUP_SCHEMA_DIR="${BACKUP_DIR}/${CONTROL_NODES_DB_TAG}/${NODENAME}/${TODAY_DATE}/SCHEMA"
+
+SNAPSHOT_NAME=snp-$(date +%F-%H%M-%S)
+DATE_SCHEMA=$(date +%F-%H%M-%S)
+
+DB_BIND_HOST="{{ database.bind.host }}"
+DB_BIND_PORT="{{ database.bind.port }}"
+CQL_SH="$(which cqlsh) ${DB_BIND_HOST} ${DB_BIND_PORT}"
+## List All Keyspaces
+declare -a KEYSPACE_LIST=( $( ${CQL_SH} -e "DESC KEYSPACES" | awk '{RS="\\s+"; if(NF>0){print}}' | sort ) )
+
+# Make sure backup Directory exists
+mkdir -p "${BACKUP_SCHEMA_DIR}"
+mkdir -p "${BACKUP_SNAPSHOT_DIR}"
+
+# Dump cassandra version
+${NODETOOL} version > "${BACKUP_DIR}/${CONTROL_NODES_DB_TAG}/${NODENAME}/${TODAY_DATE}/.cassandra_version"
+# Remove previous snapshot in order to prevent disk usage increase
+${NODETOOL} clearsnapshot
+
+# SCHEMA BACKUP
+# Create directory inside backup SCHEMA directory. As per keyspace name.
+for VAR_KEYSPACE in ${KEYSPACE_LIST[*]}
+  do
+    mkdir -p "${BACKUP_SCHEMA_DIR}/${VAR_KEYSPACE}"
+    # SCHEMA Backup - All Keyspace and All tables
+    ${CQL_SH} -e "DESC KEYSPACE  ${VAR_KEYSPACE}" > "${BACKUP_SCHEMA_DIR}/${VAR_KEYSPACE}/${VAR_KEYSPACE}_schema-${DATE_SCHEMA}.cql"
+  done
+
+# Create snapshots for all keyspaces
+${NODETOOL} snapshot -t "${SNAPSHOT_NAME}"
+
+###### Get Snapshot directory path
+declare -a SNAPSHOT_DIR_LIST=( $(find ${DATA_DIR} -type d -name snapshots) )
+
+## Create directory inside backup directory. As per keyspace name.
+for SNP_PATH in ${SNAPSHOT_DIR_LIST[*]}
+  do
+    i=$(echo "${SNP_PATH}" | awk '{gsub("'${DATA_DIR}'/", "");print}')
+    mkdir -p "${BACKUP_SNAPSHOT_DIR}/${i}"
+    cp -prf "${SNP_PATH}/${SNAPSHOT_NAME}" "${BACKUP_SNAPSHOT_DIR}/${i}/"
+  done
